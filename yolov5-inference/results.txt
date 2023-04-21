@@ -1,0 +1,79 @@
+cv onnx
+preprocess: 24.73 3.52663
+inference: 358.67 50.9649
+postprocess: 0 0
+
+cv onnx simplified
+preprocess: 26.2 4.84768
+inference: 381.9 70.9984
+postprocess: 0.03 0.170587
+
+tf int8
+preprocess: 15.87 1.17179
+inference: 1196.16 53.1659
+postprocess: 58.25 4.20327
+
+tf fp16
+preprocess: 13.29 2.29475
+inference: 238.1 43.714
+postprocess: 58.68 5.57473
+
+tf fp16 release
+preprocess: 2.17 1.69148
+inference: 38.45 5.60959
+postprocess: 7.25 1.67556
+=========================================
+cv onnx simp device 3, debug
+preprocess: 31.76 4.31768
+inference: 1975.52 112.636
+postprocess: 4.29 0.534696
+
+cv onnx simp device 3, release
+preprocess: 31.37 4.12469
+inference: 1970.18 44.0089
+postprocess: 3.74 0.996193
+
+cv onnx device 3, release
+preprocess: 32.03 4.12663
+inference: 1957.08 45.6269
+postprocess: 3.77 0.858545
+
+
+tf lite int8 base device 3, release
+preprocess: 22.03 2.09502
+inference: 843.74 21.0355
+postprocess: 129.6 1.40712
+
+
+tf fp16
+1thread
+preprocess: 29.05 8.81292
+inference: 1155.34 23.7222
+postprocess: 94.52 3.91275
+
+2 threads
+preprocess: 29.05 8.77653
+inference: 688.34 20.158
+postprocess: 93.77 4.00214
+
+4 thread
+preprocess: 29.16 8.82805
+inference: 489.54 19.4584
+postprocess: 93.66 4.02298
+
+
+tf int8
+1 thread
+preprocess: 10.05 1.2278
+inference: 1245.75 4.28573
+postprocess: 110.71 7.33934
+
+2 threads
+preprocess: 9.52 1.34521
+inference: 802.7 4.04104
+postprocess: 110.55 7.50916
+
+4 threads
+preprocess: 9.87 1.29348
+inference: 581.62 9.22906
+postprocess: 110.42 7.44739

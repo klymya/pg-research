@@ -1,0 +1,31 @@
+{
+    "name": "dl-test",
+    "version-string": "1.0.0",
+    "dependencies": [
+        {
+            "name": "opencv4",
+            "default-features": false,
+            "features": [
+                "default-features", "dnn"
+            ]
+        },
+        {
+            "name": "ffmpeg",
+            "default-features": true,
+            "features": [
+                "postproc"
+            ]
+        }
+    ],
+    "overrides": [
+        {
+            "name": "opencv4",
+            "version": "4.5.5"
+        },
+        {
+            "name": "ffmpeg",
+            "version": "4.2#26"
+        }
+    ],
+    "builtin-baseline": "c2c25d916f049ff15591c50f3aa47345454f0772"
+}
