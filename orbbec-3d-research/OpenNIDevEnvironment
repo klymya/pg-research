@@ -1,0 +1,5 @@
+export OPENNI2_INCLUDE=/home/ubuntu/orbbecAPI_rev1.0/orbbecintegratesimple_rev1.0/ThirdParty/OpenNI2/Include
+export OPENNI2_REDIST=/home/ubuntu/orbbecAPI_rev1.0/orbbecintegratesimple_rev1.0/ThirdParty/OpenNI2/Redist/Linux/ARM
+
+export INCGL=/home/ubuntu/orbbecAPI_rev1.0/orbbecintegratesimple_rev1.0/ThirdParty/GL/Include
+export INLIBUSB=/home/ubuntu/orbbecAPI_rev1.0/orbbecintegratesimple_rev1.0/ThirdParty/LibUSB/Include
