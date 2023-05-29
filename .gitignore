@@ -35,3 +35,5 @@ yolov5-inference/build
 yolov5-inference/tensorflow_src
 yolov5-inference/tflite_build
 yolov5-inference/vcpkg
+
+.ipynb_checkpoints

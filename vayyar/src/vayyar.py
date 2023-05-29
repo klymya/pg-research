@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import pickle
 import json
@@ -22,6 +23,8 @@ DTYPES = {
 
 ASCII_RS = '\u001e'
 ASCII_US = '\u001f'
+
+BUSY_CHARS = "/—\\|"
 
 
 def to_message(buffer):
@@ -50,7 +53,6 @@ def to_message(buffer):
 def main(area_dims, height, opath):
     if not os.path.exists(opath):
         os.mkdir(opath)
-    
     if len(area_dims) != 6:
         raise ValueError("Area lenght should be 6.")
 
@@ -108,37 +110,37 @@ def main(area_dims, height, opath):
 
     msgs = []
     try:
-        i = '*'
         frame_count = 0
         while True:
-            print('{}\r'.format(i), end='')
-            i = ' ' if i=='*' else '*'
+            sys.stdout.write("\r" + "Capturing " + BUSY_CHARS[frame_count % len(BUSY_CHARS)])
+            sys.stdout.flush()
 
             buffer = listener.recv()
             data = to_message(buffer)
             if data['ID'] == 'BINARY_DATA':
-                msgs.append({"ts": time.time(), "frame": frame_count,"data": data})
+                msgs.append({"ts": time.time(), "frame": frame_count, "data": data})
                 frame_count += 1
                 listener.send(json.dumps({'Type': 'QUERY', 'ID': 'BINARY_DATA'}))
     finally:
         listener.send(json.dumps({'Type': 'COMMAND', 'ID': 'STOP', 'Payload': {}}))
         listener.close()
 
+        print("\nData saving...")
         with open(os.path.join(opath, "data.pickle"), 'wb') as f:
             pickle.dump(msgs, f)
 
-        with open(os.path.join(opath, "params.json"), 'wt') as f:
+        with open(os.path.join(opath, "area_params.json"), 'wt') as f:
             json.dump({
                 "area_dims": area_dims,
                 "height": height,
-                "frame_count": frame_count + 1
+                "frame_count": len(msgs)
             }, f)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser("Write data from the Vayyar radar.")
     parser.add_argument(
-        "--arena", type=float, default=[-2.5, 2.5, 0.2, 5.0, 0, 2], nargs='+', 
+        "--arena", type=float, default=[-2.5, 2.5, 0.2, 5.0, 0, 2], nargs='+',
         help="Define arena [xmin, xmax, ymin, ymax, zmin, zmax]."
     )
     parser.add_argument("--height", type=float, default=1.5, help="Define sensor installation height.")
