@@ -35,3 +35,9 @@ yolov5-inference/build
 yolov5-inference/tensorflow_src
 yolov5-inference/tflite_build
 yolov5-inference/vcpkg
+
+object-detection/yolov5
+object-detection/yolov7
+object-detection/baseline_res
+object-detection/data
+object-detection/object_detection_repeat_2023
