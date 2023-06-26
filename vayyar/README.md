@@ -21,6 +21,10 @@ py src/vayyar.py
 
 ## Data collection
 1. Setup the radar and the PG device. Write installation parameters to `params.json`
-2. Record video and timestamps on the device using `capture.py` and record the radar data using `vayyar.py` 
+2. Record video and timestamps on the device using `src/capture.py` and record the radar data using `src/vayyar.py` 
 3. Put the resulting data together
-4. Run `render_vayyar_data.py` to create video with points projection. Please add path to PG_PyTraining repo to `PYTHONPATH`, because the script requires tools from it.
+4. Run `src/render_vayyar_data.py` to create video with points projection. Please add path to PG_PyTraining repo to `PYTHONPATH`, because the script requires tools from it.
+
+## Additional scripts
+- src/draw_vayyar_data.py - draw vayyar points withoud projection on the PG video.
+- src/vayyr_data_to_seq.py - create seq file and aligned by timestamps video from the vayyar data file and the original PG videofile.

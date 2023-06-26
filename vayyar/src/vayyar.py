@@ -90,6 +90,7 @@ def main(area_dims, height, opath):
                 'targets_Locs',
                 "targets_Heights",
                 "targets_Velocities",
+                'targets_IDs',
                 'points_Locs',
                 'points_absValues',
                 'points_realValues',
