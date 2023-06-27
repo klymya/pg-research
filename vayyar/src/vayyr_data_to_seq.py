@@ -32,13 +32,13 @@ def vayyar_to_ts_dict(data):
     data_points = {}
     for track in sort_tracker.trackers:
         for point, t in zip(track.raw, track.ts):
-            if t not in data_points:
+            if t - 1 not in data_points:
                 data_points[t - 1] = []
             data_points[t - 1].append((track.id, point))
 
     for track in sort_tracker.dead_trackers:
         for point, t in zip(track.raw, track.ts):
-            if t not in data_points:
+            if t - 1 not in data_points:
                 data_points[t - 1] = []
             data_points[t - 1].append((track.id, point))
 
@@ -121,7 +121,7 @@ def main(ipath, video_name):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Renders vayyar data on video from PG sensor.")
     parser.add_argument("--input", help="Path to folder with input data.")
-    parser.add_argument("--video-name", help="Name of the input video file.")
+    # parser.add_argument("--video-name", help="Name of the input video file.")
     args = parser.parse_args()
 
-    main(args.input, args.video_name)
+    main(args.input, "")
