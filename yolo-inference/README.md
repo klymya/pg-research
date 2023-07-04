@@ -1,5 +1,7 @@
-YOLOv5 inference on C++ using tf lite and opencv+onnx. The experiment uses the yolov5n model pre-trained on COCO.
-Code: https://dev.azure.com/pointgrab/PG/_git/researches?path=/yolov5-inference
+YOLO inference on C++ using tf lite and opencv+onnx.
+
+# YOLOv5 
+The experiment uses the yolov5n model pre-trained on COCO.
 
 ## How to download and build TF lite: https://www.tensorflow.org/lite/guide/build_cmake#step_5_build_tensorflow_lite
 TF lite CMakeLists.txt example: https://github.com/tensorflow/tensorflow/blob/master/tensorflow/lite/examples/minimal/CMakeLists.txt
@@ -57,8 +59,26 @@ inference | 540/2 | 350/2 | 266/4
 postprocessing | 36/4 | 35/4 | 35/4
 
 
-The tables above show that the best inference type is tf lite. with multiple threads. For pg1c int8 is better. 
+The tables above show that the best inference type is tf lite. with multiple threads. For pg1c int8 is better.
 
-## How to reproduce
+# YOLOv7
+The experiment uses the yolov5 model trained for object detection task(3 classes).
+Here we only measure onnx+cv performance.
+
+[How to convert yolov7 to onnx](https://github.com/WongKinYiu/yolov7/issues/49#issuecomment-1185120410). We need only set number of classes = 3 in config yaml file and code.
+
+## Results
+The inferences were tested on pg1b and pg1c devices(raspberry pi 3 and 4) with stopped cp-core.service. Each experiment uses the same setup:
+- as input cam2 image
+- input size 640*640
+- number of runs = 100 and inference time averaged
+
+### tab. 7. pg1b VS pg1c
+part | pg1b | pg1c
+-- | -- | -- |
+inference | 16863/8620 | 10266/1118
+
+
+# How to reproduce
 
 Rename one of the CMakeLists file templates and build the project in release mode.

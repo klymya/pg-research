@@ -7,7 +7,7 @@
     {
         "name": "Linux aarch64 pg (dunfell)",
         "toolchainFile": "${workspaceFolder}/toolchain/aarch64-pg-linux.cmake",
-        "environmentSetupScript": "/opt/cp/5.2.1/environment-setup-aarch64-pg-linux",
+        "environmentSetupScript": "${workspaceFolder}/toolchain/environment-setup-aarch64-pg-linux",
         "keep": true
     }
 ]

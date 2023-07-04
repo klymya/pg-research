@@ -35,10 +35,14 @@ __pycache__
 .vscode
 .gitignore
 
-yolov5-inference/build
-yolov5-inference/tensorflow_src
-yolov5-inference/tflite_build
-yolov5-inference/vcpkg
+vcpkg
+vcpkg_installed
+
+yolo-inference/build
+yolo-inference/tensorflow_src
+yolo-inference/tflite_build
+yolo-inference/vcpkg
+!yolo-inference/.vscode
 
 vayyar/test-data*
 vayyar/src/draft-notebooks

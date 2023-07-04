@@ -9,7 +9,7 @@ if [ ! -z "$LD_LIBRARY_PATH" ]; then
     echo "For more references see:"
     echo "  http://tldp.org/HOWTO/Program-Library-HOWTO/shared-libraries.html#AEN80"
     echo "  http://xahlee.info/UnixResource_dir/_/ldpath.html"
-    return 1
+    unset LD_LIBRARY_PATH
 fi
 export SDKTARGETSYSROOT=/opt/cp/5.2.1/sysroots/aarch64-pg-linux
 export PATH=/opt/cp/5.2.1/sysroots/x86_64-pgsdk-linux/usr/bin:/opt/cp/5.2.1/sysroots/x86_64-pgsdk-linux/usr/sbin:/opt/cp/5.2.1/sysroots/x86_64-pgsdk-linux/bin:/opt/cp/5.2.1/sysroots/x86_64-pgsdk-linux/sbin:/opt/cp/5.2.1/sysroots/x86_64-pgsdk-linux/usr/bin/../x86_64-pgsdk-linux/bin:/opt/cp/5.2.1/sysroots/x86_64-pgsdk-linux/usr/bin/aarch64-pg-linux:/opt/cp/5.2.1/sysroots/x86_64-pgsdk-linux/usr/bin/aarch64-pg-linux-musl:$PATH
