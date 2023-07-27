@@ -57,3 +57,5 @@ sagemaker/tfdata
 sagemaker/tfmodel
 sagemaker/torchdata
 sagemaker/torchmodel
+
+yolov7-model
