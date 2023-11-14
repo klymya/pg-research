@@ -1,0 +1,7 @@
+- 51_test.py - example of voxel 51 server launching with test set.
+- eval_yolov8.ipynb - yolov8 quantization, evaluation and launching
+- eval.ipynb - yolov8 evaluation.
+- gap9_yolo_example.ipynb - yolo inference using gap9 simulator
+- model_eval.ipynb - evaluation of yolox onnx model using object detection tools.
+- yolov8.ipynb - yolov8 quantization, evaluation and launching
+- yolox.ipynb - yolox quantization, evaluation and launching
