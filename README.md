@@ -9,3 +9,5 @@ The repo stores the results and code of different research.
 - vayyar - radar usage investigation. vol 2
 - yolo-inference - yolov5 inference on C++ using tf lite and opencv+onnx. The experiment uses yolov5n model.
 - yolov7-model - yolov7 reparametrization and onnx export scripts.
+- leg_position_detectors - neural networks which detect leg position.
+- leg_position_calculator - linear regression model which calculated leg position by bbox coordinates and aspect ratio.
