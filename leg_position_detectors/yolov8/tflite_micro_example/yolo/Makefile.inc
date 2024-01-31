@@ -1,0 +1,43 @@
+HELLO_WORLD_TEST_SRCS := \
+$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/yolo/yolo_test.cc
+
+HELLO_WORLD_SRCS := \
+$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/yolo/yolo_test.cc
+
+HELLO_WORLD_HDRS :=
+
+HELLO_WORLD_GENERATOR_INPUTS := \
+$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/yolo/models/dfl_256_float32.tflite \
+$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/yolo/models/yolov8_256_int8.tflite \
+$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/yolo/models/yolov8_640_int8.tflite \
+$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/yolo/models/head_256_float32.tflite
+
+HELLO_WORLD_GENERATED_SRCS := \
+$(GENERATED_SRCS_DIR)$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/yolo/models/dfl_256_float32_model_data.cc \
+$(GENERATED_SRCS_DIR)$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/yolo/models/yolov8_256_int8_model_data.cc \
+$(GENERATED_SRCS_DIR)$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/yolo/models/yolov8_640_int8_model_data.cc \
+$(GENERATED_SRCS_DIR)$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/yolo/models/head_256_float32_model_data.cc
+
+HELLO_WORLD_GENERATED_HDRS := \
+$(GENERATED_SRCS_DIR)$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/yolo/models/dfl_256_float32_model_data.h \
+$(GENERATED_SRCS_DIR)$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/yolo/models/yolov8_256_int8_model_data.h \
+$(GENERATED_SRCS_DIR)$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/yolo/models/yolov8_640_int8_model_data.h \
+$(GENERATED_SRCS_DIR)$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/yolo/models/head_256_float32_model_data.h
+
+# Tests loading and running the sine model.
+$(eval $(call microlite_test,yolo_test,\
+$(HELLO_WORLD_TEST_SRCS),,$(HELLO_WORLD_GENERATOR_INPUTS)))
+
+# Builds a standalone binary.
+$(eval $(call microlite_test,yolo,\
+$(HELLO_WORLD_SRCS),,$(HELLO_WORLD_GENERATOR_INPUTS)))
+
+# Add sources and headers generated from $(HELLO_WORLD_GENERATOR_INPUTS).
+HELLO_WORLD_SRCS += $(HELLO_WORLD_GENERATED_SRCS)
+HELLO_WORLD_HDRS += $(HELLO_WORLD_GENERATED_HDRS)
+
+list_hello_world_example_sources:
+	@echo $(HELLO_WORLD_SRCS)
+
+list_hello_world_example_headers:
+	@echo $(HELLO_WORLD_HDRS)
