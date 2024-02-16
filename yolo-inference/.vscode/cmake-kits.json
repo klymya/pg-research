@@ -9,5 +9,10 @@
         "toolchainFile": "${workspaceFolder}/toolchain/aarch64-pg-linux.cmake",
         "environmentSetupScript": "${workspaceFolder}/toolchain/environment-setup-aarch64-pg-linux",
         "keep": true
+    },
+    {
+        "name": "linux-aarch64-pg-dunfell-tfite",
+        "environmentSetupScript": "/opt/cp/6.0/environment-setup-aarch64-pg-linux",
+        "keep": true
     }
 ]

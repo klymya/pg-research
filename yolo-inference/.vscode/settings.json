@@ -96,6 +96,12 @@
         "locale": "cpp",
         "queue": "cpp",
         "span": "cpp",
-        "stack": "cpp"
-    }
+        "stack": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "numbers": "cpp",
+        "semaphore": "cpp",
+        "stop_token": "cpp"
+    },
+    "cmake.sourceDirectory": "/home/kyamkovyi/projects/researches/yolo-inference"
 }

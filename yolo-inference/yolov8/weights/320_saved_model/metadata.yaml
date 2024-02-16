@@ -1,0 +1,16 @@
+description: Ultralytics YOLOv8-pose-tiny model trained on positiondb_pose.yaml
+author: Ultralytics
+license: AGPL-3.0 https://ultralytics.com/license
+date: '2024-02-14T12:51:59.947671'
+version: 8.0.207
+stride: 32
+task: pose
+batch: 1
+imgsz:
+- 320
+- 320
+names:
+  0: person
+kpt_shape:
+- 1
+- 2
