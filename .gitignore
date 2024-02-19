@@ -65,3 +65,5 @@ data-exploration/tmp_dataset
 data
 
 yolo-tools/datasets
+
+tracker/ByteTrack
