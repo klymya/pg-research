@@ -63,7 +63,7 @@ if __name__ == "__main__":
                     cv2.LINE_AA
                 )
         
-        for track in frame_data["tracks"]:
+        for track in frame_data.get("tracks", []):
             if not args.ignore_kalman:
                 box = np.array(track["tlwh_pred"]).astype(int)
                 p1 = box[:2].astype(int)
