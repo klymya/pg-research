@@ -39,9 +39,10 @@ if __name__ == "__main__":
         dets = np.array(dets["detections"], dtype=float)
         if dets.size:
             dets[:, 2:4] = dets[:, :2] + dets[:, 2:4]
+            dets = np.hstack([dets[:, :5], dets[:, 6:]])
         else:
-            dets = np.empty((1, 5))
-        online_targets = tracker.update(dets[:, :5], info_imgs, img_size)
+            dets = np.empty((1, 7))
+        online_targets = tracker.update(dets, info_imgs, img_size)
 
         proceses_targets = []
         for online_target in online_targets:
@@ -53,6 +54,8 @@ if __name__ == "__main__":
                 "is_activated": online_target.is_activated,
                 "tlwh": box,
                 "tlwh_pred": online_target.tlwh_predicted,
+                "pos": online_target.pos,
+                "pos_pred": online_target.pos_predicted,
                 "score": online_target.score
             })
         tracks.append({"detections": dets_in, "tracks": proceses_targets})
