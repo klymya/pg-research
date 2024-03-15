@@ -11,9 +11,17 @@ struct Rect
 	T height;
 };
 
+template <typename T>
+struct Point
+{
+	T x;
+	T y;
+};
+
 struct Object
 {
     Rect<float> rect;
+	Point<float> pos;
     int label;
     float prob;
 };

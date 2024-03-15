@@ -31,6 +31,8 @@ void readData(const string& dataPath, vector<vector<Object>>& detections)
             obj.rect.height = rawDetection[3];
             obj.label = rawDetection[5];
             obj.prob = rawDetection[4];
+            obj.pos.x = rawDetection[6];
+            obj.pos.y = rawDetection[7];
 
             tmpDetections.push_back(obj);
         }
@@ -53,7 +55,9 @@ void writeData(const string& outPath, vector<vector<Object>>& detections, vector
                 tmpDetection.rect.width,
                 tmpDetection.rect.height,
                 tmpDetection.prob,
-                tmpDetection.label
+                (float)tmpDetection.label,
+                tmpDetection.pos.x,
+                tmpDetection.pos.y,
             };
             rawDetections.push_back(rawDetection);
         }
@@ -65,7 +69,7 @@ void writeData(const string& outPath, vector<vector<Object>>& detections, vector
             rawTrack["state"] = tmpTrack.state;
             rawTrack["is_activated"] = tmpTrack.is_activated;
             rawTrack["tlwh"] = tmpTrack.tlwh;
-            rawTrack["tlwh_pred"] = vector<float> {0, 0, 0 ,0};
+            rawTrack["pos"] = tmpTrack.pos;
             rawTrack["score"] = tmpTrack.score;
 
             rawTracks.push_back(rawTrack);

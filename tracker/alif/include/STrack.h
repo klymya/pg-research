@@ -9,13 +9,14 @@ enum TrackState { New = 0, Tracked, Lost, Removed };
 class STrack
 {
 public:
-	STrack(vector<float> tlwh_, float score);
+	STrack(vector<float> tlwh_, float score, vector<float> pos_);
 	~STrack();
 
 	vector<float> static tlbr_to_tlwh(vector<float> &tlbr);
 	void static multi_predict(vector<STrack*> &stracks, byte_kalman::KalmanFilter &kalman_filter);
 	void static_tlwh();
 	void static_tlbr();
+	void static_pos();
 	vector<float> tlwh_to_xyah(vector<float> tlwh_tmp);
 	vector<float> to_xyah();
 	void mark_lost();
@@ -35,6 +36,8 @@ public:
 	vector<float> _tlwh;
 	vector<float> tlwh;
 	vector<float> tlbr;
+	vector<float> _pos;
+	vector<float> pos;
 	int frame_id;
 	int tracklet_len;
 	int start_frame;

@@ -23,8 +23,8 @@ namespace byte_kalman
 			bool only_position = false);
 
 	private:
-		Eigen::Matrix<float, 8, 8, Eigen::RowMajor> _motion_mat;
-		Eigen::Matrix<float, 4, 8, Eigen::RowMajor> _update_mat;
+		Eigen::Matrix<float, KALMAN_N_VAR, KALMAN_N_VAR, Eigen::RowMajor> _motion_mat;
+		Eigen::Matrix<float, KALMAN_N_DIM, KALMAN_N_VAR, Eigen::RowMajor> _update_mat;
 		float _std_weight_position;
 		float _std_weight_velocity;
 	};

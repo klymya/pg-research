@@ -58,7 +58,7 @@ if __name__ == "__main__":
                     COLOR_DET,
                     3
                 )
-                cv2.circle(frame, det[-2:].astype(int), 4, (0, 255, 0), 5)
+                cv2.circle(frame, det[-2:].astype(int), 4, COLOR_DET, 5)
                 cv2.putText(
                     frame, f"{det[4]:.02f}", p1 + [5, 10], cv2.FONT_HERSHEY_PLAIN, 0.7, COLOR_DET, 1,
                     cv2.LINE_AA
@@ -80,7 +80,8 @@ if __name__ == "__main__":
                     COLOR_TRACK_PRED,
                     2
                 )
-                cv2.circle(frame, np.asanyarray(track["pos_pred"], dtype=int), 4, COLOR_TRACK_PRED, 3)
+                if "pos_pred" in track:
+                    cv2.circle(frame, np.asanyarray(track["pos_pred"], dtype=int), 4, COLOR_TRACK_PRED, 3)
 
             if not args.ignore_tracks:
                 box = np.array(track["tlwh"]).astype(int)
@@ -91,13 +92,14 @@ if __name__ == "__main__":
                 p2[0] = min(p2[0], w)
                 p2[1] = min(p2[1], h)
                 cv2.rectangle(
-                    frame, 
+                    frame,
                     p1,
                     p2,
                     COLOR_TRACK,
                     1
                 )
-                cv2.circle(frame, np.asanyarray(track["pos"], dtype=int), 3, COLOR_TRACK, 3)
+                if "pos" in track:
+                    cv2.circle(frame, np.asanyarray(track["pos"], dtype=int), 3, COLOR_TRACK, 3)
 
                 x = (p2[0] + p1[0]) // 2 - 15
                 y = (p2[1] + p1[1]) // 2

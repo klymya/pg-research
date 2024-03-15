@@ -1,9 +1,12 @@
 #include "STrack.h"
 
-STrack::STrack(vector<float> tlwh_, float score)
+STrack::STrack(vector<float> tlwh_, float score, vector<float> pos_)
 {
 	_tlwh.resize(4);
 	_tlwh.assign(tlwh_.begin(), tlwh_.end());
+
+	_pos.resize(2);
+	_pos.assign(pos_.begin(), pos_.end());
 
 	is_activated = false;
 	track_id = 0;
@@ -11,9 +14,11 @@ STrack::STrack(vector<float> tlwh_, float score)
 	
 	tlwh.resize(4);
 	tlbr.resize(4);
+	pos.resize(2);
 
 	static_tlwh();
 	static_tlbr();
+	static_pos();
 	frame_id = 0;
 	tracklet_len = 0;
 	this->score = score;
@@ -40,12 +45,15 @@ void STrack::activate(byte_kalman::KalmanFilter &kalman_filter, int frame_id)
 	xyah_box[1] = xyah[1];
 	xyah_box[2] = xyah[2];
 	xyah_box[3] = xyah[3];
+	xyah_box[4] = this->_pos[0];
+	xyah_box[5] = this->_pos[1];
 	auto mc = this->kalman_filter.initiate(xyah_box);
 	this->mean = mc.first;
 	this->covariance = mc.second;
 
 	static_tlwh();
 	static_tlbr();
+	static_pos();
 
 	this->tracklet_len = 0;
 	this->state = TrackState::Tracked;
@@ -66,12 +74,15 @@ void STrack::re_activate(STrack &new_track, int frame_id, bool new_id)
 	xyah_box[1] = xyah[1];
 	xyah_box[2] = xyah[2];
 	xyah_box[3] = xyah[3];
+	xyah_box[4] = new_track.pos[0];
+	xyah_box[5] = new_track.pos[1];
 	auto mc = this->kalman_filter.update(this->mean, this->covariance, xyah_box);
 	this->mean = mc.first;
 	this->covariance = mc.second;
 
 	static_tlwh();
 	static_tlbr();
+	static_pos();
 
 	this->tracklet_len = 0;
 	this->state = TrackState::Tracked;
@@ -93,6 +104,8 @@ void STrack::update(STrack &new_track, int frame_id)
 	xyah_box[1] = xyah[1];
 	xyah_box[2] = xyah[2];
 	xyah_box[3] = xyah[3];
+	xyah_box[4] = new_track.pos[0];
+	xyah_box[5] = new_track.pos[1];
 
 	auto mc = this->kalman_filter.update(this->mean, this->covariance, xyah_box);
 	this->mean = mc.first;
@@ -134,6 +147,19 @@ void STrack::static_tlbr()
 	tlbr.assign(tlwh.begin(), tlwh.end());
 	tlbr[2] += tlbr[0];
 	tlbr[3] += tlbr[1];
+}
+
+void STrack::static_pos()
+{
+	if (this->state == TrackState::New)
+	{
+		pos[0] = _pos[0];
+		pos[1] = _pos[1];
+		return;
+	}
+
+	pos[0] = mean[4];
+	pos[1] = mean[5];
 }
 
 vector<float> STrack::tlwh_to_xyah(vector<float> tlwh_tmp)
@@ -185,10 +211,11 @@ void STrack::multi_predict(vector<STrack*> &stracks, byte_kalman::KalmanFilter &
 	{
 		if (stracks[i]->state != TrackState::Tracked)
 		{
-			stracks[i]->mean[7] = 0;
+			stracks[i]->mean[9] = 0;
 		}
 		kalman_filter.predict(stracks[i]->mean, stracks[i]->covariance);
 		stracks[i]->static_tlwh();
 		stracks[i]->static_tlbr();
+		stracks[i]->static_pos();
 	}
 }
