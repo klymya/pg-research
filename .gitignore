@@ -30,6 +30,8 @@
 *.out
 *.app
 
+build
+
 .ipynb_checkpoints
 __pycache__
 .vscode
@@ -65,3 +67,5 @@ data-exploration/tmp_dataset
 data
 
 yolo-tools/datasets
+
+tracker/artifacts
