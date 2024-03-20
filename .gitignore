@@ -67,3 +67,5 @@ data-exploration/tmp_dataset
 yolo-tools/datasets
 
 tracker/artifacts
+
+*.tfrecord
