@@ -64,8 +64,6 @@ yolov7-model
 
 data-exploration/tmp_dataset
 
-data
-
 yolo-tools/datasets
 
 tracker/artifacts
