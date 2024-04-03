@@ -69,3 +69,4 @@ yolo-tools/datasets
 tracker/artifacts
 
 *.tfrecord
+theodore/theodore_yolo
