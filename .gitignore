@@ -70,3 +70,4 @@ tracker/artifacts
 
 *.tfrecord
 theodore/theodore_yolo
+theodore/theodore_unet
