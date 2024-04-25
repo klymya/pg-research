@@ -10,13 +10,18 @@ import torch
 import segmentation_models_pytorch as smp
 from segmentation_models_pytorch import utils as smp_utils
 
+# FPN + "mobilenet_v2" # 4215425
+# PSPNet + mobilenet_v2 = 2263353
+# PAN + mobilenet_v2 = 2416552
+# DeepLabV3Plus + mobilenet_v2 = 4378513
+
 
 # ENCODER = 'timm-mobilenetv3_small_100' # 2721953 prams
-ENCODER = 'timm-mobilenetv3_large_minimal_100' # 3328985 params
+ENCODER = 'mobilenet_v2' # 3328985 params
 ENCODER_WEIGHTS = 'imagenet'
 ACTIVATION = 'sigmoid' # could be None for logits or 'softmax2d' for multiclass segmentation
 DEVICE = 'cuda'
-EXP_NAME = f"baseline_fpn_{ENCODER}_schedule_25_upd_early_stopping"
+EXP_NAME = f"fpn_{ENCODER}_schedule_25_upd_early_stopping"
 LOG_DIR = f"runs/{EXP_NAME}"
 NUM_EPOCHS = 1000
 BATCH_SIZE = 64
