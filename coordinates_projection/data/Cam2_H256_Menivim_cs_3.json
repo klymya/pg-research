@@ -6,12 +6,12 @@
       "label": "cabinet",
       "points": [
         [
-          109.66666666666667,
-          603.6666666666666
+          104.28571428571428,
+          600.4761904761906
         ],
         [
-          188.0,
-          706.3333333333334
+          188.41269841269838,
+          708.4126984126984
         ]
       ],
       "group_id": null,
@@ -79,6 +79,354 @@
       "group_id": null,
       "description": "",
       "shape_type": "polygon",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "desk",
+      "points": [
+        [
+          584.4444444444445,
+          113.17460317460319
+        ],
+        [
+          971.7460317460318,
+          312.3809523809524
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "desk",
+      "points": [
+        [
+          266.19047619047615,
+          349.6825396825397
+        ],
+        [
+          463.015873015873,
+          717.1428571428572
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "chair",
+      "points": [
+        [
+          59.04761904761903,
+          260.7936507936508
+        ],
+        [
+          290.7936507936508,
+          406.031746031746
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "chair",
+      "points": [
+        [
+          43.174603174603156,
+          467.14285714285717
+        ],
+        [
+          254.28571428571428,
+          622.6984126984128
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "chair",
+      "points": [
+        [
+          801.1111111111111,
+          2.0634920634920815
+        ],
+        [
+          958.2539682539683,
+          150.47619047619048
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "monitor",
+      "points": [
+        [
+          692.3809523809524,
+          199.6825396825397
+        ],
+        [
+          881.2698412698413,
+          302.06349206349205
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "monitor",
+      "points": [
+        [
+          845.5555555555555,
+          206.03174603174605
+        ],
+        [
+          1038.4126984126985,
+          291.74603174603175
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "monitor",
+      "points": [
+        [
+          251.1111111111111,
+          427.46031746031747
+        ],
+        [
+          428.88888888888886,
+          706.0317460317461
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "desk_mask",
+      "points": [
+        [
+          592.3809523809524,
+          114.76190476190477
+        ],
+        [
+          586.031746031746,
+          286.1904761904762
+        ],
+        [
+          824.1269841269841,
+          301.26984126984127
+        ],
+        [
+          961.4285714285714,
+          305.23809523809524
+        ],
+        [
+          966.984126984127,
+          195.71428571428572
+        ],
+        [
+          966.984126984127,
+          148.8888888888889
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "polygon",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "desk_mask",
+      "points": [
+        [
+          278.88888888888886,
+          349.6825396825397
+        ],
+        [
+          463.015873015873,
+          365.55555555555554
+        ],
+        [
+          426.56196170545945,
+          719.0
+        ],
+        [
+          268.57142857142856,
+          719.0
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "polygon",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "desk_pos",
+      "points": [
+        [
+          363.8095238095238,
+          527.4603174603176
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "point",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "desk_pos",
+      "points": [
+        [
+          790.0,
+          213.1746031746032
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "point",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "chair_pos",
+      "points": [
+        [
+          230.47619047619045,
+          346.5079365079365
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "point",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "chair_pos",
+      "points": [
+        [
+          244.76190476190476,
+          536.1904761904763
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "point",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "chair_pos",
+      "points": [
+        [
+          844.7619047619048,
+          137.7777777777778
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "point",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "cabinet_pos",
+      "points": [
+        [
+          222.5396825396825,
+          626.6666666666667
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "point",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "monitor_pos",
+      "points": [
+        [
+          394.76190476190476,
+          529.8412698412699
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "point",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "monitor_pos",
+      "points": [
+        [
+          751.1111111111111,
+          271.9047619047619
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "point",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "monitor_pos",
+      "points": [
+        [
+          886.8253968253969,
+          269.5238095238095
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "point",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "cabinet_full",
+      "points": [
+        [
+          253.4920634920635,
+          581.4285714285714
+        ],
+        [
+          109.84126984126982,
+          710.0000000000001
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
       "flags": {},
       "mask": null
     }
