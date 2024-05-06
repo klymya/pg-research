@@ -74,7 +74,7 @@ if __name__ == "__main__":
                 p2[0] = min(p2[0], w)
                 p2[1] = min(p2[1], h)
                 cv2.rectangle(
-                    frame, 
+                    frame,
                     p1,
                     p2,
                     COLOR_TRACK_PRED,

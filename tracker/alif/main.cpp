@@ -7,32 +7,33 @@
 #include <Eigen/Dense>
 #include "nlohmann/json.hpp"
 
-#include "BYTETracker.h"
+#include "BYTETracker.hpp"
 
 using namespace std;
+using namespace arm::app::pg_object_detection;
 using json = nlohmann::json;
 
-void readData(const string& dataPath, vector<vector<Object>>& detections)
+void readData(const string& dataPath, vector<vector<Detection>>& detections)
 {
     std::ifstream f(dataPath);
     json data = json::parse(f);
 
     for (const auto& item : data) {
-        vector<Object> tmpDetections;
+        vector<Detection> tmpDetections;
         for (const auto& detection : item["detections"]) {
             vector<float> rawDetection;
             for (const auto& value : detection) {
                 rawDetection.push_back(value);
             }
-            Object obj;
-            obj.rect.x = rawDetection[0];
-            obj.rect.y = rawDetection[1];
-            obj.rect.width = rawDetection[2];
-            obj.rect.height = rawDetection[3];
-            obj.label = rawDetection[5];
-            obj.prob = rawDetection[4];
-            obj.pos.x = rawDetection[6];
-            obj.pos.y = rawDetection[7];
+            Detection obj;
+            obj.bbox.x = rawDetection[0];
+            obj.bbox.y = rawDetection[1];
+            obj.bbox.w = rawDetection[2];
+            obj.bbox.h = rawDetection[3];
+            obj.cls = rawDetection[5];
+            obj.confidence = rawDetection[4];
+            obj.position.x = rawDetection[6];
+            obj.position.y = rawDetection[7];
 
             tmpDetections.push_back(obj);
         }
@@ -40,7 +41,7 @@ void readData(const string& dataPath, vector<vector<Object>>& detections)
     }
 }
 
-void writeData(const string& outPath, vector<vector<Object>>& detections, vector<vector<STrack>>& tracks)
+void writeData(const string& outPath, vector<vector<Detection>>& detections, vector<vector<STrack>>& tracks)
 {
     // Create an array to hold tracks objects
     json tracksArray = json::array();
@@ -50,14 +51,14 @@ void writeData(const string& outPath, vector<vector<Object>>& detections, vector
         vector<vector<float>> rawDetections;
         for (auto tmpDetection: detections[i]) {
             vector<float> rawDetection{
-                tmpDetection.rect.x,
-                tmpDetection.rect.y,
-                tmpDetection.rect.width,
-                tmpDetection.rect.height,
-                tmpDetection.prob,
-                (float)tmpDetection.label,
-                tmpDetection.pos.x,
-                tmpDetection.pos.y,
+                tmpDetection.bbox.x,
+                tmpDetection.bbox.y,
+                tmpDetection.bbox.w,
+                tmpDetection.bbox.h,
+                tmpDetection.confidence,
+                (float)tmpDetection.cls,
+                tmpDetection.position.x,
+                tmpDetection.position.y,
             };
             rawDetections.push_back(rawDetection);
         }
@@ -70,7 +71,7 @@ void writeData(const string& outPath, vector<vector<Object>>& detections, vector
             rawTrack["is_activated"] = tmpTrack.is_activated;
             rawTrack["tlwh"] = tmpTrack.tlwh;
             rawTrack["pos"] = tmpTrack.pos;
-            rawTrack["score"] = tmpTrack.score;
+            rawTrack["score"] = tmpTrack.m_score;
 
             rawTracks.push_back(rawTrack);
         }
@@ -93,7 +94,7 @@ void writeData(const string& outPath, vector<vector<Object>>& detections, vector
 }
 
 int main() {
-    vector<vector<Object>> detections;
+    vector<vector<Detection>> detections;
     string dataPath = "/home/kyamkovyi/projects/pg/code/researches/tracker/artifacts/detections.json";
     string outPath = "/home/kyamkovyi/projects/pg/code/researches/tracker/artifacts/tracks_cpp.json";
     readData(dataPath, detections);
