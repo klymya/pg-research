@@ -1,0 +1,1 @@
+./build/Yolov8CPPInference /home/kyamkovyi/projects/researches/theodore/yolo_artifacts/baseline_ultralytics/weights/best.onnx /home/kyamkovyi/projects/researches/theodore/theodore_yolo/test/0000275.jpg
