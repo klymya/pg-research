@@ -15,14 +15,16 @@ const int MARGIN = 5;
 
 int main(int argc, char** argv)
 {
-	if (argc < 4) {
-		cout << "the models and image paths not specified\n";
+	if (argc < 6) {
+		cout << "the parameters not specified\n";
 		return 1;
 	}
 
 	string detModelPath(argv[1]);
 	string segModelPath(argv[2]);
 	string imgPath(argv[3]);
+	int showImg(stoi(argv[4]));
+	int writeImg(stoi(argv[5]));
 
 	// init
 	cv::Mat frame = cv::imread(imgPath);
@@ -78,8 +80,16 @@ int main(int argc, char** argv)
 
 	detModel.DrawPredictions(frame, classIds, confidences, boxes);
 
-	cv::imshow("Inference", frame);
-	cv::waitKey(-1);
+		if (writeImg)
+	{
+		imwrite("output.png", frame);
+	}
+
+	if (showImg)
+	{
+		imshow("Inference", frame);
+		waitKey(-1);
+	}
 
 	return 0;
 }
