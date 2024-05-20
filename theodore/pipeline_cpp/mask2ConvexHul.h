@@ -24,5 +24,11 @@ void mask2convexHull(const Mat& segMask, vector<Point>& hull)
 	findContours(res_morphology, contours, hierarchy, RETR_TREE, CHAIN_APPROX_TC89_L1);
 
 	//convex hull
-	convexHull(contours[0], hull);
+	vector<Point> contour;
+	for (auto i: contours)
+	{
+		contour.insert(contour.end(), i.begin(), i.end());
+	}
+	convexHull(contour, hull);
+
 }

@@ -34,7 +34,7 @@ void PANMobilenetV2::Inference(Mat& blob, vector<Mat>& output)
 void PANMobilenetV2::Postprocessing(const Mat& image, Mat& output)
 {
 	cv::Mat channelScore = cv::Mat(m_width, m_height, CV_32FC1, const_cast<float *>(output.ptr<float>(0, 0, 0)));
-	channelScore.convertTo(output, CV_8U, 255.);
+	channelScore.convertTo(output, CV_8U);
 	resize(output, output, image.size(), 0, 0, INTER_LINEAR_EXACT);
 }
 
@@ -52,7 +52,7 @@ void PANMobilenetV2::Detect(const Mat& bgrImage, Mat& segMask)
 void PANMobilenetV2::DrawPredictions(Mat& image, Mat& segMask)
 {
 	Mat segMaskBGR;
-	cvtColor(segMask, segMaskBGR, COLOR_GRAY2BGR);
+	cvtColor(segMask * 255, segMaskBGR, COLOR_GRAY2BGR);
 	float alpha = 0.6;
 	float beta = ( 1.0 - alpha );
 	addWeighted(image, alpha, segMaskBGR, beta, 0.0, image);
