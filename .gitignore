@@ -71,3 +71,5 @@ tracker/artifacts
 *.tfrecord
 theodore/theodore_yolo
 theodore/theodore_unet
+
+object-detection-v3/datasets
