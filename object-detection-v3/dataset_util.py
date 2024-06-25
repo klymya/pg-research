@@ -65,9 +65,10 @@ Algo:
 """
 
 
-def dataframes2objects(df_annotations: pd.DataFrame, df_images: pd.DataFrame) -> tuple:
-    label_counts = df_annotations["label"].value_counts().reset_index().to_dict(orient="records")
-    labels = [i["label"] for i in label_counts]
+def dataframes2objects(df_annotations: pd.DataFrame, df_images: pd.DataFrame, labels: list | None = None) -> tuple:
+    if labels is None:
+        label_counts = df_annotations["label"].value_counts().reset_index().to_dict(orient="records")
+        labels = [i["label"] for i in label_counts]
     label_mapping = {idx: i for idx, i in enumerate(labels)}
     reverse_label_mapping = {i: idx for idx, i in enumerate(labels)}
 
