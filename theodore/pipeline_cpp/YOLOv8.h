@@ -12,19 +12,21 @@ using namespace std;
 using namespace cv;
 using namespace dnn;
 
-class YOLOv8: IObjDetModel
+class YOLOv8: public IObjDetModel
 {
 public:
 	YOLOv8(const string& modelPath, float confThreshold=0.01, float nmsThreshold=0.5, int height=640, int width=640);
-	void Detect(const Mat& bgrImage, vector<int>& classIds, vector<float>& confidences, vector<Rect>& boxes) override;
-	void DrawPredictions(Mat& image, vector<int>& classIds, vector<float>& confidences, vector<Rect>& boxes) override;
+	void Detect(const Mat& bgrImage, vector<int>& classIds, vector<float>& confidences, vector<Rect>& boxes,
+				vector<Point>& positions) override;
+	void DrawPredictions(Mat& image, vector<int>& classIds, vector<float>& confidences, vector<Rect>& boxes,
+						 vector<Point>& positions) override;
 
 private:
 	Mat formatToSquare(const Mat &source);
 	void Preprocessing(const Mat& image, Mat& blob);
 	void Inference(Mat& blob, vector<Mat>& output);
-	void Postprocessing(
-		const Mat& image, vector<Mat>& output, vector<int>& classIds, vector<float>& confidences, vector<Rect>& boxes);
+	void Postprocessing(const Mat& image, vector<Mat>& output, vector<int>& classIds, vector<float>& confidences,
+						vector<Rect>& boxes, vector<Point>& positions);
 
 	Net m_net;
 	float m_confThreshold;

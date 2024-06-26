@@ -11,8 +11,10 @@ using namespace cv;
 class IObjDetModel
 {
 public:
-	virtual void Detect(const Mat& bgrImage, vector<int>& classIds, vector<float>& confidences, vector<Rect>& boxes) = 0;
-	virtual void DrawPredictions(Mat& image, vector<int>& classIds, vector<float>& confidences, vector<Rect>& boxes) = 0;
+	virtual void Detect(const Mat& bgrImage, vector<int>& classIds, vector<float>& confidences, vector<Rect>& boxes,
+						vector<Point>& positions) = 0;
+	virtual void DrawPredictions(Mat& image, vector<int>& classIds, vector<float>& confidences, vector<Rect>& boxes,
+								 vector<Point>& positions) = 0;
 };
 
 class ISegModel

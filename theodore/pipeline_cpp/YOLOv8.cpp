@@ -18,8 +18,8 @@ void YOLOv8::Inference(Mat& blob, vector<Mat>& output)
 	m_net.forward(output, m_net.getUnconnectedOutLayersNames());
 }
 
-void YOLOv8::Postprocessing(
-	const Mat& image, vector<Mat>& output, vector<int>& classIds, vector<float>& confidences, vector<Rect>& boxes)
+void YOLOv8::Postprocessing(const Mat& image, vector<Mat>& output, vector<int>& classIds, vector<float>& confidences,
+							vector<Rect>& boxes, vector<Point>& positions)
 {
 	int rows = output[0].size[2];
 	int dimensions = output[0].size[1];
@@ -72,39 +72,54 @@ void YOLOv8::Postprocessing(
 	// lower confidences
 	vector<int> indices;
 	dnn::NMSBoxes(rawBoxes, rawConfidences, m_confThreshold, m_nmsThreshold, indices);
+
+	boxes.clear();
+	confidences.clear();
+	classIds.clear();
+	positions.clear();
 	for (size_t i = 0; i < indices.size(); ++i)
 	{
 		int idx = indices[i];
 		boxes.push_back(rawBoxes[idx]);
 		confidences.push_back(rawConfidences[idx]);
 		classIds.push_back(rawClassIds[idx]);
+		Point position(rawBoxes[i].x + rawBoxes[i].width / 2, rawBoxes[i].y + rawBoxes[i].height / 2);
+		positions.push_back(position);
 	}
 }
 
-void YOLOv8::Detect(const Mat& bgrImage, vector<int>& classIds, vector<float>& confidences, vector<Rect>& boxes)
+void YOLOv8::Detect(const Mat& bgrImage, vector<int>& classIds, vector<float>& confidences, vector<Rect>& boxes,
+					vector<Point>& positions)
 {
 	Mat blob;
 	vector<Mat> output;
 
 	Preprocessing(bgrImage, blob);
 	Inference(blob, output);
-	Postprocessing(bgrImage, output, classIds, confidences, boxes);
+	Postprocessing(bgrImage, output, classIds, confidences, boxes, positions);
 }
 
-void YOLOv8::DrawPredictions(Mat& image, vector<int>& classIds, vector<float>& confidences, vector<Rect>& boxes)
+void YOLOv8::DrawPredictions(Mat& image, vector<int>& classIds, vector<float>& confidences, vector<Rect>& boxes,
+							 vector<Point>& positions)
 {
+	Scalar color(0, 255, 0);
+	int thickness = 2;
+
 	int baseLine;
 	int top;
 	Rect* box;
+	Point* position;
 	for (auto i = 0; i < classIds.size(); ++i)
 	{
 		box = &boxes[i];
-		rectangle(image, Point(box->x, box->y), Point(box->x + box->width, box->y + box->height), Scalar(0, 0, 255), 2);
+		position = &positions[i];
+		rectangle(image, Point(box->x, box->y), Point(box->x + box->width, box->y + box->height), color, thickness);
+		circle(image, *position, 5, color, thickness);
 
 		string label = format("%d: %.2f", classIds[i], confidences[i]);
 		Size labelSize = getTextSize(label, FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
 		top = max(box->y, labelSize.height);
-		putText(image, label, Point(boxes[i].x, top), FONT_HERSHEY_SIMPLEX, 0.75, Scalar(0, 255, 0), 1);
+		putText(image, label, Point(boxes[i].x, top), FONT_HERSHEY_SIMPLEX, 0.75, color, 1);
 	}
 }
 

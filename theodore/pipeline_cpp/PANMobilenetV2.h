@@ -10,7 +10,7 @@ using namespace cv;
 using namespace dnn;
 
 
-class PANMobilenetV2: ISegModel
+class PANMobilenetV2: public ISegModel
 {
 public:
 	PANMobilenetV2(const string& modelPath, int height=128, int width=128);
