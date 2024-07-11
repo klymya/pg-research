@@ -43,7 +43,30 @@ This is a 3d iteration of object detection feature:
 
 dataset path: `/mnt/pg-fs01/Current/DB/ObjectDetectionV3`
 
-## Final model
+## Final models
+
+### YOLOv8s-pose
+
+Model name: `v2_batch6_merged_furniture_table_chair_model_s`
+
+Dataset version: V2
+
+Classes:
+- chair;
+- table.
+
+Confidence threshold: 0.35
+Iou threshold: 0.45
+
+Metrics on val dataset:
+```
+Class  Images  Instances  Box(P      R     F1  mAP50  mAP50-95)  Pose(P      R  F1     mAP50  mAP50-95):
+  all     292       3858  0.905  0.722  0.803  0.823      0.529   0.957  0.762  0.848   0.87      0.867
+chair     285       2670  0.913  0.755  0.827  0.849      0.507   0.955   0.79  0.865  0.884      0.882
+table     284       1188  0.897  0.688  0.779  0.797      0.551   0.958  0.735  0.832  0.856      0.852
+```
+
+### YOLOv9n-pose
 
 Model name: `v2_batch6_merged_furniture`
 
