@@ -9,6 +9,7 @@ This is a 3d iteration of object detection feature:
 
 - database - annotations, IDs, splittings for actual version of the dataset;
 - results - ultrlytics training results;
+- v3_1 - scripts for dataset v3.1: tables have additional 4 dots for corners;
 - compare_datasets.ipynb - compares different versions of the dataset;
 - convert2yolo.ipynb -  creates YOLO dataset for next training (deprecated);
 - create_dataset.ipynb - creates YOLO dataset for next training;

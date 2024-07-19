@@ -2,6 +2,7 @@ import os
 import shutil
 import json
 
+import numpy as np
 import pandas as pd
 import yaml
 from tqdm.contrib.concurrent import thread_map
@@ -74,7 +75,7 @@ def dataframes2objects(df_annotations: pd.DataFrame, df_images: pd.DataFrame, la
 
     objects = []
     for _, row in df_images.iterrows():
-        pth = os.path.join(row["batch"], row["folder"], row["name"])
+        pth = os.path.join(row["batch"], str(row["folder"]), row["name"])
         dets = []
         for _, row_det in df_annotations[df_annotations["img_id"] == row["id"]].iterrows():
             dets.append({
@@ -87,6 +88,13 @@ def dataframes2objects(df_annotations: pd.DataFrame, df_images: pd.DataFrame, la
                 "x": row_det["x"] / row["width"],
                 "y": row_det["y"] / row["height"],
             })
+            if "corners" in row_det and not pd.isna(row_det["corners"]):
+                corners = np.array(eval(row_det["corners"]))
+                corners[::2] = corners[::2] / row["width"]
+                corners[1::2] = corners[1::2] / row["height"]
+                corners[corners < 0] = 0
+                corners[corners > 1] = 1
+                dets[-1]["corners"] = corners
         objects.append({
             "id": row["id"],
             "group_id": row["group_id"],
@@ -97,12 +105,12 @@ def dataframes2objects(df_annotations: pd.DataFrame, df_images: pd.DataFrame, la
     return objects, label_mapping
 
 
-def create_project_file(file_pth: str, dataset_pth: str, label_mapping: dict) -> None:
+def create_project_file(file_pth: str, dataset_pth: str, label_mapping: dict, kpt_shape: list = [1, 2]) -> None:
     data = {
         "path": dataset_pth,
         "train": "images/train",
         "val": "images/val",
-        "kpt_shape": [1, 2],
+        "kpt_shape": kpt_shape,
     }
 
     with open(file_pth, "wt") as f:
@@ -120,7 +128,8 @@ def create_label_txt(args) -> None:
             h = det["ybr"] - det["ytl"]
             x_c = det["xtl"] + w / 2
             y_c = det["ytl"] + h / 2
-            f.write(f"{det['cls']} {x_c} {y_c} {w} {h} {det['x']} {det['y']}\n")
+            corners = " ".join([str(i) for i in det["corners"]])
+            f.write(f"{det['cls']} {x_c} {y_c} {w} {h} {det['x']} {det['y']} {corners}\n")
 
 
 def cp_img(args) -> None:
@@ -132,7 +141,7 @@ def cp_img(args) -> None:
 
 
 def create_yolo_dataset(
-    objects: list, label_mapping: dict, base_imgs_pth: str, dataset_pth: str, split_pth: str
+    objects: list, label_mapping: dict, base_imgs_pth: str, dataset_pth: str, split_pth: str, kpt_shape: list
 ) -> None:
     """_summary_
 
@@ -151,7 +160,8 @@ def create_yolo_dataset(
                     "xbr": float,
                     "ybr": float,
                     "x": float,
-                    "y": float
+                    "y": float,
+                    "corners": np.array [optional]
                 }
             ]
             
@@ -199,4 +209,4 @@ def create_yolo_dataset(
         desc="val images", max_workers=4
     )
 
-    create_project_file(os.path.join(dataset_pth, "project.yaml"), dataset_pth, label_mapping)
+    create_project_file(os.path.join(dataset_pth, "project.yaml"), dataset_pth, label_mapping, kpt_shape)
