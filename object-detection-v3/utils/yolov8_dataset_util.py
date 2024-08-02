@@ -66,7 +66,10 @@ Algo:
 """
 
 
-def dataframes2objects(df_annotations: pd.DataFrame, df_images: pd.DataFrame, labels: list | None = None) -> tuple:
+def dataframes2objects(
+        df_annotations: pd.DataFrame, df_images: pd.DataFrame, labels: list | None = None, use_corners: bool = False,
+        img_folder_prefix: str = ""
+) -> tuple:
     if labels is None:
         label_counts = df_annotations["label"].value_counts().reset_index().to_dict(orient="records")
         labels = [i["label"] for i in label_counts]
@@ -75,7 +78,7 @@ def dataframes2objects(df_annotations: pd.DataFrame, df_images: pd.DataFrame, la
 
     objects = []
     for _, row in df_images.iterrows():
-        pth = os.path.join(row["batch"], str(row["folder"]), row["name"])
+        pth = os.path.join(row["batch"], str(row["folder"]), img_folder_prefix, row["name"])
         dets = []
         for _, row_det in df_annotations[df_annotations["img_id"] == row["id"]].iterrows():
             dets.append({
@@ -88,7 +91,7 @@ def dataframes2objects(df_annotations: pd.DataFrame, df_images: pd.DataFrame, la
                 "x": row_det["x"] / row["width"],
                 "y": row_det["y"] / row["height"],
             })
-            if "corners" in row_det and not pd.isna(row_det["corners"]):
+            if use_corners and ("corners" in row_det and not pd.isna(row_det["corners"])):
                 corners = np.array(eval(row_det["corners"]))
                 corners[::2] = corners[::2] / row["width"]
                 corners[1::2] = corners[1::2] / row["height"]
@@ -128,7 +131,7 @@ def create_label_txt(args) -> None:
             h = det["ybr"] - det["ytl"]
             x_c = det["xtl"] + w / 2
             y_c = det["ytl"] + h / 2
-            corners = " ".join([str(i) for i in det["corners"]])
+            corners = " ".join([str(i) for i in det.get("corners", [])])
             f.write(f"{det['cls']} {x_c} {y_c} {w} {h} {det['x']} {det['y']} {corners}\n")
 
 

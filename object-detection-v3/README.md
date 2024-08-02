@@ -44,7 +44,39 @@ This is a 3d iteration of object detection feature:
 
 dataset path: `/mnt/pg-fs01/Current/DB/ObjectDetectionV3`
 
-## Final models
+## Final model
+
+Model name: `v3_2_table_chair_table_top_v2_no_occupied_chair`
+
+Dataset version: V2
+
+Classes:
+- chair;
+- table.
+
+Confidence threshold: 0.35
+Iou threshold: 0.45
+
+Metrics on val dataset:
+
+```
+Class  Images  Instances  Box(P      R     F1  mAP50  mAP50-95)  Pose(P      R     F1  mAP50  mAP50-95):
+  all     424       5093  0.882  0.737  0.803  0.827      0.627    0.92  0.769  0.838   0.86      0.856
+chair     392       2784   0.87  0.705  0.779  0.804      0.563   0.898  0.728  0.804  0.828      0.823
+table     413       2309  0.893  0.769  0.827   0.85       0.69   0.942  0.811  0.872  0.893      0.889
+```
+
+Metrics on holdout dataset (PG ooffice):
+
+```
+Class  Images  Instances  Box(P      R     F1  mAP50  mAP50-95)  Pose(P      R     F1  mAP50  mAP50-95):
+  all      36        271   0.94  0.991  0.965   0.98      0.824    0.94  0.991  0.965  0.989      0.985
+chair      35        173  0.919  0.982  0.949  0.976      0.787   0.919  0.983  0.950  0.984      0.979
+table      35         98  0.961      1  0.980  0.984      0.862    0.96      1  0.980  0.994      0.991
+```
+
+
+## Prev final model
 
 ### YOLOv8s-pose
 
@@ -77,48 +109,13 @@ chair     285       2670      0.911  0.758  0.827   0.85      0.506   0.951  0.7
 table     284       1188      0.894  0.676  0.770   0.79      0.544   0.958  0.724  0.825  0.851      0.847
 ```
 
-### YOLOv9n-pose
+Metrics on holdout dataset (PG ooffice)*:
 
-Model name: `v2_batch6_merged_furniture`
-
-Dataset version: V2
-
-Classes:
-- chair;
-- table;
-- laptop_opened;
-- monitor;
-- keyboard;
-- plants;
-- cabinet.
-
-Confidence threshold: 0.4
-Iou threshold: 0.5
-
-Metric on val dataset:
-
-RGB images:
 ```
-        Class  Images  Instances  Box(P      R     F1  mAP50  mAP50-95) Pose(P      R     F1  mAP50  mAP50-95):
-          all     292       6055  0.686  0.416  0.513  0.559      0.329   0.77  0.466  0.575  0.627      0.618
-        chair     285       2670  0.826  0.621  0.709  0.746      0.424  0.905  0.681  0.777  0.811      0.802
-        table     284       1188   0.84  0.602  0.701  0.742      0.452  0.931  0.667  0.777  0.815      0.809
-laptop_opened     207        664  0.621  0.452  0.523   0.55      0.298   0.72  0.524  0.607  0.638      0.616
-      monitor     167        553  0.624  0.336  0.437  0.492      0.291  0.711  0.383  0.498  0.565      0.553
-     keyboard      97        299  0.635  0.244  0.353  0.448      0.267  0.722  0.278  0.401  0.502      0.496
-       plants     164        313  0.625  0.319  0.423  0.456      0.267  0.738  0.377  0.499  0.558      0.553
-      cabinet     217        368  0.631   0.34  0.442   0.48      0.301  0.662  0.356  0.463  0.504      0.499
+Class  Images  Instances  Box(P      R     F1 mAP50  mAP50-95)  Pose(P      R     F1  mAP50  mAP50-95):
+  all      36        271   0.88  0.856  0.867  0.85      0.632   0.919  0.906  0.911  0.912      0.908
+chair      35        173  0.856  0.896  0.876 0.868      0.721    0.86  0.925  0.891  0.887       0.88
+table      35         98  0.904  0.816  0.858 0.833      0.542   0.978  0.888  0.931  0.938      0.935
 ```
 
-Graysacel images:
-```
-          Class  Images  Instances  Box(P      R     F1  mAP50  mAP50-95)  Pose(P      R     F1  mAP50  mAP50-95):
-            all     292       6055  0.686  0.408  0.504  0.556      0.322   0.769  0.458  0.566  0.623      0.614
-          chair     285       2670  0.801  0.605  0.689   0.73      0.412   0.894  0.675  0.769  0.804      0.794
-          table     284       1188  0.821  0.608  0.699  0.742      0.447   0.911  0.674  0.775  0.816      0.809
-  laptop_opened     207        664  0.645   0.47  0.544  0.573      0.311    0.74  0.539  0.624  0.655      0.632
-        monitor     167        553  0.665  0.338  0.448   0.51      0.296   0.772  0.392  0.520   0.59      0.577
-      keyboard       97        299  0.647  0.251  0.362  0.455      0.271   0.716  0.278  0.400  0.499      0.493
-        plants      164        313  0.629  0.319  0.424  0.456      0.267   0.742  0.377  0.500  0.559      0.555
-        cabinet     217        368  0.591  0.264  0.365  0.423       0.25    0.61  0.272  0.376   0.44      0.439
-```
+* duing the model training holdout set was part of train and val
