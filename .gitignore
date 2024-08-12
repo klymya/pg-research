@@ -63,6 +63,9 @@ sagemaker/torchmodel
 yolov7-model
 
 data-exploration/tmp_dataset
+data-exploration/data
+data-exploration/tmp
+data-exploration/people_detection.db
 
 yolo-tools/datasets
 

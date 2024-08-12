@@ -4,9 +4,9 @@ import os
 import pandas as pd
 from tqdm import tqdm
 
-os.makedirs("results", exist_ok=True)
+os.makedirs("tmp/results", exist_ok=True)
 
-df = pd.read_csv("data.csv")
+df = pd.read_csv("tmp/data.csv")
 
 file_paths = df["seq_path"].values
 
@@ -37,4 +37,4 @@ def run(f, my_iter):
 res = run(parse_seq, file_paths)
 df["video_path"] = res
 
-df.to_csv("data_video_paths_upd_nearest_first.csv", index=False)
+df.to_csv("tmp/data_video_paths_upd_nearest_first.csv", index=False)

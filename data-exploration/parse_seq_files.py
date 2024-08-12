@@ -5,9 +5,12 @@ import os
 import pandas as pd
 from tqdm import tqdm
 
-os.makedirs("results", exist_ok=True)
+OUT_PATH = "tmp/results"
+IN_PATH = "tmp"
 
-df = pd.read_csv("data_deduplicated.csv")
+os.makedirs(OUT_PATH, exist_ok=True)
+
+df = pd.read_csv(os.path.join(IN_PATH, "data_deduplicated.csv"))
 
 file_paths = df["seq_path"].values
 file_names = df["seq_name"].values
@@ -62,7 +65,7 @@ def parse_seq(in_data):
                 else:
                     splitter = "_"
                 pos_x, pos_y = pos.split(splitter)
-                with open(f"results/{thread_id}.txt", "a") as outfile:
+                with open(os.path.join(OUT_PATH, f"{thread_id}.txt") , "a") as outfile:
                     outfile.write(",".join([
                         seq_name, seq_path, avi_path, frame_h, frame_w, camera_type, altitude, frame_n, user_id,
                         left, top, width, height, pos_x, pos_y
@@ -80,5 +83,5 @@ def run(f, my_iter):
 
 
 errors = run(parse_seq, seq_data)
-with open("statuses.txt", "w") as f:
+with open(os.path.join(IN_PATH, "statuses.txt"), "w") as f:
     f.writelines(errors)
