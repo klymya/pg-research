@@ -76,3 +76,5 @@ theodore/theodore_yolo
 theodore/theodore_unet
 
 object-detection-v3/datasets
+
+.env

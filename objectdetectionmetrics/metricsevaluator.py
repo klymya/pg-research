@@ -45,7 +45,7 @@ class MetricsEvaluator:
         if class_id not in self._all_classes:
             self._all_classes.append(class_id)
 
-    def add_gt_box(self, img_path: str, class_name: str, bbox: Sequence) -> None:
+    def add_gt_box(self, img_path: str, class_name: str, bbox: Sequence, box_id: str = None) -> None:
         bb = BoundingBox(
             img_path,
             class_name,
@@ -53,12 +53,13 @@ class MetricsEvaluator:
             self._type_coordinates,
             self._img_size,
             BBType.GroundTruth,
-            format=self._box_format
+            format=self._box_format,
+            box_id=box_id,
         )
 
         self._add_box(bb, class_name)
 
-    def add_det_box(self, img_path: str, class_name: str, bbox: Sequence, confidence: float) -> None:
+    def add_det_box(self, img_path: str, class_name: str, bbox: Sequence, confidence: float, box_id: str = None) -> None:
         bb = BoundingBox(
             img_path,
             class_name,
@@ -67,7 +68,8 @@ class MetricsEvaluator:
             self._img_size,
             BBType.Detected,
             confidence,
-            format=self._box_format
+            format=self._box_format,
+            box_id=box_id,
         )
         self._add_box(bb, class_name)
 

@@ -66,14 +66,16 @@ class Evaluator:
                 groundTruths.append([
                     bb.getImageName(),
                     bb.getClassId(), 1,
-                    bb.getAbsoluteBoundingBox(BBFormat.XYX2Y2)
+                    bb.getAbsoluteBoundingBox(BBFormat.XYX2Y2),
+                    bb.getId(),
                 ])
             else:
                 detections.append([
                     bb.getImageName(),
                     bb.getClassId(),
                     bb.getConfidence(),
-                    bb.getAbsoluteBoundingBox(BBFormat.XYX2Y2)
+                    bb.getAbsoluteBoundingBox(BBFormat.XYX2Y2),
+                    bb.getId(),
                 ])
             # get class
             if bb.getClassId() not in classes:
@@ -140,6 +142,19 @@ class Evaluator:
             else:
                 [ap, mpre, mrec, _] = Evaluator.ElevenPointInterpolatedAP(rec, prec)
             # add class result in the dictionary to be returned
+
+            # ids works only if only one image
+            # TODO: improve it to multiimage mode
+            gt_ids = []  # np.array([i[-1] for i in groundTruths if i[1] == c])
+            for i in gts.values():
+                for j in i:
+                    gt_ids.append(j[-1])
+            gt_ids = np.array(gt_ids)
+            gt_detected = []
+            for i in det.values():
+                gt_detected += i.tolist()
+            gt_detected = np.array(gt_detected)
+            det_ids = np.array([i[-1] for i in dects])
             r = {
                 'class': c,
                 'confidence': confs,
@@ -152,7 +167,10 @@ class Evaluator:
                 'interpolated recall': mrec,
                 'total positives': npos,
                 'total TP': np.sum(TP),
-                'total FP': np.sum(FP)
+                'total FP': np.sum(FP),
+                'TP_ids': det_ids[TP.astype(bool)],
+                'FP_ids': det_ids[FP.astype(bool)],
+                'FN_ids': gt_ids[~gt_detected.astype(bool)],
             }
             ret.append(r)
         return ret
