@@ -78,3 +78,5 @@ theodore/theodore_unet
 object-detection-v3/datasets
 
 .env
+
+data-exploration/video_similarity/embeddings
