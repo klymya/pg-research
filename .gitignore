@@ -80,3 +80,10 @@ object-detection-v3/datasets
 .env
 
 data-exploration/video_similarity/embeddings
+data-exploration/embeddings_full
+
+people_detection_pg2/val
+people_detection_pg2/yolov8m-pose.pt
+people_detection_pg2/yolov8n-pose.pt
+people_detection_pg2/yolov8n.pt
+people_detection_pg2/yolov8s-pose.pt

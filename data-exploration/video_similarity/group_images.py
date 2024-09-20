@@ -8,6 +8,7 @@ import torchvision.transforms as T
 import pandas as pd
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+from PIL import Image
 
 
 class Node:
@@ -105,6 +106,7 @@ class Embedder:
     def extract_embedding_from_img(self, img: np.ndarray):
         """Utility to extract embeddings from a single image."""
         device = self.model.device
+        img = Image.fromarray(img)
         img = self.transformation_chain(img)
         img = img.unsqueeze(0).to(device)
         with torch.no_grad():

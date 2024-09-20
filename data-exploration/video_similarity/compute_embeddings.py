@@ -18,7 +18,6 @@ SEQ_CSV_PATH = "../seq_files.csv"
 RES_FOLDER_PATH = "embeddings"
 
 
-os.makedirs(RES_FOLDER_PATH, exist_ok=True)
 
 
 def process_avi(indata):
