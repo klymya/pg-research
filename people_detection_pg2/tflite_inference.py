@@ -33,11 +33,10 @@ class TFLiteInferer:
 
         self.iou_th = iou_th
         self.conf_th = conf_th
-
-    def infer_yolo(self, img: np.ndarray) -> list[np.ndarray]:
-        if self.yolo_pth is None:
-            raise AttributeError("yolo interpreter not initialized")
-
+    
+    def pre_process(self, img: np.ndarray) -> np.ndarray:
+        if img.shape == self.input_shape:
+            return img
         im = np.zeros(self.input_shape, dtype=np.uint8)
 
         original_h, origial_w, _ = img.shape
@@ -46,6 +45,12 @@ class TFLiteInferer:
 
         resized_img = cv2.resize(img, (self.img_shape[0], resized_h))
         im[0, :resized_h, :self.img_shape[0], :] = resized_img[:, :, :]
+        
+        return im
+
+    def infer_yolo(self, im: np.ndarray) -> list[np.ndarray]:
+        if self.yolo_pth is None:
+            raise AttributeError("yolo interpreter not initialized")
 
         details = self.yolo_input_details[0]
         self.yolo_interpreter.set_tensor(details['index'], im)
@@ -115,4 +120,4 @@ class TFLiteInferer:
         return detections
 
     def infer(self, img: np.ndarray):
-        return self.post_process(self.infer_head(self.infer_yolo(img)))
+        return self.post_process(self.infer_head(self.infer_yolo(self.pre_process(img))))
