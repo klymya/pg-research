@@ -7,7 +7,7 @@ print("TensorFlow version: ", tf.__version__)
 class TFLiteInferer:
     def __init__(
             self, yolo_pth: str | None = None, head_pth: str | None = None, imgsz: int = 320, conf_th: float = 0.35,
-            iou_th = 0.5
+            iou_th = 0.5, idxs: list | None = None
     ) -> None:
         self.yolo_pth = yolo_pth
         if self.yolo_pth is not None:
@@ -26,14 +26,17 @@ class TFLiteInferer:
             self.head_input_details = self.head_interpreter.get_input_details()
             self.head_output_details = self.head_interpreter.get_output_details()
 
-        self.head_idxs = [4, 1, 5, 3, 0, 2, 6]
+            if idxs:
+                self.head_idxs = idxs
+            else:
+                self.head_idxs = list(range(len(self.head_input_details)))
 
         self.img_shape = (imgsz, imgsz)
         self.input_shape = (1, imgsz, imgsz, 3)
 
         self.iou_th = iou_th
         self.conf_th = conf_th
-    
+
     def pre_process(self, img: np.ndarray) -> np.ndarray:
         if img.shape == self.input_shape:
             return img
@@ -45,7 +48,7 @@ class TFLiteInferer:
 
         resized_img = cv2.resize(img, (self.img_shape[0], resized_h))
         im[0, :resized_h, :self.img_shape[0], :] = resized_img[:, :, :]
-        
+
         return im
 
     def infer_yolo(self, im: np.ndarray) -> list[np.ndarray]:
@@ -71,17 +74,15 @@ class TFLiteInferer:
             raise AttributeError("head interpreter not initialized")
 
         for idx, details in enumerate(self.head_input_details):
-            self.head_interpreter.set_tensor(details['index'], y[idx])
+            self.head_interpreter.set_tensor(details['index'], y[self.head_idxs[idx]])
 
         self.head_interpreter.invoke()
 
         outputs = self.head_interpreter.get_tensor(self.head_output_details[0]['index'])
-
         return outputs
-    
+
     def post_process(self, head_output: np.ndarray) -> np.ndarray:
-        outputs = np.transpose(head_output, (0, 2, 1))
-        rows = outputs.shape[1]
+        rows = head_output.shape[1]
 
         boxes = []
         scores = []
@@ -90,19 +91,19 @@ class TFLiteInferer:
 
         # Iterate through output to collect bounding boxes, confidence scores, and class IDs
         for i in range(rows):
-            classes_scores = outputs[0][i][4:5]
+            classes_scores = head_output[0][i][4:5]
             (minScore, maxScore, minClassLoc, (x, maxClassIndex)) = cv2.minMaxLoc(classes_scores)
             if maxScore >= self.conf_th:
                 box = [
-                    outputs[0][i][0], # - (0.5 * outputs[0][i][2]),
-                    outputs[0][i][1], # - (0.5 * outputs[0][i][3]),
-                    outputs[0][i][2],
-                    outputs[0][i][3],
+                    head_output[0][i][0], # - (0.5 * outputs[0][i][2]),
+                    head_output[0][i][1], # - (0.5 * outputs[0][i][3]),
+                    head_output[0][i][2],
+                    head_output[0][i][3],
                 ]
                 boxes.append(box)
                 scores.append(maxScore)
                 class_ids.append(maxClassIndex)
-                kps.append(outputs[0][i][5:7])
+                kps.append(head_output[0][i][5:7])
 
         # Apply NMS (Non-maximum suppression)
         result_boxes = cv2.dnn.NMSBoxes(boxes, scores, self.conf_th, self.iou_th, 0.5)

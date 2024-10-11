@@ -88,7 +88,7 @@ class DetectionHead(nn.Module):
         # kps[:, 0] = (kps[:, 0] * 2.0 + (self.anchors[0] - 0.5)) * self.strides
         # kps[:, 1] = (kps[:, 1] * 2.0 + (self.anchors[1] - 0.5)) * self.strides
 
-        return torch.cat([dbox, kps], 1)
+        return torch.permute(torch.cat([dbox, kps], 1), (0, 2, 1))
 
 
 def detection_head2onnx(file_path: str, head: nn.Module, y: list[np.ndarray], simplify=False):
