@@ -90,3 +90,7 @@ people_detection_pg2/yolov8s-pose.pt
 
 people_detection_pg2/ultralytics_yolov8
 people_detection_pg2/calibration_image_sample_data_20x128x128x3_float32.npy
+
+pg_camera_geometry/.vscode
+pg_camera_geometry/vcpkg
+pg_camera_geometry/build
