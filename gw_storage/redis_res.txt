@@ -1,0 +1,31 @@
+default
+Number of points: 100
+Uppend: 0.000
+Query: 0.000
+Remove: 0.000
+
+Number of points: 1000
+Uppend: 0.000
+Query: 0.000
+Remove: 0.000
+
+Number of points: 10000
+Uppend: 0.000
+Query: 0.000
+Remove: 0.001
+
+stream
+Number of points: 100
+Uppend: 0.000
+Query: 0.000
+Remove: 0.000
+
+Number of points: 1000
+Uppend: 0.000
+Query: 0.000
+Remove: 0.000
+
+Number of points: 10000
+Uppend: 0.000
+Query: 0.000
+Remove: 0.000

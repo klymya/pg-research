@@ -1,0 +1,14 @@
+Number of points: 100
+Uppend: 0.005
+Query: 0.000
+Remove: 0.005
+
+Number of points: 1000
+Uppend: 0.006
+Query: 0.000
+Remove: 0.008
+
+Number of points: 10000
+Uppend: 0.006
+Query: 0.000
+Remove: 0.017
