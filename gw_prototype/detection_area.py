@@ -24,7 +24,7 @@ class CameraConfiguration:
 
 
 class DetectionArea:
-    def __init__(self, cam: CameraConfiguration):
+    def __init__(self, cam: CameraConfiguration, use_da_limit: bool = False):
         self.m_cam = cam
         fov_x_at_focal_len = 2.0 * np.tan(DetectionAreaInternal.deg2rad(self.m_cam.fov_angle_x / 2.0))
         fov_y_at_focal_len = 2.0 * np.tan(DetectionAreaInternal.deg2rad(self.m_cam.fov_angle_y / 2.0))
@@ -34,9 +34,9 @@ class DetectionArea:
         width = round((self.m_cam.height_cm - MIN_VISIBLE_HEIGHT_CM) * fov_x_at_focal_len)
         height = round((self.m_cam.height_cm - MIN_VISIBLE_HEIGHT_CM) * fov_y_at_focal_len)
 
-        if width * height > MAX_DETECTION_AREA_CM2:
+        if width * height > MAX_DETECTION_AREA_CM2 and use_da_limit:
             width = round(np.sqrt(MAX_DETECTION_AREA_CM2 * aspect_ratio))
-            height = round(1 / aspect_ratio * height)
+            height = round(width / aspect_ratio)
 
         self.m_rectangle_cm = Rectangle.from_xyxy(-width / 2, height / 2, width / 2, -height / 2)
 
@@ -59,3 +59,43 @@ class DetectionArea:
 
     def is_rect_intersect_px(self, r):
         return calculate_iou(r, self.m_rectangle_px) > DA_INTERSECTION_TH
+
+    def get_cm_polygon(self, closed=True):
+
+        l = self.m_rectangle_cm.x
+        r = self.m_rectangle_cm.x1
+        t = self.m_rectangle_cm.y
+        b = self.m_rectangle_cm.y1
+        vertices = [[l, t], [r, t], [r, b], [l, b]]
+        if closed:
+            vertices += [vertices[0]]
+
+        return vertices
+
+    @staticmethod
+    def _resample_polygon(vertices):
+
+        STEP_SIZE_PX = 50.0  # resampling step
+
+        num_of_vertices = len(vertices)
+        resampled_vertices = []
+        for i in range(num_of_vertices):
+            v_curr = vertices[i]
+            v_next = vertices[(i + 1) % num_of_vertices]
+            diff = [v_next[0] - v_curr[0], v_next[1] - v_curr[1]]
+            dist = np.sqrt(diff[0] ** 2 + diff[1] ** 2)
+            number_of_segments_in_edge = max(1, int(dist / STEP_SIZE_PX))
+            for i_segment in range(number_of_segments_in_edge):
+                segment_length = float(i_segment) / number_of_segments_in_edge
+                resampled_vertices += [[v_curr[0] + segment_length * diff[0],
+                                        v_curr[1] + segment_length * diff[1]]]
+
+        return resampled_vertices
+
+    def polygon_in_pixels(self):
+        vertices = self.get_cm_polygon()
+        resampled_vertices = self._resample_polygon(vertices)
+        vertices_px = [cm2pixel(Point(*v), self.m_cam.height_cm, 0, self.m_cam.calibration_params) for v in resampled_vertices]
+        vertices_px = [[int(v.x), int(v.y)] for v in vertices_px]
+
+        return vertices_px

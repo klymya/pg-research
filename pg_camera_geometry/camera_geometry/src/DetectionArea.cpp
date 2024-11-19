@@ -35,7 +35,7 @@ DetectionArea::DetectionArea(const CameraConfiguration& cam): m_cam(cam)
     if (width * height > MAX_DETECTION_AREA_CM2)
     {
         width = round(sqrt(MAX_DETECTION_AREA_CM2 * aspectRatio));
-        height = round(1 / aspectRatio * height);
+        height = round(1 / aspectRatio * width);
     }
 
     m_rectangleCm = Rectangle::fromXYXY(-width / 2, height / 2, width / 2, -height / 2);
