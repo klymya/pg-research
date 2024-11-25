@@ -1,6 +1,6 @@
 import pytest
 
-from preprocessing import filter_detections_by_da, Detection, detection2xy, preprocessing
+from preprocessing_utils import filter_detections_by_da, Detection, detection2xy, preprocessing
 from detection_area import DetectionArea
 from geometry import Rectangle, Point
 from common import DEFAULT_CAMERA_CONFIG, DEFAULT_CALIBRATION_PARAMS, CAMERA_H

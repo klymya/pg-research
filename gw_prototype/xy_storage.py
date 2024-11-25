@@ -16,7 +16,7 @@ class XYStorage:
         CREATE TABLE IF NOT EXISTS xy_data (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             timestamp INTEGER NOT NULL,
-            sensor_serial_number INTEGER NOT NULL,
+            sensor_serial_number TEXT NOT NULL,
             x INTEGER NOT NULL,
             y INTEGER NOT NULL
         );
@@ -33,7 +33,7 @@ class XYStorage:
             self.conn.execute(create_index_sql_timestamp)
             self.conn.execute(create_index_sql_sensor_serial_number)
 
-    def append_data_point(self, sensor_serial_number: int, x: int, y: int, timestamp: int = None) -> None:
+    def append_data_point(self, sensor_serial_number: str, x: int, y: int, timestamp: int = None) -> None:
         if timestamp is None:
             timestamp = int(time.time())
 
@@ -45,7 +45,7 @@ class XYStorage:
             self.conn.execute(insert_sql, (timestamp, sensor_serial_number, x, y))
 
     def query_data_points(
-            self, sensor_serial_number: int, start_timestamp: int, end_timestamp: int = None
+            self, sensor_serial_number: str, start_timestamp: int, end_timestamp: int = None
     ) -> List[Tuple[int, int, int, int]]:
         if end_timestamp is None:
             end_timestamp = int(time.time())

@@ -21,7 +21,9 @@ def filter_detections_by_da(detections: list[Detection], da: DetectionArea) -> l
     return filtered_detections
 
 
-def detection2xy(detections: list[Detection], calibration_params: CameraCalibrationParameters, cam_h_cm: int) -> list[Point]:
+def detection2xy(
+    detections: list[Detection], calibration_params: CameraCalibrationParameters, cam_h_cm: int
+) -> list[Point]:
     points = [pixel2cm(detection.position, cam_h_cm, calibration_params) for detection in detections]
     for p in points:
         p.x = round(p.x)

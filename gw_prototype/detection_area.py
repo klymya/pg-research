@@ -14,7 +14,9 @@ class DetectionAreaInternal:
 
 
 class CameraConfiguration:
-    def __init__(self, calibration_params: CameraCalibrationParameters, fov_angle_x, fov_angle_y, height_cm, image_w, image_h):
+    def __init__(
+        self, calibration_params: CameraCalibrationParameters, fov_angle_x, fov_angle_y, height_cm, image_w, image_h
+    ) -> None:
         self.calibration_params: CameraCalibrationParameters = calibration_params
         self.fov_angle_x = fov_angle_x
         self.fov_angle_y = fov_angle_y
