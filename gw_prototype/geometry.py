@@ -3,6 +3,12 @@ class Point:
         self.x = x
         self.y = y
 
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
 class Rectangle:
     def __init__(self, x=0, y=0, w=0, h=0, x1=0, y1=0):
         self.x = x

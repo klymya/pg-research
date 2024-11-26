@@ -15,7 +15,7 @@ def storage():
 
 def test_append_data_point(storage):
     # Test with default timestamp
-    timestamp = int(time.time()) - 100
+    timestamp = int(time.time()) - 1000
     storage.append_data_point(sensor_serial_number="123", x=10, y=20, timestamp=timestamp)
     data_points = storage.query_data_points(sensor_serial_number="123", start_timestamp=0)
     time.sleep(1e-1)
@@ -23,7 +23,7 @@ def test_append_data_point(storage):
     assert data_points[0][1:] == ("123", 10, 20)
 
     # Test with provided timestamp
-    timestamp = int(time.time()) - 1000
+    timestamp = int(time.time()) - 100
     storage.append_data_point(sensor_serial_number="123", x=30, y=40, timestamp=timestamp)
     time.sleep(1e-1)
     data_points = storage.query_data_points(sensor_serial_number="123", start_timestamp=0)
@@ -41,6 +41,7 @@ def test_query_data_points(storage):
     # Query with a range that includes both data points
     data_points = storage.query_data_points(sensor_serial_number="123", start_timestamp=timestamp1 - 1, end_timestamp=timestamp2 + 1)
     assert len(data_points) == 2
+    assert data_points[0][0] < data_points[1][0]
 
     # Query with a range that includes only the second data point
     data_points = storage.query_data_points(sensor_serial_number="123", start_timestamp=timestamp2 - 1, end_timestamp=timestamp2 + 1)

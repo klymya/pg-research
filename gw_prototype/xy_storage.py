@@ -53,7 +53,8 @@ class XYStorage:
         query_sql = """
         SELECT timestamp, sensor_serial_number, x, y
         FROM xy_data
-        WHERE timestamp > ? AND timestamp <= ? AND sensor_serial_number = ?;
+        WHERE timestamp >= ? AND timestamp < ? AND sensor_serial_number = ?
+        ORDER BY timestamp;
         """
         with self.conn:
             cursor = self.conn.execute(query_sql, (start_timestamp, end_timestamp, sensor_serial_number))
