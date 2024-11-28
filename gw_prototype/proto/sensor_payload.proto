@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package telemetrypayload;
+
+message ReportingObject {
+    float position_x = 1;
+    float position_y = 2;
+    float box_x = 3;
+    float box_y = 4;
+    float box_w = 5;
+    float box_h = 6;
+    float confidence = 7;
+}
+
+message Notification {
+    uint32 timestamp = 2;
+    repeated ReportingObject objects = 3;
+}

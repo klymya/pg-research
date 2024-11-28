@@ -1,4 +1,5 @@
-import numpy as np
+import math
+
 from geometry import Point
 
 MAX_UNDISTORT_ITRS = 10
@@ -44,8 +45,8 @@ class FisheyeInternal:
         if r < params.EPS2:
             return point_in
 
-        r = np.sqrt(r)
-        t = np.arctan(r)
+        r = math.sqrt(r)
+        t = math.atan(r)
         t2 = t ** 2
         t3 = t2 * t
         t5 = t3 * t2
