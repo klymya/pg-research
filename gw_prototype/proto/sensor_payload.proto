@@ -3,12 +3,12 @@ syntax = "proto3";
 package telemetrypayload;
 
 message ReportingObject {
-    float position_x = 1;
-    float position_y = 2;
-    float box_x = 3;
-    float box_y = 4;
-    float box_w = 5;
-    float box_h = 6;
+    uint32 position_x = 1;
+    uint32 position_y = 2;
+    uint32 box_x = 3;
+    uint32 box_y = 4;
+    uint32 box_w = 5;
+    uint32 box_h = 6;
     float confidence = 7;
 }
 

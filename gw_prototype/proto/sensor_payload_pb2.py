@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x14sensor_payload.proto\x12\x10telemetrypayload\"\x89\x01\n\x0fReportingObject\x12\x12\n\nposition_x\x18\x01 \x01(\x02\x12\x12\n\nposition_y\x18\x02 \x01(\x02\x12\r\n\x05\x62ox_x\x18\x03 \x01(\x02\x12\r\n\x05\x62ox_y\x18\x04 \x01(\x02\x12\r\n\x05\x62ox_w\x18\x05 \x01(\x02\x12\r\n\x05\x62ox_h\x18\x06 \x01(\x02\x12\x12\n\nconfidence\x18\x07 \x01(\x02\"U\n\x0cNotification\x12\x11\n\ttimestamp\x18\x02 \x01(\r\x12\x32\n\x07objects\x18\x03 \x03(\x0b\x32!.telemetrypayload.ReportingObjectb\x06proto3'
+  serialized_pb=b'\n\x14sensor_payload.proto\x12\x10telemetrypayload\"\x89\x01\n\x0fReportingObject\x12\x12\n\nposition_x\x18\x01 \x01(\r\x12\x12\n\nposition_y\x18\x02 \x01(\r\x12\r\n\x05\x62ox_x\x18\x03 \x01(\r\x12\r\n\x05\x62ox_y\x18\x04 \x01(\r\x12\r\n\x05\x62ox_w\x18\x05 \x01(\r\x12\r\n\x05\x62ox_h\x18\x06 \x01(\r\x12\x12\n\nconfidence\x18\x07 \x01(\x02\"U\n\x0cNotification\x12\x11\n\ttimestamp\x18\x02 \x01(\r\x12\x32\n\x07objects\x18\x03 \x03(\x0b\x32!.telemetrypayload.ReportingObjectb\x06proto3'
 )
 
 
@@ -35,43 +35,43 @@ _REPORTINGOBJECT = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='position_x', full_name='telemetrypayload.ReportingObject.position_x', index=0,
-      number=1, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
+      number=1, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='position_y', full_name='telemetrypayload.ReportingObject.position_y', index=1,
-      number=2, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
+      number=2, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='box_x', full_name='telemetrypayload.ReportingObject.box_x', index=2,
-      number=3, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
+      number=3, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='box_y', full_name='telemetrypayload.ReportingObject.box_y', index=3,
-      number=4, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
+      number=4, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='box_w', full_name='telemetrypayload.ReportingObject.box_w', index=4,
-      number=5, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
+      number=5, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='box_h', full_name='telemetrypayload.ReportingObject.box_h', index=5,
-      number=6, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
+      number=6, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),

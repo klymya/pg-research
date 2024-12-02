@@ -49,11 +49,14 @@ class Preprocessor:
     def get_timestamp_sec() -> int:
         return int(time.time())
 
-    def preprocess_detection(self, detections: list[Detection], sensor_serial_number: str) -> None:
+    def preprocess_detection(
+        self, detections: list[Detection], sensor_serial_number: str, ts: int | None = None
+    ) -> None:
         if sensor_serial_number not in self._sensor_serial_numbers:
             raise ValueError(f"Unknown sensor serial number: {sensor_serial_number}")
 
-        ts = self.get_timestamp_sec()
+        if ts is None:
+            ts = self.get_timestamp_sec()
         xy_points = preprocessing(
             detections,
             self._detection_areas[sensor_serial_number],
