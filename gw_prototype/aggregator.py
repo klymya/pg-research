@@ -92,7 +92,7 @@ class Aggregator:
         data_points = self._storage.query_data_points(serial_num, start_ts, end_ts)
         return [(ts, Point(x, y)) for ts, _, x, y in data_points]
 
-    def check_aois(self) -> list[tuple[str, str, int, int]]:
+    def check_aois(self) -> tuple[int, list[tuple[str, str, int]]]:
         ts = int(time.time())
 
         counts = []
@@ -100,11 +100,11 @@ class Aggregator:
         for aoi, serial_num in aois:
             data_points = self._get_points(serial_num, ts - aoi.reporting_period, ts)
             count = self._calculate_count(aoi, data_points, ts - aoi.reporting_period, ts)
-            counts.append((serial_num, aoi.id, count, ts))
+            counts.append((serial_num, aoi.id, count))
 
-        return counts
+        return ts, counts
 
-    def get_xys(self) -> list[tuple[str, int, int, int]]:
+    def get_xys(self) -> tuple[int, list[tuple[str, int, int]]]:
         ts = int(time.time())
 
         xys = []
@@ -113,5 +113,5 @@ class Aggregator:
             points_by_ts = Aggregator._group_points_by_ts(data_points)
             last_points = points_by_ts.get(max(points_by_ts.keys()), []) if len(points_by_ts) > 0 else []
             for point in last_points:
-                xys.append((serial_num, ts, point.x, point.y))
-        return xys
+                xys.append((serial_num, point.x, point.y))
+        return ts, xys

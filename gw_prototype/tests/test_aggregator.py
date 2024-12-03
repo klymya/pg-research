@@ -134,7 +134,7 @@ def test_check_aois(mocker, mock_storage):
     mocker.patch('time.time', return_value=30)
     counts = aggregator.check_aois()
 
-    assert counts == [('sensor1', 'aoi1', 1, 30)]
+    assert counts == (30, [('sensor1', 'aoi1', 1)])
 
 def test_group_points_by_ts():
     points = [
@@ -166,10 +166,10 @@ def test_get_xys(mocker):
         [(995, 'sensor2', 3, 3), (1000, 'sensor2', 4, 4)],
     ]
 
-    expected_output = [
-        ('sensor1', 1000, 2, 2),
-        ('sensor2', 1000, 4, 4),
-    ]
+    expected_output = (1000, [
+        ('sensor1', 2, 2),
+        ('sensor2', 4, 4),
+    ])
 
     result = aggregator.get_xys()
     assert result == expected_output

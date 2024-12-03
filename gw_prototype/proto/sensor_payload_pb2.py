@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x14sensor_payload.proto\x12\x10telemetrypayload\"\x89\x01\n\x0fReportingObject\x12\x12\n\nposition_x\x18\x01 \x01(\r\x12\x12\n\nposition_y\x18\x02 \x01(\r\x12\r\n\x05\x62ox_x\x18\x03 \x01(\r\x12\r\n\x05\x62ox_y\x18\x04 \x01(\r\x12\r\n\x05\x62ox_w\x18\x05 \x01(\r\x12\r\n\x05\x62ox_h\x18\x06 \x01(\r\x12\x12\n\nconfidence\x18\x07 \x01(\x02\"U\n\x0cNotification\x12\x11\n\ttimestamp\x18\x02 \x01(\r\x12\x32\n\x07objects\x18\x03 \x03(\x0b\x32!.telemetrypayload.ReportingObjectb\x06proto3'
+  serialized_pb=b'\n\x14sensor_payload.proto\x12\x10telemetrypayload\"\x89\x01\n\x0fReportingObject\x12\x12\n\nposition_x\x18\x01 \x01(\r\x12\x12\n\nposition_y\x18\x02 \x01(\r\x12\r\n\x05\x62ox_x\x18\x03 \x01(\r\x12\r\n\x05\x62ox_y\x18\x04 \x01(\r\x12\r\n\x05\x62ox_w\x18\x05 \x01(\r\x12\r\n\x05\x62ox_h\x18\x06 \x01(\r\x12\x12\n\nconfidence\x18\x07 \x01(\x02\"^\n\x15TelemetryNotification\x12\x11\n\ttimestamp\x18\x02 \x01(\r\x12\x32\n\x07objects\x18\x03 \x03(\x0b\x32!.telemetrypayload.ReportingObject\" \n\x08XYObject\x12\t\n\x01x\x18\x01 \x01(\x05\x12\t\n\x01y\x18\x02 \x01(\x05\"P\n\x0eXYNotification\x12\x11\n\ttimestamp\x18\x01 \x01(\r\x12+\n\x07objects\x18\x02 \x03(\x0b\x32\x1a.telemetrypayload.XYObject\"/\n\x0e\x41oICountObject\x12\x0e\n\x06\x61oi_id\x18\x01 \x01(\t\x12\r\n\x05\x63ount\x18\x02 \x01(\r\"\\\n\x14\x41oICountNotification\x12\x11\n\ttimestamp\x18\x01 \x01(\r\x12\x31\n\x07objects\x18\x02 \x03(\x0b\x32 .telemetrypayload.AoICountObjectb\x06proto3'
 )
 
 
@@ -99,23 +99,23 @@ _REPORTINGOBJECT = _descriptor.Descriptor(
 )
 
 
-_NOTIFICATION = _descriptor.Descriptor(
-  name='Notification',
-  full_name='telemetrypayload.Notification',
+_TELEMETRYNOTIFICATION = _descriptor.Descriptor(
+  name='TelemetryNotification',
+  full_name='telemetrypayload.TelemetryNotification',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='timestamp', full_name='telemetrypayload.Notification.timestamp', index=0,
+      name='timestamp', full_name='telemetrypayload.TelemetryNotification.timestamp', index=0,
       number=2, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='objects', full_name='telemetrypayload.Notification.objects', index=1,
+      name='objects', full_name='telemetrypayload.TelemetryNotification.objects', index=1,
       number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -134,12 +134,174 @@ _NOTIFICATION = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=182,
-  serialized_end=267,
+  serialized_end=276,
 )
 
-_NOTIFICATION.fields_by_name['objects'].message_type = _REPORTINGOBJECT
+
+_XYOBJECT = _descriptor.Descriptor(
+  name='XYObject',
+  full_name='telemetrypayload.XYObject',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='x', full_name='telemetrypayload.XYObject.x', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='y', full_name='telemetrypayload.XYObject.y', index=1,
+      number=2, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=278,
+  serialized_end=310,
+)
+
+
+_XYNOTIFICATION = _descriptor.Descriptor(
+  name='XYNotification',
+  full_name='telemetrypayload.XYNotification',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='timestamp', full_name='telemetrypayload.XYNotification.timestamp', index=0,
+      number=1, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='objects', full_name='telemetrypayload.XYNotification.objects', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=312,
+  serialized_end=392,
+)
+
+
+_AOICOUNTOBJECT = _descriptor.Descriptor(
+  name='AoICountObject',
+  full_name='telemetrypayload.AoICountObject',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='aoi_id', full_name='telemetrypayload.AoICountObject.aoi_id', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='count', full_name='telemetrypayload.AoICountObject.count', index=1,
+      number=2, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=394,
+  serialized_end=441,
+)
+
+
+_AOICOUNTNOTIFICATION = _descriptor.Descriptor(
+  name='AoICountNotification',
+  full_name='telemetrypayload.AoICountNotification',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='timestamp', full_name='telemetrypayload.AoICountNotification.timestamp', index=0,
+      number=1, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='objects', full_name='telemetrypayload.AoICountNotification.objects', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=443,
+  serialized_end=535,
+)
+
+_TELEMETRYNOTIFICATION.fields_by_name['objects'].message_type = _REPORTINGOBJECT
+_XYNOTIFICATION.fields_by_name['objects'].message_type = _XYOBJECT
+_AOICOUNTNOTIFICATION.fields_by_name['objects'].message_type = _AOICOUNTOBJECT
 DESCRIPTOR.message_types_by_name['ReportingObject'] = _REPORTINGOBJECT
-DESCRIPTOR.message_types_by_name['Notification'] = _NOTIFICATION
+DESCRIPTOR.message_types_by_name['TelemetryNotification'] = _TELEMETRYNOTIFICATION
+DESCRIPTOR.message_types_by_name['XYObject'] = _XYOBJECT
+DESCRIPTOR.message_types_by_name['XYNotification'] = _XYNOTIFICATION
+DESCRIPTOR.message_types_by_name['AoICountObject'] = _AOICOUNTOBJECT
+DESCRIPTOR.message_types_by_name['AoICountNotification'] = _AOICOUNTNOTIFICATION
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 ReportingObject = _reflection.GeneratedProtocolMessageType('ReportingObject', (_message.Message,), {
@@ -149,12 +311,40 @@ ReportingObject = _reflection.GeneratedProtocolMessageType('ReportingObject', (_
   })
 _sym_db.RegisterMessage(ReportingObject)
 
-Notification = _reflection.GeneratedProtocolMessageType('Notification', (_message.Message,), {
-  'DESCRIPTOR' : _NOTIFICATION,
+TelemetryNotification = _reflection.GeneratedProtocolMessageType('TelemetryNotification', (_message.Message,), {
+  'DESCRIPTOR' : _TELEMETRYNOTIFICATION,
   '__module__' : 'sensor_payload_pb2'
-  # @@protoc_insertion_point(class_scope:telemetrypayload.Notification)
+  # @@protoc_insertion_point(class_scope:telemetrypayload.TelemetryNotification)
   })
-_sym_db.RegisterMessage(Notification)
+_sym_db.RegisterMessage(TelemetryNotification)
+
+XYObject = _reflection.GeneratedProtocolMessageType('XYObject', (_message.Message,), {
+  'DESCRIPTOR' : _XYOBJECT,
+  '__module__' : 'sensor_payload_pb2'
+  # @@protoc_insertion_point(class_scope:telemetrypayload.XYObject)
+  })
+_sym_db.RegisterMessage(XYObject)
+
+XYNotification = _reflection.GeneratedProtocolMessageType('XYNotification', (_message.Message,), {
+  'DESCRIPTOR' : _XYNOTIFICATION,
+  '__module__' : 'sensor_payload_pb2'
+  # @@protoc_insertion_point(class_scope:telemetrypayload.XYNotification)
+  })
+_sym_db.RegisterMessage(XYNotification)
+
+AoICountObject = _reflection.GeneratedProtocolMessageType('AoICountObject', (_message.Message,), {
+  'DESCRIPTOR' : _AOICOUNTOBJECT,
+  '__module__' : 'sensor_payload_pb2'
+  # @@protoc_insertion_point(class_scope:telemetrypayload.AoICountObject)
+  })
+_sym_db.RegisterMessage(AoICountObject)
+
+AoICountNotification = _reflection.GeneratedProtocolMessageType('AoICountNotification', (_message.Message,), {
+  'DESCRIPTOR' : _AOICOUNTNOTIFICATION,
+  '__module__' : 'sensor_payload_pb2'
+  # @@protoc_insertion_point(class_scope:telemetrypayload.AoICountNotification)
+  })
+_sym_db.RegisterMessage(AoICountNotification)
 
 
 # @@protoc_insertion_point(module_scope)

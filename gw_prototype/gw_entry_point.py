@@ -1,15 +1,19 @@
 import json
 import time
-import configparser
 from multiprocessing import Process
+import logging
 
-from proto.sensor_payload_pb2 import Notification
+from proto.sensor_payload_pb2 import TelemetryNotification, AoICountNotification, XYNotification
 from mqtt_client import MQTTClient
 from preprocessor import Preprocessor
 from preprocessing_utils import Detection, Rectangle, Point
 from aoi import AreaOfInterest
 from aggregator import Aggregator
 from xy_storage import XYStorage
+from logconfig import configure_logging
+from config import get_config
+
+configure_logging()
 
 
 class PreprocessorWrapper:
@@ -17,7 +21,7 @@ class PreprocessorWrapper:
         self._preprocessor = Preprocessor(data_pth)
 
     def on_message(self, client, userdata, message):
-        notification = Notification()
+        notification = TelemetryNotification()
         notification.ParseFromString(message.payload)
 
         detections = []
@@ -27,17 +31,16 @@ class PreprocessorWrapper:
                 Point(obj.position_x, obj.position_y),
                 obj.confidence,
             ))
-        print("Received message: ", notification.timestamp)
+        logging.debug(f"Received message from  topic {message.topic} with ts: {notification.timestamp}")
         self._preprocessor.preprocess_detection(detections, "0", notification.timestamp)
 
 
 def preprocessing_worker():
-    config = configparser.ConfigParser()
-    config.read('config.ini')
+    config = get_config()
 
     preprocessor = PreprocessorWrapper(config["sensor_params"]["path"])
     client = MQTTClient(
-        "GW",
+        "GWPublisher",
         config["mosquitto"]["host"],
         config.getint("mosquitto", "port"),
         [(config["mqtt.topics"]["telemetry"], 0)],
@@ -48,10 +51,10 @@ def preprocessing_worker():
         while client.is_connected() == True:
             time.sleep(1)
         if client.is_connected() == False:
-            print('Connection failed, exiting...')
+            logging.warning('Connection failed, exiting...')
 
     finally:
-        print("Closing connection")
+        logging.info("Closing connection")
         client.close()
 
 
@@ -70,27 +73,66 @@ def get_aois(pth) -> list[AreaOfInterest]:
         aois.append(aoi)
     return aois
 
+
+def send_counts(client: MQTTClient, topic: str, ts: int, counts: list[tuple[str, str, int]]):
+    notification = AoICountNotification()
+    notification.timestamp = ts
+    for _, aoi_id, count in counts:
+        object = notification.objects.add()
+        object.aoi_id = aoi_id
+        object.count = count
+    proto_msg = notification.SerializeToString()
+    result = client.push_message(topic, proto_msg)
+    status = result[0]
+    if status == 0:
+        logging.debug(f"Message is published to topic {topic}")
+    else:
+        logging.warning(f"Failed to send message to topic {topic}")
+
+
+def send_xys(client: MQTTClient, topic: str, ts: int, xys: list[tuple[str, int, int]]):
+    notification = XYNotification()
+    notification.timestamp = ts
+    for _, x, y in xys:
+        object = notification.objects.add()
+        object.x = x
+        object.y = y
+    proto_msg = notification.SerializeToString()
+    result = client.push_message(topic, proto_msg)
+    status = result[0]
+    if status == 0:
+        logging.debug(f"Message is published to topic {topic}")
+    else:
+        logging.warning(f"Failed to send message to topic {topic}")
+
+
 def aggregator():
-    config = configparser.ConfigParser()
-    config.read('config.ini')
+    config = get_config()
+
+    client = MQTTClient(
+        "GWSubscriber",
+        config["mosquitto"]["host"],
+        config.getint("mosquitto", "port"),
+    )
 
     aois = get_aois(config["aoi"]["path"])
-    aggregator = Aggregator()
+    aggregator = Aggregator(["0"])
     aggregator.set_aoi("0", aois)
 
     while True:
-        counts = aggregator.check_aois()
+        ts, counts = aggregator.check_aois()
         if len(counts) > 0:
-            print(counts)
-        xys = aggregator.get_xys()
-        print(xys)
+            send_counts(client, config["mqtt.topics"]["count"], ts, counts)
+        ts, xys = aggregator.get_xys()
+        if len(xys) > 0:
+            send_xys(client, config["mqtt.topics"]["xy"], ts, xys)
         time.sleep(1)
 
 def remove_outdated_data():
     storage = XYStorage()
     th_min = 1
     while True:
-        print("Removing outdated data points", int(time.time()))
+        logging.debug("Removing outdated data points")
         storage.remove_old_data_points(th_min)
         time.sleep(th_min * 60)
 

@@ -12,7 +12,27 @@ message ReportingObject {
     float confidence = 7;
 }
 
-message Notification {
+message TelemetryNotification {
     uint32 timestamp = 2;
     repeated ReportingObject objects = 3;
+}
+
+message XYObject {
+    int32 x = 1;
+    int32 y = 2;
+}
+
+message XYNotification {
+    uint32 timestamp = 1;
+    repeated XYObject objects = 2;
+}
+
+message AoICountObject {
+    string aoi_id = 1;
+    uint32 count = 2;
+}
+
+message AoICountNotification {
+    uint32 timestamp = 1;
+    repeated AoICountObject objects = 2;
 }

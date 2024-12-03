@@ -1,3 +1,5 @@
+import logging
+
 import paho.mqtt.client as mqtt
 
 
@@ -20,9 +22,9 @@ class MQTTClient:
     @staticmethod
     def _on_connect(client, userdata, flags, return_code):
         if return_code == 0:
-            print("connected")
+            logging.debug(f"{client._client_id} connected")
         else:
-            print("could not connect, return code:", return_code)
+            logging.warning("could not connect, return code:", return_code)
 
     def is_connected(self) -> bool:
         return self._client.is_connected()
