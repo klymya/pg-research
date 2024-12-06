@@ -1,0 +1,8 @@
+{
+  "dependencies": [
+    "gtest",
+    "sqlite3",
+    "paho-mqtt",
+    "protobuf"
+  ]
+}
