@@ -12,7 +12,12 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 
 # Unit Tests
 # Add test cpp file
-add_executable(runUnitTests TestXYStorage.cpp)
+add_executable(runUnitTests
+    Common.hpp
+    TestXYStorage.cpp
+    TestPreProcessingUtils.cpp
+    TestPreProcessor.cpp
+)
 
 # Link the test executable with GTest and the library target
 target_link_libraries(runUnitTests PRIVATE

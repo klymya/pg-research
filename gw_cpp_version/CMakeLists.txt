@@ -12,6 +12,7 @@ add_subdirectory(../pg_camera_geometry/camera_geometry ${CMAKE_BINARY_DIR}/camer
 include_directories(
     ../pg_camera_geometry/camera_geometry/include
     ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/nlohmann
 )
 
 # Add all source files from the src directory

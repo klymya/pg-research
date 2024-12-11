@@ -27,8 +27,8 @@ public:
     Rectangle GetDARectangleCm();
     Rectangle GetDARectanglePx();
 
-    bool IsPointInsidePx(const Point& p);
-    bool IsRectIntersectPx(const Rectangle& r);
+    bool IsPointInsidePx(const Point& p) const;
+    bool IsRectIntersectPx(const Rectangle& r) const;
 
 private:
     CameraConfiguration m_cam;

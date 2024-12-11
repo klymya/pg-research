@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <XYStorage.h>
+#include <XYStorage.hpp>
 #include <cstdio>
 #include <ctime>
 #include <unistd.h>

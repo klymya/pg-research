@@ -60,12 +60,12 @@ Rectangle DetectionArea::GetDARectanglePx()
     return m_rectanglePx;
 }
 
-bool DetectionArea::IsPointInsidePx(const Point& p)
+bool DetectionArea::IsPointInsidePx(const Point& p) const
 {
     return IsPointInsideRectangle(p, m_rectanglePx);
 }
 
-bool DetectionArea::IsRectIntersectPx(const Rectangle& r)
+bool DetectionArea::IsRectIntersectPx(const Rectangle& r) const
 {
     return CalculateIoU(r, m_rectanglePx) > DA_INTERSECTION_TH;
 }

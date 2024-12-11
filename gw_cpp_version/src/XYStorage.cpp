@@ -1,4 +1,4 @@
-#include "XYStorage.h"
+#include "XYStorage.hpp"
 #include <ctime>
 #include <stdexcept>
 
