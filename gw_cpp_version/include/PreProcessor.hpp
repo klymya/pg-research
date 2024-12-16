@@ -15,7 +15,6 @@ class PreProcessor {
 public:
     PreProcessor(const std::string& dataPath);
     void preProcessDetection(const std::vector<Detection>& detections, const std::string& sensorSerialNumber, int ts = -1);
-    static int getTimestampSec();
 
 private:
     void loadSensorsParams(const std::string& dataPath);

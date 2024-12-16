@@ -117,7 +117,7 @@ def aggregator():
 
     aois = get_aois(config["aoi"]["path"])
     aggregator = Aggregator(["0"])
-    aggregator.set_aoi("0", aois)
+    aggregator.set_aois("0", aois)
 
     while True:
         ts, counts = aggregator.check_aois()

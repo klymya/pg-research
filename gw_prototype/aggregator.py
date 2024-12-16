@@ -14,14 +14,13 @@ class Aggregator:
         self._storage = XYStorage()
         self._sensor_serials = sensors_serials
         self._aois = {}
-        self._sensor_reporting_periods = {}
 
-    def set_aoi(self, sensor_serial_number: str, aois: list[AreaOfInterest]) -> None:
+    def set_aois(self, sensor_serial_number: str, aois: list[AreaOfInterest]) -> None:
         if sensor_serial_number not in self._sensor_serials:
             raise ValueError(f"Sensor with serial number {sensor_serial_number} does not exist")
         self._aois[sensor_serial_number] = aois
 
-    def get_aoi(self, sensor_serial_number: str) -> list[AreaOfInterest]:
+    def get_aois(self, sensor_serial_number: str) -> list[AreaOfInterest]:
         if sensor_serial_number not in self._sensor_serials:
             raise ValueError(f"Sensor with serial number {sensor_serial_number} does not exist")
         return self._aois.get(sensor_serial_number, [])

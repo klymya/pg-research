@@ -12,6 +12,11 @@ struct Point
     Point(float x, float y): x(x), y(y) {};
     Point() = default;
     Point(const Point& other) = default;
+
+    bool operator==(const Point& other) const
+    {
+        return x == other.x && y == other.y;
+    }
 };
 
 struct Rectangle
@@ -26,6 +31,11 @@ struct Rectangle
     Rectangle(float x, float y, float w, float h, float x1, float y1): x(x), y(y), w(w), h(h), x1(x1), y1(y1) {};
     Rectangle(const Rectangle& other) = default;
     Rectangle() = default;
+
+    bool operator==(const Rectangle& other) const
+    {
+        return x == other.x && y == other.y && w == other.w && h == other.h && x1 == other.x1 && y1 == other.y1;
+    }
 
 public:
     static Rectangle fromXYWH(float x, float y, float w, float h)

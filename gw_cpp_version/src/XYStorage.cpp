@@ -3,14 +3,14 @@
 #include <stdexcept>
 
 XYStorage::XYStorage(const std::string& db_name) {
-    if (sqlite3_open(db_name.c_str(), &conn) != SQLITE_OK) {
+    if (sqlite3_open(db_name.c_str(), &m_conn) != SQLITE_OK) {
         throw std::runtime_error("Cannot open database");
     }
     createTable();
 }
 
 XYStorage::~XYStorage() {
-    sqlite3_close(conn);
+    sqlite3_close(m_conn);
 }
 
 void XYStorage::createTable() {
@@ -33,9 +33,9 @@ void XYStorage::createTable() {
     )";
 
     char* errMsg = nullptr;
-    if (sqlite3_exec(conn, createTableSQL, nullptr, nullptr, &errMsg) != SQLITE_OK ||
-        sqlite3_exec(conn, createIndexSQLTimestamp, nullptr, nullptr, &errMsg) != SQLITE_OK ||
-        sqlite3_exec(conn, createIndexSQLSensorSerialNumber, nullptr, nullptr, &errMsg) != SQLITE_OK) {
+    if (sqlite3_exec(m_conn, createTableSQL, nullptr, nullptr, &errMsg) != SQLITE_OK ||
+        sqlite3_exec(m_conn, createIndexSQLTimestamp, nullptr, nullptr, &errMsg) != SQLITE_OK ||
+        sqlite3_exec(m_conn, createIndexSQLSensorSerialNumber, nullptr, nullptr, &errMsg) != SQLITE_OK) {
         std::string error = "SQL error: ";
         error += errMsg;
         sqlite3_free(errMsg);
@@ -54,7 +54,7 @@ void XYStorage::appendDataPoint(const std::string& sensorSerialNumber, int x, in
     )";
 
     sqlite3_stmt* stmt;
-    if (sqlite3_prepare_v2(conn, insertSQL, -1, &stmt, nullptr) != SQLITE_OK) {
+    if (sqlite3_prepare_v2(m_conn, insertSQL, -1, &stmt, nullptr) != SQLITE_OK) {
         throw std::runtime_error("Failed to prepare statement");
     }
 
@@ -71,7 +71,9 @@ void XYStorage::appendDataPoint(const std::string& sensorSerialNumber, int x, in
     sqlite3_finalize(stmt);
 }
 
-std::vector<std::tuple<int, std::string, int, int>> XYStorage::queryDataPoints(const std::string& sensorSerialNumber, int startTimestamp, int endTimestamp) {
+void XYStorage::queryDataPoints(std::vector<DataPoint>& dataPoints, const std::string& sensorSerialNumber, int startTimestamp, int endTimestamp) {
+    dataPoints.clear();
+
     if (endTimestamp == -1) {
         endTimestamp = static_cast<int>(std::time(nullptr));
     }
@@ -84,7 +86,7 @@ std::vector<std::tuple<int, std::string, int, int>> XYStorage::queryDataPoints(c
     )";
 
     sqlite3_stmt* stmt;
-    if (sqlite3_prepare_v2(conn, querySQL, -1, &stmt, nullptr) != SQLITE_OK) {
+    if (sqlite3_prepare_v2(m_conn, querySQL, -1, &stmt, nullptr) != SQLITE_OK) {
         throw std::runtime_error("Failed to prepare statement");
     }
 
@@ -92,17 +94,15 @@ std::vector<std::tuple<int, std::string, int, int>> XYStorage::queryDataPoints(c
     sqlite3_bind_int(stmt, 2, endTimestamp);
     sqlite3_bind_text(stmt, 3, sensorSerialNumber.c_str(), -1, SQLITE_STATIC);
 
-    std::vector<std::tuple<int, std::string, int, int>> results;
     while (sqlite3_step(stmt) == SQLITE_ROW) {
         int timestamp = sqlite3_column_int(stmt, 0);
         std::string serialNumber = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
         int x = sqlite3_column_int(stmt, 2);
         int y = sqlite3_column_int(stmt, 3);
-        results.emplace_back(timestamp, serialNumber, x, y);
+        dataPoints.emplace_back(DataPoint{timestamp, serialNumber, x, y});
     }
 
     sqlite3_finalize(stmt);
-    return results;
 }
 
 void XYStorage::removeOldDataPoints(int thresholdMin) {
@@ -114,7 +114,7 @@ void XYStorage::removeOldDataPoints(int thresholdMin) {
     )";
 
     sqlite3_stmt* stmt;
-    if (sqlite3_prepare_v2(conn, deleteSQL, -1, &stmt, nullptr) != SQLITE_OK) {
+    if (sqlite3_prepare_v2(m_conn, deleteSQL, -1, &stmt, nullptr) != SQLITE_OK) {
         throw std::runtime_error("Failed to prepare statement");
     }
 
@@ -129,6 +129,6 @@ void XYStorage::removeOldDataPoints(int thresholdMin) {
 }
 
 void XYStorage::close() {
-    sqlite3_close(conn);
-    conn = nullptr;
+    sqlite3_close(m_conn);
+    m_conn = nullptr;
 }

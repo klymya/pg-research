@@ -24,7 +24,8 @@ TEST_F(XYStorageTest, AppendDataPoint) {
     int timestamp = static_cast<int>(std::time(nullptr)) - 1000;
     storage->appendDataPoint("123", 10, 20, timestamp);
     usleep(100000); // Sleep for 0.1 seconds
-    auto data_points = storage->queryDataPoints("123", 0);
+    std::vector<DataPoint> data_points;
+    storage->queryDataPoints(data_points, "123", 0);
     ASSERT_EQ(data_points.size(), 1);
     EXPECT_EQ(std::get<1>(data_points[0]), "123");
     EXPECT_EQ(std::get<2>(data_points[0]), 10);
@@ -34,7 +35,7 @@ TEST_F(XYStorageTest, AppendDataPoint) {
     timestamp = static_cast<int>(std::time(nullptr)) - 100;
     storage->appendDataPoint("123", 30, 40, timestamp);
     usleep(100000); // Sleep for 0.1 seconds
-    data_points = storage->queryDataPoints("123", 0);
+    storage->queryDataPoints(data_points, "123", 0);
     ASSERT_EQ(data_points.size(), 2);
     EXPECT_EQ(data_points[1], std::make_tuple(timestamp, "123", 30, 40));
 }
@@ -47,12 +48,13 @@ TEST_F(XYStorageTest, QueryDataPoints) {
     usleep(100000); // Sleep for 0.1 seconds
 
     // Query with a range that includes both data points
-    auto data_points = storage->queryDataPoints("123", timestamp1 - 1, timestamp2 + 1);
+    std::vector<DataPoint> data_points;
+    storage->queryDataPoints(data_points, "123", timestamp1 - 1, timestamp2 + 1);
     ASSERT_EQ(data_points.size(), 2);
     EXPECT_LT(std::get<0>(data_points[0]), std::get<0>(data_points[1]));
 
     // Query with a range that includes only the second data point
-    data_points = storage->queryDataPoints("123", timestamp2 - 1, timestamp2 + 1);
+    storage->queryDataPoints(data_points, "123", timestamp2 - 1, timestamp2 + 1);
     ASSERT_EQ(data_points.size(), 1);
     EXPECT_EQ(data_points[0], std::make_tuple(timestamp2, "123", 30, 40));
 }
@@ -66,7 +68,8 @@ TEST_F(XYStorageTest, RemoveOldDataPoints) {
 
     // Remove data points older than 45 minutes
     storage->removeOldDataPoints(45);
-    auto data_points = storage->queryDataPoints("123", 0);
+    std::vector<DataPoint> data_points;
+    storage->queryDataPoints(data_points, "123", 0);
     ASSERT_EQ(data_points.size(), 1);
     EXPECT_EQ(data_points[0], std::make_tuple(timestamp2, "123", 30, 40));
 }
@@ -81,21 +84,22 @@ TEST_F(XYStorageTest, MultipleCases) {
     usleep(100000); // Sleep for 0.1 seconds
 
     // Query for sensor "123"
-    auto data_points = storage->queryDataPoints("123", 0);
+    std::vector<DataPoint> data_points;
+    storage->queryDataPoints(data_points, "123", 0);
     ASSERT_EQ(data_points.size(), 2);
 
     // Query for sensor "456"
-    data_points = storage->queryDataPoints("456", 0);
+    storage->queryDataPoints(data_points, "456", 0);
     ASSERT_EQ(data_points.size(), 1);
     EXPECT_EQ(data_points[0], std::make_tuple(timestamp3, "456", 50, 60));
 
     // Remove old data points
     storage->removeOldDataPoints(45);
-    data_points = storage->queryDataPoints("123", 0);
+    storage->queryDataPoints(data_points, "123", 0);
     ASSERT_EQ(data_points.size(), 1);
     EXPECT_EQ(data_points[0], std::make_tuple(timestamp2, "123", 30, 40));
 
-    data_points = storage->queryDataPoints("456", 0);
+    storage->queryDataPoints(data_points, "456", 0);
     ASSERT_EQ(data_points.size(), 1);
     EXPECT_EQ(data_points[0], std::make_tuple(timestamp3, "456", 50, 60));
 }

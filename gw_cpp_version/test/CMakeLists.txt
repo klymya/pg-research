@@ -17,6 +17,8 @@ add_executable(runUnitTests
     TestXYStorage.cpp
     TestPreProcessingUtils.cpp
     TestPreProcessor.cpp
+    TestAreaOfInterest.cpp
+    TestAggregator.cpp
 )
 
 # Link the test executable with GTest and the library target

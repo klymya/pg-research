@@ -11,21 +11,21 @@ def mock_storage(mocker):
 def aggregator(mock_storage):
     return Aggregator(["sensor1", "sensor2"])
 
-def test_set_and_get_aoi(aggregator):
+def test_set_and_get_aois(aggregator):
     aoi1 = AreaOfInterest(area_id="1", name="tst", polygon=[], reporting_period_sec=10)
     aoi2 = AreaOfInterest(area_id="2", name="tst", polygon=[], reporting_period_sec=20)
-    aggregator.set_aoi('sensor1', [aoi1, aoi2])
+    aggregator.set_aois('sensor1', [aoi1, aoi2])
 
-    aois = aggregator.get_aoi('sensor1')
+    aois = aggregator.get_aois('sensor1')
     assert aois == [aoi1, aoi2]
 
-    pytest.raises(ValueError, aggregator.get_aoi, 'sensor3')
+    pytest.raises(ValueError, aggregator.get_aois, 'sensor3')
 
 def test_get_aoi_by_report_period(aggregator):
     aoi1 = AreaOfInterest(area_id="1", name="tst", polygon=[], reporting_period_sec=60)
     aoi2 = AreaOfInterest(area_id="2", name="tst", polygon=[], reporting_period_sec=20)
-    aggregator.set_aoi('sensor1', [aoi1])
-    aggregator.set_aoi('sensor2', [aoi2])
+    aggregator.set_aois('sensor1', [aoi1])
+    aggregator.set_aois('sensor2', [aoi2])
 
     ts = 100
     aois = aggregator._get_aoi_by_report_period(ts)
@@ -129,7 +129,7 @@ def test_check_aois(mocker, mock_storage):
     aoi.is_point_inside.side_effect = lambda point: point.x == 1 and point.y == 1
 
     aggregator = Aggregator(["sensor1"])
-    aggregator.set_aoi('sensor1', [aoi])
+    aggregator.set_aois('sensor1', [aoi])
 
     mocker.patch('time.time', return_value=30)
     counts = aggregator.check_aois()

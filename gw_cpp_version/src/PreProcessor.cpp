@@ -1,18 +1,9 @@
 #include <fstream>
 
 #include "PreProcessor.hpp"
+#include "Utils.hpp"
 
 using json = nlohmann::json;
-
-template <typename T>
-int findIndex(const std::vector<T>& vec, const T& value) {
-    for (size_t i = 0; i < vec.size(); ++i) {
-        if (vec[i] == value) {
-            return static_cast<int>(i); // Return the index if the value is found
-        }
-    }
-    return -1; // Return -1 if the value is not found
-}
 
 PreProcessor::PreProcessor(const std::string& dataPath) {
     loadSensorsParams(dataPath);
@@ -55,10 +46,6 @@ void PreProcessor::loadSensorsParams(const std::string& dataPath) {
         m_cameraConfigs.push_back(camConfig);
         m_detectionAreas.push_back(da);
     }
-}
-
-int PreProcessor::getTimestampSec() {
-    return static_cast<int>(std::time(nullptr));
 }
 
 void PreProcessor::preProcessDetection(const std::vector<Detection>& detections, const std::string& sensorSerialNumber, int ts) {

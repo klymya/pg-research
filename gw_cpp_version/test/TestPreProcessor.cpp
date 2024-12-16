@@ -5,6 +5,7 @@
 #include "PreProcessingUtils.hpp"
 #include "Geometry.hpp"
 #include "Common.hpp"
+#include "Utils.hpp"
 
 using json = nlohmann::json;
 
@@ -62,7 +63,8 @@ TEST_F(PreProcessorTest, PreprocessDetection) {
 
     preprocessor.preProcessDetection(detections, "sensor_1");
 
-    auto data_points = storage->queryDataPoints("sensor_1", 0, preprocessor.getTimestampSec() + 1);
+    std::vector<DataPoint> data_points;
+    storage->queryDataPoints(data_points, "sensor_1", 0, getTimestampSec() + 1);
     ASSERT_EQ(data_points.size(), 1);
     ASSERT_EQ(std::get<1>(data_points[0]), "sensor_1");
     ASSERT_EQ(std::get<2>(data_points[0]), -17);
