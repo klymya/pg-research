@@ -5,6 +5,8 @@ project(pg_gateway)
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 17)
 
+find_package(eclipse-paho-mqtt-c CONFIG REQUIRED)
+
 # Add the CameraGeometry library as a subdirectory
 add_subdirectory(../pg_camera_geometry/camera_geometry ${CMAKE_BINARY_DIR}/camera_geometry)
 
@@ -22,7 +24,14 @@ file(GLOB SRC_FILES ${CMAKE_SOURCE_DIR}/src/*.cpp)
 add_library(pg_library ${SRC_FILES})
 
 # Link the CameraGeometry library and SQLite3 to the library target
-target_link_libraries(pg_library PRIVATE CameraGeometry sqlite3)
+target_link_libraries(pg_library PRIVATE
+    CameraGeometry
+    sqlite3
+    eclipse-paho-mqtt-c::paho-mqtt3a-static
+    eclipse-paho-mqtt-c::paho-mqtt3c-static
+    eclipse-paho-mqtt-c::paho-mqtt3as-static
+    eclipse-paho-mqtt-c::paho-mqtt3cs-static
+)
 
 # Add the executable
 add_executable(pg_gateway main.cpp)
