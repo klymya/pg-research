@@ -1,5 +1,6 @@
-#include "MQTTClientHandler.hpp"
 #include <iostream>
+#include <unistd.h>
+#include "MQTTClientHandler.hpp"
 
 MQTTClientHandler::MQTTClientHandler(const std::string& clientId, const std::string& serverAdress,
                                      const std::vector<std::string>& topics,
@@ -13,7 +14,13 @@ MQTTClientHandler::MQTTClientHandler(const std::string& clientId, const std::str
         return;
     }
 
-    if ((rc = MQTTClient_setCallbacks(m_client, nullptr, onConnectionLost, onMessage, onMessageDelivered)) != MQTTCLIENT_SUCCESS) {
+    MessageCallback onMsgCallack = nullptr;
+    if (onMessage == nullptr && topics.empty()) {
+        onMsgCallack = onMessageArrivedStub;
+    } else {
+        onMsgCallack = onMessage;
+    }
+    if ((rc = MQTTClient_setCallbacks(m_client, this, onConnectionLost, onMsgCallack, onMessageDelivered)) != MQTTCLIENT_SUCCESS) {
         std::cerr << "Failed to set callbacks, return code " << rc << std::endl;
         return;
     }
@@ -61,6 +68,7 @@ int MQTTClientHandler::pushMessage(const std::string& topic, const std::string& 
     pubmsg.payloadlen = (int)message.size();
     pubmsg.qos = 1;
     pubmsg.retained = 0;
+    m_deliveredToken = 0;
     MQTTClient_deliveryToken token;
     int rc;
 
@@ -69,9 +77,9 @@ int MQTTClientHandler::pushMessage(const std::string& topic, const std::string& 
         return rc;
     }
 
-    // while (token != deliveredtoken) {
-    //     usleep(10000L);
-    // }
+    while (token != m_deliveredToken) {
+        usleep(10000L);
+    }
 
     return rc;
 }
@@ -84,6 +92,10 @@ void MQTTClientHandler::close() {
     }
 }
 
+void MQTTClientHandler::setDeliveryToken(MQTTClient_deliveryToken token) {
+    m_deliveredToken = token;
+}
+
 void MQTTClientHandler::onConnect(void* context, MQTTClient_deliveryToken dt) {
     std::cout << "Message with token value " << dt << " delivery confirmed" << std::endl;
 }
@@ -94,4 +106,12 @@ void MQTTClientHandler::onConnectionLost(void* context, char* cause) {
 
 void MQTTClientHandler::onMessageDelivered(void* context, MQTTClient_deliveryToken dt) {
     std::cout << "Message with token value " << dt << " delivery confirmed" << std::endl;
+
+    MQTTClientHandler* handler = static_cast<MQTTClientHandler*>(context);
+    handler->setDeliveryToken(dt);
+}
+
+int MQTTClientHandler::onMessageArrivedStub(void* context, char* topicName, int topicLen, MQTTClient_message* message) {
+    std::cout << "Message arrived" << std::endl;
+    return 1;
 }
