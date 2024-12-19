@@ -126,11 +126,9 @@ void aggretation(std::string aoiPath, MQTTClientHandler mttqClient, std::string 
     std::vector<AreaCount> areaCounts;
     std::vector<XY> xys;
     while (true) {
-        std::cout << "Aggregating start" << std::endl;
         ts = getTimestampSec();
         aggregarot.checkAoIs(ts, areaCounts);
         aggregarot.getXYs(ts, xys);
-        std::cout << "Aggregation done " << areaCounts.size() << " " << xys.size() << std::endl;
         if (!areaCounts.empty()) {
             sendCounts(mttqClient, topicCounts, ts, areaCounts);
         }

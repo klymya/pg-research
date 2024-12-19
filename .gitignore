@@ -98,3 +98,4 @@ pg_camera_geometry/build
 gw_prototype/*.db
 gw_prototype/mosquitto/data/*
 gw_prototype/mosquitto/log/*
+gw_cpp_version/*.db

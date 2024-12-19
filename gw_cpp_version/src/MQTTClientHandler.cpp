@@ -20,7 +20,7 @@ MQTTClientHandler::MQTTClientHandler(const std::string& clientId, const std::str
     } else {
         onMsgCallack = onMessage;
     }
-    if ((rc = MQTTClient_setCallbacks(m_client, nullptr, onConnectionLost, onMsgCallack, onMessageDelivered)) != MQTTCLIENT_SUCCESS) {
+    if ((rc = MQTTClient_setCallbacks(m_client, nullptr, onConnectionLost, onMsgCallack, onMessageDeliveredStub)) != MQTTCLIENT_SUCCESS) {
         std::cerr << "Failed to set callbacks, return code " << rc << std::endl;
         return;
     }
@@ -87,10 +87,6 @@ void MQTTClientHandler::close() {
     }
 }
 
-// void MQTTClientHandler::setDeliveryToken(MQTTClient_deliveryToken token) {
-//     m_deliveredToken = token;
-// }
-
 void MQTTClientHandler::onConnect(void* context, MQTTClient_deliveryToken dt) {
     std::cout << "Message with token value " << dt << " delivery confirmed" << std::endl;
 }
@@ -99,13 +95,10 @@ void MQTTClientHandler::onConnectionLost(void* context, char* cause) {
     std::cerr << "Connection lost, cause: " << cause << std::endl;
 }
 
-void MQTTClientHandler::onMessageDelivered(void* context, MQTTClient_deliveryToken dt) {
-    // std::cout << "Message with token value " << dt << " delivery confirmed" << std::endl;
-    // MQTTClientHandler* handler = static_cast<MQTTClientHandler*>(context);
-    // handler->setDeliveryToken(dt);
+void MQTTClientHandler::onMessageDeliveredStub(void* context, MQTTClient_deliveryToken dt) {
+
 }
 
 int MQTTClientHandler::onMessageArrivedStub(void* context, char* topicName, int topicLen, MQTTClient_message* message) {
-    //std::cout << "Message arrived" << std::endl;
     return 1;
 }
