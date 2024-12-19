@@ -13,7 +13,7 @@ public:
 
     bool isConnected() const;
     int pushMessage(const std::string& topic, const std::string& message);
-    void setDeliveryToken(MQTTClient_deliveryToken token);
+    // void setDeliveryToken(MQTTClient_deliveryToken token);
     void close();
 
 private:
@@ -26,5 +26,5 @@ private:
     std::string m_serverAddress;
     MQTTClient m_client;
     bool m_connected;
-    MQTTClient_deliveryToken m_deliveredToken;
+    // MQTTClient_deliveryToken m_deliveredToken;
 };

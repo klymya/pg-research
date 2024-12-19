@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 find_package(eclipse-paho-mqtt-c CONFIG REQUIRED)
 find_package(Protobuf CONFIG REQUIRED)
+find_package(unofficial-inih CONFIG REQUIRED)
 
 # Add the CameraGeometry library as a subdirectory
 add_subdirectory(../pg_camera_geometry/camera_geometry ${CMAKE_BINARY_DIR}/camera_geometry)
@@ -42,13 +43,14 @@ target_link_libraries(pg_library PRIVATE
     protobuf::libprotoc
     protobuf::libprotobuf
     protobuf::libprotobuf-lite
+    unofficial::inih::inireader
 )
 
 # Add the protobuf include directories to the target
 target_include_directories(pg_library PRIVATE ${Protobuf_INCLUDE_DIRS})
 
 # Add the executable
-add_executable(pg_gateway main.cpp)
+add_executable(pg_gateway gw_entrypoint.cpp)
 
 # Link the library target to the executable
 target_link_libraries(pg_gateway PRIVATE pg_library)

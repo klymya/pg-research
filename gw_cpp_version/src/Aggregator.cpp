@@ -98,7 +98,7 @@ void Aggregator::getPoints(const std::string& serialNum, int startTs, int endTs,
     }
 }
 
-void Aggregator::checkAoIs(int tsSec, vector<AreaCount>& counts) {
+void Aggregator::checkAoIs(int tsSec, std::vector<AreaCount>& counts) {
     counts.clear();
     std::vector<std::tuple<std::string, AreaOfInterest>> aois2Check;
     getAoIByReportPeriod(tsSec, aois2Check);

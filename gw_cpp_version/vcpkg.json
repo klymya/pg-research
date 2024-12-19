@@ -3,6 +3,7 @@
     "gtest",
     "sqlite3",
     "paho-mqtt",
-    "protobuf"
+    "protobuf",
+    "inih"
   ]
 }
