@@ -24,23 +24,30 @@ PreProcessor* preprocessor;
 int onMessage(void* context, char* topicName, int topicLen, MQTTClient_message* message) {
     std::string payload(static_cast<char*>(message->payload), message->payloadlen);
 
-    telemetrypayload::TelemetryNotification msg;
+    telemetrypayload::Notification msg;
     if (!msg.ParseFromString(payload)) {
         std::cerr << "Failed to parse payload." << std::endl;
         return 1;
     }
 
+    if (!msg.has_telemetry()) {
+        std::cerr << "Message does not contain telemetry." << std::endl;
+        return 1;
+    }
+
+    telemetrypayload::TelemetryNotification telemetryMsg = msg.telemetry();
+
     std::vector<Detection> detections;
-    for (int i = 0; i < msg.objects_size(); ++i) {
-        const telemetrypayload::ReportingObject& object = msg.objects(i);
+    for (int i = 0; i < telemetryMsg.objects_size(); ++i) {
+        const telemetrypayload::ReportingObject& object = telemetryMsg.objects(i);
         detections.push_back(Detection(
             Rectangle::fromXYWH(object.box_x(), object.box_y(), object.box_w(), object.box_h()),
             Point(object.position_x(), object.position_y()),
             object.confidence()
         ));
     }
-    std::cout << "Received message from  topic " << topicName << " " << "with ts: " << msg.timestamp() << std::endl;
-    preprocessor->preProcessDetection(detections, "0", msg.timestamp());
+    std::cout << "Received message from  topic " << topicName << " " << "with ts: " << telemetryMsg.timestamp() << std::endl;
+    preprocessor->preProcessDetection(detections, "0", telemetryMsg.timestamp());
 
     return 1;
 }

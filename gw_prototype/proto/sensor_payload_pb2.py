@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x14sensor_payload.proto\x12\x10telemetrypayload\"\x89\x01\n\x0fReportingObject\x12\x12\n\nposition_x\x18\x01 \x01(\r\x12\x12\n\nposition_y\x18\x02 \x01(\r\x12\r\n\x05\x62ox_x\x18\x03 \x01(\r\x12\r\n\x05\x62ox_y\x18\x04 \x01(\r\x12\r\n\x05\x62ox_w\x18\x05 \x01(\r\x12\r\n\x05\x62ox_h\x18\x06 \x01(\r\x12\x12\n\nconfidence\x18\x07 \x01(\x02\"^\n\x15TelemetryNotification\x12\x11\n\ttimestamp\x18\x02 \x01(\r\x12\x32\n\x07objects\x18\x03 \x03(\x0b\x32!.telemetrypayload.ReportingObject\" \n\x08XYObject\x12\t\n\x01x\x18\x01 \x01(\x05\x12\t\n\x01y\x18\x02 \x01(\x05\"P\n\x0eXYNotification\x12\x11\n\ttimestamp\x18\x01 \x01(\r\x12+\n\x07objects\x18\x02 \x03(\x0b\x32\x1a.telemetrypayload.XYObject\"/\n\x0e\x41oICountObject\x12\x0e\n\x06\x61oi_id\x18\x01 \x01(\t\x12\r\n\x05\x63ount\x18\x02 \x01(\r\"\\\n\x14\x41oICountNotification\x12\x11\n\ttimestamp\x18\x01 \x01(\r\x12\x31\n\x07objects\x18\x02 \x03(\x0b\x32 .telemetrypayload.AoICountObjectb\x06proto3'
+  serialized_pb=b'\n\x14sensor_payload.proto\x12\x10telemetrypayload\"\x89\x01\n\x0fReportingObject\x12\x12\n\nposition_x\x18\x01 \x01(\r\x12\x12\n\nposition_y\x18\x02 \x01(\r\x12\r\n\x05\x62ox_x\x18\x03 \x01(\r\x12\r\n\x05\x62ox_y\x18\x04 \x01(\r\x12\r\n\x05\x62ox_w\x18\x05 \x01(\r\x12\r\n\x05\x62ox_h\x18\x06 \x01(\r\x12\x12\n\nconfidence\x18\x07 \x01(\x02\"^\n\x15TelemetryNotification\x12\x11\n\ttimestamp\x18\x02 \x01(\r\x12\x32\n\x07objects\x18\x03 \x03(\x0b\x32!.telemetrypayload.ReportingObject\"\"\n\x0f\x41\x63kNotification\x12\x0f\n\x07seq_num\x18\x01 \x01(\r\"#\n\x10NackNotification\x12\x0f\n\x07seq_num\x18\x01 \x01(\r\"\xc2\x01\n\x0cNotification\x12<\n\ttelemetry\x18\x01 \x01(\x0b\x32\'.telemetrypayload.TelemetryNotificationH\x00\x12\x30\n\x03\x61\x63k\x18\x02 \x01(\x0b\x32!.telemetrypayload.AckNotificationH\x00\x12\x32\n\x04nack\x18\x03 \x01(\x0b\x32\".telemetrypayload.NackNotificationH\x00\x42\x0e\n\x0cnotification\" \n\x08XYObject\x12\t\n\x01x\x18\x01 \x01(\x05\x12\t\n\x01y\x18\x02 \x01(\x05\"P\n\x0eXYNotification\x12\x11\n\ttimestamp\x18\x01 \x01(\r\x12+\n\x07objects\x18\x02 \x03(\x0b\x32\x1a.telemetrypayload.XYObject\"/\n\x0e\x41oICountObject\x12\x0e\n\x06\x61oi_id\x18\x01 \x01(\t\x12\r\n\x05\x63ount\x18\x02 \x01(\r\"\\\n\x14\x41oICountNotification\x12\x11\n\ttimestamp\x18\x01 \x01(\r\x12\x31\n\x07objects\x18\x02 \x03(\x0b\x32 .telemetrypayload.AoICountObjectb\x06proto3'
 )
 
 
@@ -138,6 +138,121 @@ _TELEMETRYNOTIFICATION = _descriptor.Descriptor(
 )
 
 
+_ACKNOTIFICATION = _descriptor.Descriptor(
+  name='AckNotification',
+  full_name='telemetrypayload.AckNotification',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='seq_num', full_name='telemetrypayload.AckNotification.seq_num', index=0,
+      number=1, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=278,
+  serialized_end=312,
+)
+
+
+_NACKNOTIFICATION = _descriptor.Descriptor(
+  name='NackNotification',
+  full_name='telemetrypayload.NackNotification',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='seq_num', full_name='telemetrypayload.NackNotification.seq_num', index=0,
+      number=1, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=314,
+  serialized_end=349,
+)
+
+
+_NOTIFICATION = _descriptor.Descriptor(
+  name='Notification',
+  full_name='telemetrypayload.Notification',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='telemetry', full_name='telemetrypayload.Notification.telemetry', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='ack', full_name='telemetrypayload.Notification.ack', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='nack', full_name='telemetrypayload.Notification.nack', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+    _descriptor.OneofDescriptor(
+      name='notification', full_name='telemetrypayload.Notification.notification',
+      index=0, containing_type=None,
+      create_key=_descriptor._internal_create_key,
+    fields=[]),
+  ],
+  serialized_start=352,
+  serialized_end=546,
+)
+
+
 _XYOBJECT = _descriptor.Descriptor(
   name='XYObject',
   full_name='telemetrypayload.XYObject',
@@ -172,8 +287,8 @@ _XYOBJECT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=278,
-  serialized_end=310,
+  serialized_start=548,
+  serialized_end=580,
 )
 
 
@@ -211,8 +326,8 @@ _XYNOTIFICATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=312,
-  serialized_end=392,
+  serialized_start=582,
+  serialized_end=662,
 )
 
 
@@ -250,8 +365,8 @@ _AOICOUNTOBJECT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=394,
-  serialized_end=441,
+  serialized_start=664,
+  serialized_end=711,
 )
 
 
@@ -289,15 +404,30 @@ _AOICOUNTNOTIFICATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=443,
-  serialized_end=535,
+  serialized_start=713,
+  serialized_end=805,
 )
 
 _TELEMETRYNOTIFICATION.fields_by_name['objects'].message_type = _REPORTINGOBJECT
+_NOTIFICATION.fields_by_name['telemetry'].message_type = _TELEMETRYNOTIFICATION
+_NOTIFICATION.fields_by_name['ack'].message_type = _ACKNOTIFICATION
+_NOTIFICATION.fields_by_name['nack'].message_type = _NACKNOTIFICATION
+_NOTIFICATION.oneofs_by_name['notification'].fields.append(
+  _NOTIFICATION.fields_by_name['telemetry'])
+_NOTIFICATION.fields_by_name['telemetry'].containing_oneof = _NOTIFICATION.oneofs_by_name['notification']
+_NOTIFICATION.oneofs_by_name['notification'].fields.append(
+  _NOTIFICATION.fields_by_name['ack'])
+_NOTIFICATION.fields_by_name['ack'].containing_oneof = _NOTIFICATION.oneofs_by_name['notification']
+_NOTIFICATION.oneofs_by_name['notification'].fields.append(
+  _NOTIFICATION.fields_by_name['nack'])
+_NOTIFICATION.fields_by_name['nack'].containing_oneof = _NOTIFICATION.oneofs_by_name['notification']
 _XYNOTIFICATION.fields_by_name['objects'].message_type = _XYOBJECT
 _AOICOUNTNOTIFICATION.fields_by_name['objects'].message_type = _AOICOUNTOBJECT
 DESCRIPTOR.message_types_by_name['ReportingObject'] = _REPORTINGOBJECT
 DESCRIPTOR.message_types_by_name['TelemetryNotification'] = _TELEMETRYNOTIFICATION
+DESCRIPTOR.message_types_by_name['AckNotification'] = _ACKNOTIFICATION
+DESCRIPTOR.message_types_by_name['NackNotification'] = _NACKNOTIFICATION
+DESCRIPTOR.message_types_by_name['Notification'] = _NOTIFICATION
 DESCRIPTOR.message_types_by_name['XYObject'] = _XYOBJECT
 DESCRIPTOR.message_types_by_name['XYNotification'] = _XYNOTIFICATION
 DESCRIPTOR.message_types_by_name['AoICountObject'] = _AOICOUNTOBJECT
@@ -317,6 +447,27 @@ TelemetryNotification = _reflection.GeneratedProtocolMessageType('TelemetryNotif
   # @@protoc_insertion_point(class_scope:telemetrypayload.TelemetryNotification)
   })
 _sym_db.RegisterMessage(TelemetryNotification)
+
+AckNotification = _reflection.GeneratedProtocolMessageType('AckNotification', (_message.Message,), {
+  'DESCRIPTOR' : _ACKNOTIFICATION,
+  '__module__' : 'sensor_payload_pb2'
+  # @@protoc_insertion_point(class_scope:telemetrypayload.AckNotification)
+  })
+_sym_db.RegisterMessage(AckNotification)
+
+NackNotification = _reflection.GeneratedProtocolMessageType('NackNotification', (_message.Message,), {
+  'DESCRIPTOR' : _NACKNOTIFICATION,
+  '__module__' : 'sensor_payload_pb2'
+  # @@protoc_insertion_point(class_scope:telemetrypayload.NackNotification)
+  })
+_sym_db.RegisterMessage(NackNotification)
+
+Notification = _reflection.GeneratedProtocolMessageType('Notification', (_message.Message,), {
+  'DESCRIPTOR' : _NOTIFICATION,
+  '__module__' : 'sensor_payload_pb2'
+  # @@protoc_insertion_point(class_scope:telemetrypayload.Notification)
+  })
+_sym_db.RegisterMessage(Notification)
 
 XYObject = _reflection.GeneratedProtocolMessageType('XYObject', (_message.Message,), {
   'DESCRIPTOR' : _XYOBJECT,

@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package telemetrypayload;
 
+// Alif -> GW
 message ReportingObject {
     uint32 position_x = 1;
     uint32 position_y = 2;
@@ -17,6 +18,23 @@ message TelemetryNotification {
     repeated ReportingObject objects = 3;
 }
 
+message AckNotification {
+    uint32 seq_num = 1;
+}
+
+message NackNotification {
+    uint32 seq_num = 1;
+}
+
+message Notification {
+    oneof notification {
+        TelemetryNotification telemetry = 1;
+        AckNotification ack = 2;
+        NackNotification nack = 3;
+    }
+}
+
+// GW -> Cloud
 message XYObject {
     int32 x = 1;
     int32 y = 2;

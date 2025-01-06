@@ -3,7 +3,7 @@ import time
 from multiprocessing import Process
 import logging
 
-from proto.sensor_payload_pb2 import TelemetryNotification, AoICountNotification, XYNotification
+from proto.sensor_payload_pb2 import TelemetryNotification, AoICountNotification, XYNotification, Notification
 from mqtt_client import MQTTClient
 from preprocessor import Preprocessor
 from preprocessing_utils import Detection, Rectangle, Point
@@ -21,18 +21,23 @@ class PreprocessorWrapper:
         self._preprocessor = Preprocessor(data_pth)
 
     def on_message(self, client, userdata, message):
-        notification = TelemetryNotification()
+        notification = Notification()
         notification.ParseFromString(message.payload)
 
+        if not notification.HasField('telemetry'):
+            logging.warning(f"Received message from topic {message.topic} without telemetry")
+            return
+
         detections = []
-        for obj in notification.objects:
+        for obj in notification.telemetry.objects:
             detections.append(Detection(
                 Rectangle.from_xywh(obj.box_x, obj.box_y, obj.box_w, obj.box_h),
                 Point(obj.position_x, obj.position_y),
                 obj.confidence,
             ))
-        logging.debug(f"Received message from  topic {message.topic} with ts: {notification.timestamp}")
-        self._preprocessor.preprocess_detection(detections, "0", notification.timestamp)
+        ts = notification.telemetry.timestamp
+        logging.debug(f"Received message from  topic {message.topic} with ts: {ts}")
+        self._preprocessor.preprocess_detection(detections, "0", ts)
 
 
 def preprocessing_worker():

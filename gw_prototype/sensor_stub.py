@@ -2,7 +2,7 @@ import time
 import logging
 from random import randrange
 
-from proto.sensor_payload_pb2 import TelemetryNotification
+from proto.sensor_payload_pb2 import TelemetryNotification, Notification
 from mqtt_client import MQTTClient
 from config import get_config
 from logconfig import configure_logging
@@ -11,11 +11,11 @@ from logconfig import configure_logging
 configure_logging()
 
 def get_notification():
-    notification = TelemetryNotification()
+    telemetry_notification = TelemetryNotification()
 
-    notification.timestamp = int(time.time())
+    telemetry_notification.timestamp = int(time.time())
 
-    obj = notification.objects.add()
+    obj = telemetry_notification.objects.add()
     obj.confidence = 0.9
     obj.position_x = 480 + randrange(0, 5)
     obj.position_y = 200 + randrange(0, 5)
@@ -24,7 +24,7 @@ def get_notification():
     obj.box_w = 20
     obj.box_h = 20
 
-    obj = notification.objects.add()
+    obj = telemetry_notification.objects.add()
     obj.confidence = 0.8
     obj.position_x = 190 + randrange(0, 5)
     obj.position_y = 260 + randrange(0, 5)
@@ -33,7 +33,7 @@ def get_notification():
     obj.box_w = 20
     obj.box_h = 20
 
-    obj = notification.objects.add()
+    obj = telemetry_notification.objects.add()
     obj.confidence = 0.8
     obj.position_x = 220 + randrange(0, 5)
     obj.position_y = 260 + randrange(0, 5)
@@ -42,15 +42,9 @@ def get_notification():
     obj.box_w = 20
     obj.box_h = 20
 
+    notification = Notification(telemetry=telemetry_notification)
     return notification
 
-
-def telemetry_notification_to_str(notification: TelemetryNotification) -> str:
-    output = ""
-    output += f"ts: {notification.timestamp}. "
-    for obj in notification.objects:
-        output += f"conf: {obj.confidence}, position: ({obj.position_x}, {obj.position_y}), box: ({obj.box_x}, {obj.box_y}, {obj.box_w}, {obj.box_h}). "
-    return output
 
 if __name__ == "__main__":
     config = get_config()
