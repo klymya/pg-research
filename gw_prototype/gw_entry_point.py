@@ -3,7 +3,7 @@ import time
 from multiprocessing import Process
 import logging
 
-from proto.sensor_payload_pb2 import TelemetryNotification, AoICountNotification, XYNotification, Notification
+from proto.sensor_payload_pb2 import AoICountNotification, XYNotification, Notification
 from mqtt_client import MQTTClient
 from preprocessor import Preprocessor
 from preprocessing_utils import Detection, Rectangle, Point

@@ -21,7 +21,7 @@ Also, the prototype has sensor and cloud stubs.
 
 ## How to launch
 
-1. Mosquitto:
+1. Mosquitto (v. 2.0.20):
 ```bash
 cd mosquitto
 docker compose up
@@ -40,4 +40,29 @@ python gw_entry_point.py
 4. Sensor stub
 ```bash
 python sensor_stub.py
+```
+
+## Raspbrry Pi setup
+1. Copy source code to device (updat the destination before)
+```bash
+bash sync.sh
+```
+Next steps on the device
+
+2. Install pip and virtualenv if needed
+```bash
+sudo apt install -y python3-pip python3-virtualenv
+```
+
+3. Setup GW python env
+```bash
+cd gw && python3 -m virtualenv .venv
+source .venv/bin/activate
+pip install -r reqirements.txt 
+```
+
+4. Install and setup mosquitto (https://randomnerdtutorials.com/how-to-install-mosquitto-broker-on-raspberry-pi/)
+```bash
+cd mosquitto
+bash setup_mosquitto.sh
 ```
