@@ -1,0 +1,22 @@
+PREPROCESSING PERFORMANCE TEST
+Detections:    1. Elapsed time: 0.004 sec
+Detections:   10. Elapsed time: 0.041 sec
+Detections:  100. Elapsed time: 0.418 sec
+====================================
+XY PERFORMANCE TEST
+Detections:    1. Elapsed time: 0.000050 sec
+Detections:   10. Elapsed time: 0.000074 sec
+Detections:  100. Elapsed time: 0.000386 sec
+Detections: 1000. Elapsed time: 0.004062 sec
+====================================
+COUNT ONE AOI PERFORMANCE TEST
+Detections:    1. Elapsed time: 0.000055 sec
+Detections:   10. Elapsed time: 0.000159 sec
+Detections:  100. Elapsed time: 0.000987 sec
+Detections: 1000. Elapsed time: 0.010714 sec
+====================================
+COUNT MANY AOI PERFORMANCE TEST
+AoIs:    1. Elapsed time: 0.000131 sec
+AoIs:   10. Elapsed time: 0.001280 sec
+AoIs:  100. Elapsed time: 0.012426 sec
+====================================

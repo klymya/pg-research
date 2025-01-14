@@ -7,7 +7,10 @@ DB_NAME = "gw.db"
 
 
 class XYStorage:
-    def __init__(self, db_name: str = DB_NAME) -> None:
+    def __init__(self, db_name: str | None = None) -> None:
+        if db_name is None:
+            db_name = DB_NAME
+
         self.conn = sqlite3.connect(db_name, check_same_thread=False)
         self._create_table()
 

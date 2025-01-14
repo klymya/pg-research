@@ -10,8 +10,8 @@ DEFAULT_SENSOR_REPORTING_PERIOD_SEC = 5
 
 
 class Aggregator:
-    def __init__(self, sensors_serials: list[str]) -> None:
-        self._storage = XYStorage()
+    def __init__(self, sensors_serials: list[str], db_name: str | None = None) -> None:
+        self._storage = XYStorage(db_name)
         self._sensor_serials = sensors_serials
         self._aois = {}
 
@@ -91,8 +91,9 @@ class Aggregator:
         data_points = self._storage.query_data_points(serial_num, start_ts, end_ts)
         return [(ts, Point(x, y)) for ts, _, x, y in data_points]
 
-    def check_aois(self) -> tuple[int, list[tuple[str, str, int]]]:
-        ts = int(time.time())
+    def check_aois(self, ts: int | None = None) -> tuple[int, list[tuple[str, str, int]]]:
+        if ts is None:
+            ts = int(time.time())
 
         counts = []
         aois = self._get_aoi_by_report_period(ts)
@@ -103,8 +104,9 @@ class Aggregator:
 
         return ts, counts
 
-    def get_xys(self) -> tuple[int, list[tuple[str, int, int]]]:
-        ts = int(time.time())
+    def get_xys(self, ts: int | None = None) -> tuple[int, list[tuple[str, int, int]]]:
+        if ts is None:
+            ts = int(time.time())
 
         xys = []
         for serial_num in self._sensor_serials:

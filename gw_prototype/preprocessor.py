@@ -8,8 +8,8 @@ from xy_storage import XYStorage
 
 
 class Preprocessor:
-    def __init__(self, data_pth: str) -> None:
-        self._xy_storage = XYStorage()
+    def __init__(self, data_pth: str, db_name: str | None = None) -> None:
+        self._xy_storage = XYStorage(db_name)
 
         self._camera_configs: dict[CameraConfiguration] = {}
         self._detection_areas: dict[DetectionArea] = {}
