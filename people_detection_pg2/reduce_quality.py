@@ -6,8 +6,8 @@ import shutil
 from tqdm.contrib.concurrent import process_map
 
 
-BASE_DATASET_PTH = "/home/klymy/data/people_detection/filtered_v3_margin_15_reduced_quality"
-BASE_PTH = "/home/klymy/data/people_detection/filtered_v3_margin_15_reduced_quality/images"
+BASE_DATASET_PTH = "/home/klymy/data/people_detection/filtered_v3_margin_15_median_blur"
+BASE_PTH = "/home/klymy/data/people_detection/filtered_v3_margin_15_median_blur/images"
 
 shutil.copytree(
     "/home/klymy/data/people_detection/filtered_v3_margin_15",
@@ -32,7 +32,8 @@ print(len(img_paths))
 
 
 def blur(img, kernel_size=(15, 15)):
-    return cv2.GaussianBlur(img, kernel_size, 0)
+    # return cv2.GaussianBlur(img, kernel_size, 0)
+    return cv2.medianBlur(img, kernel_size[0])
 
 def adjast_contrast_brightness(img, alpha=1, beta=0):
     return cv2.convertScaleAbs(img, alpha=alpha, beta=beta)
@@ -57,7 +58,8 @@ def processor(img_pth):
    beta = np.random.randint(5, 15, 1)[0]
    gamma = 1.5 + np.random.randint(-5, 5, 1)[0] / 10
 
-   processed_img = adjast_gamma(adjast_contrast_brightness(blur(img, (kernel_size, kernel_size)), alpha=alpha, beta=beta), gamma=gamma)
+   processed_img = adjast_gamma(
+       adjast_contrast_brightness(blur(img, (kernel_size, kernel_size)), alpha=alpha, beta=beta), gamma=gamma)
 
    cv2.imwrite(img_pth, processed_img)
 
