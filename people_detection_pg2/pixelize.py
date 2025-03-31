@@ -8,8 +8,8 @@ from tqdm.contrib.concurrent import process_map
 
 
 BASE_DATASET_PTHS = [
-    "/home/klymy/data/people_detection/filtered_v3_margin_15_pixilized",
-    "/home/klymy/data/people_detection/filtered_v3_margin_15_pixilized_sharped",
+    "/home/klymy/data/people_detection/filtered_v3_margin_15_sharped",
+    "/home/klymy/data/people_detection/filtered_v3_margin_15_pixilized_1_25_sharped",
 ]
 
 
@@ -37,7 +37,7 @@ def sharpen(img: np.ndarray) -> np.ndarray:
     return sharpened_image
 
 
-def processor(img_pth, do_sharpening: bool = False):
+def processor(img_pth, do_sharpening: bool = False, do_pixelize: bool = False):
     img = cv2.imread(img_pth)
 
     w = img.shape[1]
@@ -47,18 +47,20 @@ def processor(img_pth, do_sharpening: bool = False):
     if do_sharpening:
         img = sharpen(img)
 
-    processed_img = pixelize(img, scale_factor=1.5)
+    if do_pixelize:
+        img = pixelize(img, scale_factor=1.25)
 
-    cv2.imwrite(img_pth, processed_img)
+    cv2.imwrite(img_pth, img)
 
 
 processor_with_sharpening = partial(processor, do_sharpening=True)
+processor_with_pixelizing = partial(processor, do_sharpening=True, do_pixelize=True)
 
 
 for dataset_pth, img_processor, desc in zip(
     BASE_DATASET_PTHS,
-    (processor, processor_with_sharpening),
-    ("Pixelizing images", "Pixelizing and sharpening images"),
+    (processor_with_sharpening, processor_with_pixelizing),
+    ("sharpening images", "Pixelizing and sharpening images"),
 ):
 
     base_pth = os.path.join(dataset_pth, "images")
