@@ -1,5 +1,8 @@
 import os
+import glob
+from pathlib import Path
 
+import cv2
 import numpy as np
 import torch
 import torch.nn as nn
@@ -43,9 +46,10 @@ def model2onnx(file_path: str, model: nn.Module, y: np.ndarray, simplify=False):
 
     torch.onnx.export(
         model,
-        [torch.Tensor(y)],
+        torch.Tensor(y),
         file_path,
-        input_names=["input_0"]
+        input_names=["input_0"],
+        output_names=["output_0"],
     )
 
     if simplify:
@@ -57,17 +61,51 @@ def model2onnx(file_path: str, model: nn.Module, y: np.ndarray, simplify=False):
         onnx.save(model_onnx, file_path)
 
 
-def model2tflite(folder_path: str, model: nn.Module, y: np.ndarray):
+def imgs2calib_data_pth(data_pth: str, calib_pth: str, imgs: np.ndarray, max_ncalib_imgs: int = 100) -> str:
+    img_pths = glob.glob(os.path.join(data_pth, "images", "val", "*.jpg"))
+
+    imgs = []
+    n = 0
+    for img_pth in img_pths:
+        img = cv2.imread(img_pth)
+        img = cv2.resize(img, (320, 240), interpolation=cv2.INTER_LINEAR)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        imgs.append(img)
+        n += 1
+        if n >= max_ncalib_imgs:
+            break
+    imgs = np.stack(imgs, axis=0).astype(np.float32)
+
+    np.save(calib_pth, imgs)
+
+
+def model2tflite(folder_path: str, model: nn.Module, y: np.ndarray, data_pth: str, max_ncalib_imgs: int = 100):
     import onnx2tf
 
+    f = Path(folder_path)
     os.makedirs(folder_path, exist_ok=True)
 
-    onnx_model_path = os.path.join(folder_path, "input_adapter.onnx")
+    onnx_model_path = str(f / "input_adapter.onnx")
     model2onnx(onnx_model_path, model, y, simplify=True)
 
+    calib_data_pth = f / "calib_data.npy"
+    imgs2calib_data_pth(data_pth, str(calib_data_pth), y, max_ncalib_imgs)
     onnx2tf.convert(
         input_onnx_file_path=onnx_model_path,
-        output_folder_path=str(folder_path),
+        output_folder_path=str(f),
         not_use_onnxsim=True,
         verbosity=True,
+        output_integer_quantized_tflite=True,
+        quant_type="per-tensor",  # "per-tensor" (faster) or "per-channel" (slower but more accurate)
+        custom_input_op_name_np_data_path=[["input_0", str(calib_data_pth), [[[[0, 0, 0]]]], [[[[255, 255, 255]]]]]],
+        input_output_quant_dtype="uint8",
+        disable_group_convolution=True,  # for end-to-end model compatibility
+        enable_batchmatmul_unfold=True,  # for end-to-end model compatibility
     )
+
+    # Remove/rename TFLite models
+    calib_data_pth.unlink(missing_ok=True)
+    for file in f.rglob("*_dynamic_range_quant.tflite"):
+        file.rename(file.with_name(file.stem.replace("_dynamic_range_quant", "_int8") + file.suffix))
+    for file in f.rglob("*_integer_quant_with_int16_act.tflite"):
+        file.unlink()  # delete extra fp16 activation TFLite files

@@ -105,5 +105,5 @@ def predict_tflite(model, args, batch):
         else:
             dets[:, 2:4] += dets[:, :2]
         preds.append(torch.from_numpy(dets).to(args["device"][0]))
-    
+
     return preds
