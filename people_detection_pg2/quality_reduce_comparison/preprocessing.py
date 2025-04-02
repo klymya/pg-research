@@ -19,7 +19,7 @@ def torch2np(x):
 class InputAdapter(nn.Module):
     def __init__(self):
         super(InputAdapter, self).__init__()
-
+        
         # 1x1 Conv layer to apply fixed grayscale conversion
         self.rgb2gray = nn.Conv2d(in_channels=3, out_channels=1, kernel_size=1, stride=1, padding=0, bias=False)
         gray_weights = torch.tensor([[[[0.299]], [[0.587]], [[0.114]]]])  # Shape: (1, 3, 1, 1)
@@ -34,10 +34,15 @@ class InputAdapter(nn.Module):
         )  # Shape: (1, 1, 3, 3)
         self.gaussian_blur.weight = nn.Parameter(gaussian_weights, requires_grad=False)
 
+        # 1x1 Conv layer to duplicate grayscale into 3-channel RGB
+        self.gray2rgb = nn.Conv2d(in_channels=1, out_channels=3, kernel_size=1, stride=1, padding=0, bias=False)
+        duplicate_weights = torch.tensor([[[[1.0]]], [[[1.0]]], [[[1.0]]]])  # Shape: (3, 1, 1, 1)
+        self.gray2rgb.weight = nn.Parameter(duplicate_weights, requires_grad=False)
+
     def forward(self, x):
         x = self.rgb2gray(x)  # Convert RGB to grayscale
         x = self.gaussian_blur(x)  # Apply Gaussian blur
-        x = x.repeat(1, 3, 1, 1)  # Duplicate the grayscale channel to create an RGB image
+        x = self.gray2rgb(x)  # Convert grayscale to 3-channel RGB
         return x
 
 
