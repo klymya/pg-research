@@ -1,0 +1,6 @@
+path: /home/klymy/projects/researches/people_detection_pg2/quality_reduce_comparison/cam4_poc_15_nn
+train: images/train
+val: images/val
+kpt_shape: [1, 2]
+names:
+  0: person
