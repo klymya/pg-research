@@ -17,7 +17,6 @@ def run_cmd(command: list) -> None:
     except subprocess.CalledProcessError as e:
         print(f"Error running command: {' '.join(command)}")
         print(e.stderr)
-        sys.exit(e.returncode)
 
 
 def run_yolo(dataset, cfg, weights, exp_name, device, batch):
