@@ -101,3 +101,4 @@ gw_prototype/mosquitto/log/*
 gw_cpp_version/*.db
 
 *.cache
+pg1_yolo_evaluator/results*
