@@ -46,8 +46,8 @@ class TFLiteInferenceWithInputAdapter(TFLiteInferer):
             im = np.zeros(self.input_shape, dtype=np.uint8)
 
             original_h, origial_w, _ = img.shape
-            ratio = self.img_shape[0] / origial_w
-            resized_h = int(original_h * ratio)
+            self.ratio = self.img_shape[0] / origial_w
+            resized_h = int(original_h * self.ratio)
 
             resized_img = cv2.resize(img, (self.img_shape[0], resized_h))
 

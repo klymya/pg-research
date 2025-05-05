@@ -33,6 +33,7 @@ class TFLiteInferer:
 
         self.img_shape = (imgsz, imgsz)
         self.input_shape = (1, imgsz, imgsz, 3)
+        self.ratio = 1
 
         self.iou_th = iou_th
         self.conf_th = conf_th
@@ -43,8 +44,8 @@ class TFLiteInferer:
         im = np.zeros(self.input_shape, dtype=np.uint8)
 
         original_h, origial_w, _ = img.shape
-        ratio = self.img_shape[0] / origial_w
-        resized_h = int(original_h * ratio)
+        self.ratio = self.img_shape[0] / origial_w
+        resized_h = int(original_h * self.ratio)
 
         resized_img = cv2.resize(img, (self.img_shape[0], resized_h))
         im[0, :resized_h, :self.img_shape[0], :] = resized_img[:, :, :]
@@ -95,15 +96,15 @@ class TFLiteInferer:
             (minScore, maxScore, minClassLoc, (x, maxClassIndex)) = cv2.minMaxLoc(classes_scores)
             if maxScore >= self.conf_th:
                 box = [
-                    head_output[0][i][0], # - (0.5 * outputs[0][i][2]),
-                    head_output[0][i][1], # - (0.5 * outputs[0][i][3]),
-                    head_output[0][i][2],
-                    head_output[0][i][3],
+                    head_output[0][i][0] / self.ratio, # - (0.5 * outputs[0][i][2]),
+                    head_output[0][i][1] / self.ratio, # - (0.5 * outputs[0][i][3]),
+                    head_output[0][i][2] / self.ratio,
+                    head_output[0][i][3] / self.ratio,
                 ]
                 boxes.append(box)
                 scores.append(maxScore)
                 class_ids.append(maxClassIndex)
-                kps.append(head_output[0][i][5:7])
+                kps.append([head_output[0][i][5] / self.ratio, head_output[0][i][6] / self.ratio])
 
         # Apply NMS (Non-maximum suppression)
         result_boxes = cv2.dnn.NMSBoxes(boxes, scores, self.conf_th, self.iou_th, 0.5)
