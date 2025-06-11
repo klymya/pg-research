@@ -19,16 +19,19 @@ def run_cmd(command: list) -> None:
         print(e.stderr)
 
 
-def run_yolo(dataset, cfg, weights, exp_name, device, batch):
+def run_yolo(dataset, cfg, weights, exp_name, device, batch, yolo_kwargs):
     command = [
         "python", "train_yolo.py",
         "--dataset", dataset,
-        "--cfg", cfg,
         "--weights", weights,
         "--exp_name", exp_name,
         "--device", ' '.join([str(d) for d in device]),
         "--batch", str(batch),
+        "--kwargs", yolo_kwargs,
     ]
+
+    if cfg != "":
+        command += ["--cfg", cfg]
 
     run_cmd(command)
 
@@ -59,10 +62,11 @@ def main():
     parser = argparse.ArgumentParser(description="Run vela commands for best_saved_model and head_saved_model.")
     parser.add_argument("--dataset", type=str, default="baseline")
     parser.add_argument("--exp_name", type=str, default="baseline")
-    parser.add_argument("--cfg", type=str, default="yolov8-pose-xs.yaml")
+    parser.add_argument("--cfg", type=str, default="")
     parser.add_argument("--weights", type=str, default="yolov8s-pose.pt")
     parser.add_argument("--device", nargs="+", type=int, default=[0])
     parser.add_argument("--batch", type=int, default=32)
+    parser.add_argument("--yolo_kwargs", type=str, default="")
 
     parser.add_argument("--max_ncalib_imgs", type=int, default="100", help="calibration image set size")
 
@@ -74,7 +78,8 @@ def main():
         args.weights,
         args.exp_name,
         args.device,
-        args.batch
+        args.batch,
+        args.yolo_kwargs,
     )
 
     run_export(

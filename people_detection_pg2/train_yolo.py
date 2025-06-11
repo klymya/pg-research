@@ -7,13 +7,19 @@ from ultralytics import YOLO
 parser = argparse.ArgumentParser()
 parser.add_argument("--dataset", type=str, default="baseline")
 parser.add_argument("--exp_name", type=str, default="baseline")
-parser.add_argument("--cfg", type=str, default="yolov8-pose-xs.yaml")
+parser.add_argument("--cfg", type=str, default="")
 parser.add_argument("--weights", type=str, default="yolov8s-pose.pt")
 parser.add_argument("--device", nargs="+", type=int, default=[0])
 parser.add_argument("--batch", type=int, default=32)
+parser.add_argument("--kwargs", type=str, default="")
 args = parser.parse_args()
 
-model = YOLO(args.cfg).load(args.weights)
+if args.cfg == "":
+    model = YOLO(args.weights)
+else:
+    model = YOLO(args.cfg).load(args.weights)
+
+kwargs = eval(args.kwargs) if args.kwargs else {}
 
 # Train the model
 results = model.train(
@@ -26,4 +32,5 @@ results = model.train(
     project=os.path.join(os.getcwd(), "results"),
     name=args.exp_name,
     exist_ok=True,
+    **kwargs,
 )
