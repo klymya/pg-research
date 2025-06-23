@@ -102,3 +102,5 @@ gw_cpp_version/*.db
 
 *.cache
 pg1_yolo_evaluator/results*
+
+people_detection_pg2/cam4_revB/val

@@ -2,7 +2,13 @@ import numpy as np
 from geometry import Point, Rectangle, is_point_inside_rectangle, calculate_iou
 from fisheye_camera import cm2pixel, CameraCalibrationParameters
 
-MIN_VISIBLE_HEIGHT_CM = 100
+# Parameters for determining the margin we take from the FOV boundary
+# for computing the detection area. For a narrow FOV we take a smaller
+# margin, to allow a reasonable detection area size.
+MIN_VISIBLE_HEIGHT_FOR_DA_NARROW_VFOV = 30 # (cm)
+MIN_VISIBLE_HEIGHT_FOR_DA_WIDE_VFOV = 100 # (cm)
+VFOV_WIDE_THRESH = 100 # (deg). FOV is considered 'narrow' if lower than this value.
+
 MAX_DETECTION_AREA_CM2 = 500000
 DA_INTERSECTION_TH = 0
 
@@ -33,8 +39,11 @@ class DetectionArea:
 
         aspect_ratio = fov_x_at_focal_len / fov_y_at_focal_len
 
-        width = round((self.m_cam.height_cm - MIN_VISIBLE_HEIGHT_CM) * fov_x_at_focal_len)
-        height = round((self.m_cam.height_cm - MIN_VISIBLE_HEIGHT_CM) * fov_y_at_focal_len)
+        min_visible_height_cm = MIN_VISIBLE_HEIGHT_FOR_DA_NARROW_VFOV \
+            if self.m_cam.fov_angle_y < VFOV_WIDE_THRESH else MIN_VISIBLE_HEIGHT_FOR_DA_WIDE_VFOV
+
+        width = round((self.m_cam.height_cm - min_visible_height_cm) * fov_x_at_focal_len)
+        height = round((self.m_cam.height_cm - min_visible_height_cm) * fov_y_at_focal_len)
 
         if width * height > MAX_DETECTION_AREA_CM2 and use_da_limit:
             width = round(np.sqrt(MAX_DETECTION_AREA_CM2 * aspect_ratio))
