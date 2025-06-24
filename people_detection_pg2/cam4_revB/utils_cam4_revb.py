@@ -38,6 +38,12 @@ def clahe(img):
     return enhanced_image
 
 
+def blur(img):
+    # Apply Gaussian blur to reduce noise
+    blurred_image = cv2.GaussianBlur(img, (3, 3), 0)
+    return blurred_image
+
+
 def cp_dataset(base_pth: str, src: str, dst: str):
     """
     Copy dataset from src to dst.
@@ -55,3 +61,19 @@ def cp_dataset(base_pth: str, src: str, dst: str):
     # create project file
     create_project_file(os.path.join(dst_pth, "project.yaml"), dst_pth, {0: "person"})
     create_project_file(os.path.join(dst_pth, "project_holdout.yaml"), dst_pth, {0: "person"}, "images/holdout")
+
+
+def get_data(name: str) -> str:
+    name = name.replace("4.2_H_cam_", "").replace(".tif", "")
+    parts = name.split("_")
+    n = 2
+    if not parts[n].isnumeric():
+        n += 1
+    return "_".join(parts[:n])
+
+
+def is_in_subset(pth: str, subset_names: list[str]) -> bool:
+    for i in subset_names:
+        if f"{i}_" in pth:
+            return True
+    return False
