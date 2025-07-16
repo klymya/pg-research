@@ -12,10 +12,8 @@ add_executable(clahe_test
     img_320.cc
     clahe.c
     rgb2lab.c
-    rgb2lab.c
 )
 
 target_include_directories(clahe_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_compile_definitions(clahe_test PRIVATE BYTE_IMAGE)
 
 target_link_libraries(clahe_test m)

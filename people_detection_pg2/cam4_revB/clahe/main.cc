@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include <fstream>
 #include <sstream>
-#include <algorithm>
 
 #include "img_320.cc"
 #include "rgb2lab.h"
-#include "clahe.c"
+#include "clahe.h"
 
 const int IMG_WIDTH = 320;
 const int IMG_HEIGHT = 240;
@@ -66,39 +65,60 @@ void saveDataAsDecimalTxt(const char* filename, const double* data, size_t lengt
     ofs << std::endl;
 }
 
-void apply_clahe(const uint8_t *input_buffer, uint8_t *output_buffer, const size_t &width, const size_t &height) {
+double clamp(double d, double min, double max) {
+    const double t = d < min ? min : d;
+    return t > max ? max : t;
+}
+
+void apply_clahe(const uint8_t *input_buffer, uint8_t *output_buffer,
+                 size_t width, size_t height) {
     size_t channel_buffer_size = width * height;
-    uint8_t *l_channel = new uint8_t[channel_buffer_size];
-    double *a_channel = new double[channel_buffer_size];
-    double *b_channel = new double[channel_buffer_size];
 
-    DoubleTriplet rgb_pixel, lab_pixel;
-    for (int i = 0; i < channel_buffer_size; i++) {
-        rgb_pixel = {{
-            static_cast<double>(input_buffer[i * 3]) / 255.0,
-            static_cast<double>(input_buffer[i * 3 + 1]) / 255.0,
-            static_cast<double>(input_buffer[i * 3 + 2]) / 255.0
-        }};
-        lab_pixel = labFromRgb(rgb_pixel);
+    uint8_t *l_channel = (uint8_t *)malloc(channel_buffer_size);
+    double *a_channel = (double *)malloc(channel_buffer_size * sizeof(double));
+    double *b_channel = (double *)malloc(channel_buffer_size * sizeof(double));
 
-        l_channel[i] = static_cast<uint8_t>(lab_pixel.L * 255.0 / 100.0);
+    if (!l_channel || !a_channel || !b_channel) {
+        // Handle memory allocation failure
+        free(l_channel);
+        free(a_channel);
+        free(b_channel);
+        return;
+    }
+
+    for (size_t i = 0; i < channel_buffer_size; i++) {
+        DoubleTriplet rgb_pixel = {
+            input_buffer[i * 3] / 255.0,
+            input_buffer[i * 3 + 1] / 255.0,
+            input_buffer[i * 3 + 2] / 255.0
+        };
+
+        DoubleTriplet lab_pixel = labFromRgb(rgb_pixel);
+
+        l_channel[i] = (uint8_t)(lab_pixel.L * 255.0 / 100.0);
         a_channel[i] = lab_pixel.A;
         b_channel[i] = lab_pixel.B;
     }
 
-    int status = CLAHE(
-        l_channel, width, height,
-        0, 255, 8, 8, 256, 3.0f
-    );
+    int status = CLAHE(l_channel, width, height, 0, 255, 8, 8, 256, 3.0f);
 
-    for (int i = 0; i < channel_buffer_size; i++) {
-        lab_pixel = {{static_cast<double>(l_channel[i]) / 255.0 * 100.0, a_channel[i], b_channel[i]}};
-        rgb_pixel = rgbFromLab(lab_pixel);
+    for (size_t i = 0; i < channel_buffer_size; i++) {
+        DoubleTriplet lab_pixel = {
+            l_channel[i] * 100.0 / 255.0,
+            a_channel[i],
+            b_channel[i]
+        };
 
-        output_buffer[i * 3] = static_cast<uint8_t>(std::clamp(rgb_pixel.r * 255.0, 0.0, 255.0));
-        output_buffer[i * 3 + 1] = static_cast<uint8_t>(std::clamp(rgb_pixel.g * 255.0, 0.0, 255.0));
-        output_buffer[i * 3 + 2] = static_cast<uint8_t>(std::clamp(rgb_pixel.b * 255.0, 0.0, 255.0));
+        DoubleTriplet rgb_pixel = rgbFromLab(lab_pixel);
+
+        output_buffer[i * 3]     = (uint8_t)(clamp(rgb_pixel.r * 255.0, 0.0, 255.0));
+        output_buffer[i * 3 + 1] = (uint8_t)(clamp(rgb_pixel.g * 255.0, 0.0, 255.0));
+        output_buffer[i * 3 + 2] = (uint8_t)(clamp(rgb_pixel.b * 255.0, 0.0, 255.0));
     }
+
+    free(l_channel);
+    free(a_channel);
+    free(b_channel);
 }
 
 void process_lenna() {
@@ -210,9 +230,9 @@ void process_lenna_rgb_full() {
         lab_pixel = {{static_cast<double>(l_channel[i]) / 255.0 * 100.0, a_channel[i], b_channel[i]}};
         rgb_pixel = rgbFromLab(lab_pixel);
 
-        img[i * 3] = static_cast<unsigned char>(std::clamp(rgb_pixel.r * 255.0, 0.0, 255.0));
-        img[i * 3 + 1] = static_cast<unsigned char>(std::clamp(rgb_pixel.g * 255.0, 0.0, 255.0));
-        img[i * 3 + 2] = static_cast<unsigned char>(std::clamp(rgb_pixel.b * 255.0, 0.0, 255.0));
+        img[i * 3] = static_cast<unsigned char>(clamp(rgb_pixel.r * 255.0, 0.0, 255.0));
+        img[i * 3 + 1] = static_cast<unsigned char>(clamp(rgb_pixel.g * 255.0, 0.0, 255.0));
+        img[i * 3 + 2] = static_cast<unsigned char>(clamp(rgb_pixel.b * 255.0, 0.0, 255.0));
 
         img_r_channel[i] = rgb_pixel.r;
         img_g_channel[i] = rgb_pixel.g;

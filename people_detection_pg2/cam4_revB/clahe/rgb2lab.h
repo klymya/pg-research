@@ -10,6 +10,9 @@
 // Use, modification and distribution are permitted subject to the
 // "BSD-2-Clause"-type license stated in the accompanying file LICENSE.txt
 
+#ifndef RGB2LAB_H
+#define RGB2LAB_H
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -31,4 +34,6 @@ DoubleTriplet rgbFromLch(DoubleTriplet lch);
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif
