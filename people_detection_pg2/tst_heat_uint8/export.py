@@ -25,6 +25,23 @@ def parser_arguments():
     return parser.parse_args()
 
 
+def get_broadcast_shape(input_shape):
+    input_shape = np.array(input_shape)
+    
+    # Remove batch dimension (assumed to be first)
+    # shape_wo_batch = input_shape[1:]
+    shape_wo_batch = input_shape
+    
+    # For shape length > 1, preserve second dimension (channel), rest -> 1
+    if len(shape_wo_batch) > 1:
+        output_shape = [1 if i != 1 else dim for i, dim in enumerate(shape_wo_batch)]
+    else:
+        # For shape like [n, x], return [1]
+        output_shape = [1]
+
+    return output_shape
+
+
 def export_head(yolo_pth, output_pth, imgsz):
     os.makedirs(output_pth, exist_ok=True)
 
@@ -53,22 +70,6 @@ def export_head_separated(yolo_pth, output_pth, imgsz):
     detection_head2tflite_separated(output_pth, head, y)
 
 
-def get_broadcast_shape(input_shape):
-    input_shape = np.array(input_shape)
-    
-    # Remove batch dimension (assumed to be first)
-    # shape_wo_batch = input_shape[1:]
-    shape_wo_batch = input_shape
-    
-    # For shape length > 1, preserve second dimension (channel), rest -> 1
-    if len(shape_wo_batch) > 1:
-        output_shape = [1 if i != 1 else dim for i, dim in enumerate(shape_wo_batch)]
-    else:
-        # For shape like [n, x], return [1]
-        output_shape = [1]
-
-    return output_shape
-
 def export_head_uint8(yolo_pth, output_pth, imgsz, images, quantized_output=False):
     os.makedirs(output_pth, exist_ok=True)
 
@@ -86,10 +87,15 @@ def export_head_uint8(yolo_pth, output_pth, imgsz, images, quantized_output=Fals
         for idx, i in enumerate(output):
             np_data_examples[idx].append(i)
 
+    if quantized_output:
+        suffix = "_quantized"
+    else:
+        suffix = ""
+
     np_data = []
     for idx, i in enumerate(np_data_examples):
         name = f"input_{idx}"
-        tmp_file = os.path.join(output_pth, f"{name}.npy")
+        tmp_file = os.path.join(output_pth, f"{name}{suffix}.npy")
         data = np.concatenate(i, axis=0).astype(np.float32)
         np.save(str(tmp_file), data)
         if quantized_output:
@@ -142,16 +148,16 @@ if __name__ == '__main__':
 
     imgs = get_images(args.data, args.max_ncalib_imgs)
 
-    QUANTIZE_YOLO_OUTPUTS = False
+    QUANTIZE_YOLO_OUTPUTS = True
 
     base_pth = os.path.dirname(args.weights)
     tflite_pth = os.path.join(base_pth, "best_saved_model/best_full_integer_quant.tflite")
     head_pth = os.path.join(base_pth, "head_saved_model")
     head_separated_pth = os.path.join(base_pth, "head_sep_saved_model")
-    if QUANTIZE_YOLO_OUTPUTS:
-        head_uint8_pth = os.path.join(base_pth, "head_uint8_quant_input_norm_saved_model")
-    else:
-        head_uint8_pth = os.path.join(base_pth, "head_uint8_saved_model")
+    head_uint8_norm_pth = os.path.join(base_pth, "head_uint8_quant_input_norm_saved_model")
+    head_uint8_pth = os.path.join(base_pth, "head_uint8_saved_model")
+
     export_head(tflite_pth, head_pth, args.imgsz)
     export_head_separated(tflite_pth, head_separated_pth, args.imgsz)
-    export_head_uint8(tflite_pth, head_uint8_pth, args.imgsz, imgs, QUANTIZE_YOLO_OUTPUTS)
+    export_head_uint8(tflite_pth, head_uint8_norm_pth, args.imgsz, imgs, True)
+    export_head_uint8(tflite_pth, head_uint8_pth, args.imgsz, imgs, False)
