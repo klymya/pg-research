@@ -70,6 +70,13 @@ def export_head_separated(yolo_pth, output_pth, imgsz):
     detection_head2tflite_separated(output_pth, head, y)
 
 
+def norm_data(x: np.ndarray, limit_min: float, limit_max: float) -> np.ndarray:
+    """
+    Normalize data to the range [0, 255].
+    """
+    return np.clip((x - limit_min) / (limit_max - limit_min), 0, 1) * 255
+
+
 def export_head_uint8(yolo_pth, output_pth, imgsz, images, quantized_output=False):
     os.makedirs(output_pth, exist_ok=True)
 
@@ -96,21 +103,36 @@ def export_head_uint8(yolo_pth, output_pth, imgsz, images, quantized_output=Fals
     for idx, i in enumerate(np_data_examples):
         name = f"input_{idx}"
         tmp_file = os.path.join(output_pth, f"{name}{suffix}.npy")
+        tmp_norm_file = os.path.join(output_pth, f"{name}_norm{suffix}.npy")
+        mean_file = os.path.join(output_pth, f"{name}_mean{suffix}.npy")
+        std_file = os.path.join(output_pth, f"{name}_std{suffix}.npy")
         data = np.concatenate(i, axis=0).astype(np.float32)
+
+        val_min = data.min(axis=(0, 1))
+        val_max = data.max(axis=(0, 1))
+
+        data_norm = norm_data(data, val_min, val_max)
+        mean = 255 * np.abs(val_min) / (val_max - val_min)
+        std = 255 / (val_max - val_min)
+
         np.save(str(tmp_file), data)
+        np.save(str(tmp_norm_file), data_norm)
+        np.save(str(mean_file), mean)
+        np.save(str(std_file), std)
+
         if quantized_output:
             np_data.append([
                 name,
-                tmp_file,
-                np.zeros(get_broadcast_shape(data.shape)),
-                np.ones(get_broadcast_shape(data.shape)) * 255
+                tmp_norm_file,
+                mean[None, None],
+                std[None, None],
             ])
         else:
             np_data.append([
                 name,
-                tmp_file,
-                np.zeros(get_broadcast_shape(data.shape)),
-                np.ones(get_broadcast_shape(data.shape))
+                tmp_norm_file,
+                mean[None, None],
+                std[None, None],
             ])
 
     detection_head2tflite_uint8(output_pth, head, y, np_data)
@@ -148,16 +170,13 @@ if __name__ == '__main__':
 
     imgs = get_images(args.data, args.max_ncalib_imgs)
 
-    QUANTIZE_YOLO_OUTPUTS = True
-
     base_pth = os.path.dirname(args.weights)
     tflite_pth = os.path.join(base_pth, "best_saved_model/best_full_integer_quant.tflite")
     head_pth = os.path.join(base_pth, "head_saved_model")
     head_separated_pth = os.path.join(base_pth, "head_sep_saved_model")
-    head_uint8_norm_pth = os.path.join(base_pth, "head_uint8_quant_input_norm_saved_model")
     head_uint8_pth = os.path.join(base_pth, "head_uint8_saved_model")
 
     export_head(tflite_pth, head_pth, args.imgsz)
     export_head_separated(tflite_pth, head_separated_pth, args.imgsz)
-    export_head_uint8(tflite_pth, head_uint8_norm_pth, args.imgsz, imgs, True)
+    # export_head_uint8(tflite_pth, head_uint8_norm_pth, args.imgsz, imgs, True)
     export_head_uint8(tflite_pth, head_uint8_pth, args.imgsz, imgs, False)
