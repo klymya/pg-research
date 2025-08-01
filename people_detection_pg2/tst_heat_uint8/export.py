@@ -171,12 +171,11 @@ if __name__ == '__main__':
     imgs = get_images(args.data, args.max_ncalib_imgs)
 
     base_pth = os.path.dirname(args.weights)
-    tflite_pth = os.path.join(base_pth, "best_saved_model/best_full_integer_quant.tflite")
-    head_pth = os.path.join(base_pth, "head_saved_model")
-    head_separated_pth = os.path.join(base_pth, "head_sep_saved_model")
-    head_uint8_pth = os.path.join(base_pth, "head_uint8_saved_model")
+    tflite_pth = os.path.join(base_pth, f"best_saved_model/best_full_integer_quant.tflite")
+    head_pth = os.path.join(base_pth, f"head_saved_model_{args.max_ncalib_imgs}")
+    head_separated_pth = os.path.join(base_pth, f"head_sep_saved_model_{args.max_ncalib_imgs}")
+    head_uint8_pth = os.path.join(base_pth, f"head_uint8_saved_model_{args.max_ncalib_imgs}")
 
     export_head(tflite_pth, head_pth, args.imgsz)
     export_head_separated(tflite_pth, head_separated_pth, args.imgsz)
-    # export_head_uint8(tflite_pth, head_uint8_norm_pth, args.imgsz, imgs, True)
     export_head_uint8(tflite_pth, head_uint8_pth, args.imgsz, imgs, False)
