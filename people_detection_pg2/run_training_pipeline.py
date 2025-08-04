@@ -36,15 +36,25 @@ def run_yolo(dataset, cfg, weights, exp_name, device, batch, yolo_kwargs):
     run_cmd(command)
 
 
-def run_export(weights, data, max_ncalib_imgs):
-    command = [
-        "python", "export.py",
-        "--weights", weights,
-        "--data", data,
-        "--max_ncalib_imgs", str(max_ncalib_imgs),
-        "--imgsz", "320",
-        "--quantize"
-    ]
+def run_export(weights, data, max_ncalib_imgs, separated_head=False, output_folder_name="best_saved_model"):
+    if separated_head:
+        command = [
+            "python", "export.py",
+            "--weights", weights,
+            "--data", data,
+            "--max_ncalib_imgs", str(max_ncalib_imgs),
+            "--imgsz", "320",
+            "--quantize"
+        ]
+    else:
+        command = [
+            "python", "export_non_separated.py",
+            "--weights", weights,
+            "--data", data,
+            "--max_ncalib_imgs", str(max_ncalib_imgs),
+            "--imgsz", "320",
+            "--output-folder-name", output_folder_name
+        ]
 
     run_cmd(command)
 
@@ -69,6 +79,11 @@ def main():
     parser.add_argument("--yolo_kwargs", type=str, default="")
 
     parser.add_argument("--max_ncalib_imgs", type=int, default="100", help="calibration image set size")
+    parser.add_argument("--separated_head", action="store_true", help="Use separated head for export")
+    parser.add_argument(
+        "--converted-output-folder-name",
+        type=str, default="best_saved_model", help="Output folder name for converted model"
+    )
 
     args = parser.parse_args()
 
@@ -85,7 +100,9 @@ def main():
     run_export(
         os.path.join(os.getcwd(), "results", args.exp_name, "weights", "best.pt"),
         os.path.join(args.dataset, "project.yaml"),
-        args.max_ncalib_imgs
+        args.max_ncalib_imgs,
+        separated_head=args.separated_head,
+        output_folder_name=args.converted_output_folder_name,
     )
 
     run_vela_command(os.path.join(os.getcwd(), "results", args.exp_name, "weights"))

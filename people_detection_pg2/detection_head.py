@@ -7,6 +7,7 @@ import torch.nn as nn
 import numpy as np
 
 from ultralytics_yolov8.ultralytics.utils.tal import make_anchors
+from ultralytics_yolov8.ultralytics.utils.torch_utils import TORCH_1_13, get_latest_opset
 
 
 class DFL(nn.Module):
@@ -142,14 +143,16 @@ def detection_head2onnx(file_path: str, head: nn.Module, y: list[np.ndarray], si
             [torch.Tensor(i) for i in y],
             file_path,
             input_names=[f"input_{i}" for i in range(7)],
-            output_names=["bboxes", "scores"]
+            output_names=["bboxes", "scores"],
+            opset_version=get_latest_opset(),
         )
     else:
         torch.onnx.export(
             head,
             [torch.Tensor(i) for i in y],
             file_path,
-            input_names=[f"input_{i}" for i in range(7)]
+            input_names=[f"input_{i}" for i in range(7)],
+            opset_version=get_latest_opset(),
         )
 
     if simplify:
@@ -175,25 +178,24 @@ def detection_head2tflite(folder_path: str, head: nn.Module, y: list[np.ndarray]
         verbosity=True,
         keep_ncw_or_nchw_or_ncdhw_input_names=[f"input_{i}" for i in range(7)]
     )
-    
-def get_skip_nchw_input_indexes(inputs: list[np.ndarray]) -> list[int]:
-    """
-    Returns indexes of input arrays that should be skipped from
-    keep_ncw_or_nchw_or_ncdhw_input_names in onnx2tf conversion.
 
-    Parameters:
-    - inputs: List of np.ndarray inputs, each with shape [batch_size, ...]
 
-    Returns:
-    - List[int]: indexes to skip (not suitable for NCHW preservation)
-    """
-    skip_indexes = []
-    for idx, arr in enumerate(inputs):
-        # Remove batch dimension
-        shape = arr.shape[1:]
-        if not (3 <= len(shape) <= 5):
-            skip_indexes.append(idx)
-    return skip_indexes
+def detection_head2tflite_separated(folder_path: str, head: nn.Module, y: list[np.ndarray]):
+    import onnx2tf
+
+    os.makedirs(folder_path, exist_ok=True)
+
+    onnx_model_path = os.path.join(folder_path, "head.onnx")
+    detection_head2onnx(onnx_model_path, head, y, simplify=True, separate_outputs=True)
+
+    onnx2tf.convert(
+        input_onnx_file_path=onnx_model_path,
+        output_folder_path=str(folder_path),
+        not_use_onnxsim=True,
+        verbosity=True,
+        keep_ncw_or_nchw_or_ncdhw_input_names=[f"input_{i}" for i in range(7)]
+    )
+
 
 
 def detection_head2tflite_uint8(folder_path: str, head: nn.Module, y: list[np.ndarray], np_data: list):
