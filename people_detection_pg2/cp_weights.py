@@ -5,17 +5,20 @@ import shutil
 
 PATHS = [
     (
-        "weights/best_saved_model/best_full_integer_quant.tflite",
+        "weights/{folder_name}/best_full_integer_quant.tflite",
         "backbone.tflite",
     ),
     (
-        "weights/best_saved_model/vela_he/best_full_integer_quant_vela.tflite",
+        "weights/{folder_name}/vela_he/best_full_integer_quant_vela.tflite",
         "backbone_H128.tflite",
     ),
     (
-        "weights/best_saved_model/vela_he/best_full_integer_quant_summary_Ethos_U55_High_End_Embedded.csv",
+        "weights/{folder_name}/vela_he/best_full_integer_quant_summary_Ethos_U55_High_End_Embedded.csv",
         "backbone_summary.csv",
     ),
+]
+
+HEAD_PATHS = [
     (
         "weights/head_saved_model/head_float32.tflite",
         "head.tflite",
@@ -45,13 +48,31 @@ if __name__ == "__main__":
         required=True,
         help="Path to the destination directory where the weights will be copied.",
     )
+    parser.add_argument(
+        "--folder-name",
+        type=str,
+        required=False,
+        default="best_saved_model",
+        help="Name of the folder containing the weights to be copied.",
+    )
+    parser.add_argument(
+        "--ignore-head",
+    required=False,
+        default=False,
+        action='store_true',
+        help="If set, the head weights will not be copied.",
+    )
     args = parser.parse_args()
 
     # Create destination directory if it doesn't exist
     os.makedirs(args.dst, exist_ok=True)
 
+    paths = [(i[0].format(folder_name=args.folder_name), i[1]) for i in PATHS]
+    if not args.ignore_head:
+        paths += HEAD_PATHS
+
     # Copy all files from source to destination
-    for base_src, base_dest in PATHS:
+    for base_src, base_dest in paths:
         src_path = os.path.join(args.src, base_src)
         dest_path = os.path.join(args.dst, base_dest)
         if os.path.exists(src_path):
