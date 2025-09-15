@@ -12,7 +12,8 @@ def run_vela_command(weights_path, output_dir):
         "--optimise", "Performance",
         "--config", "vela.ini",
         "--system-config", "Ethos_U55_High_End_Embedded",
-        "--memory-mode", "Shared_Sram"
+        "--memory-mode", "Shared_Sram",
+        "--show-cpu-operations",
     ]
 
     print(f"Running command: {' '.join(command)}")

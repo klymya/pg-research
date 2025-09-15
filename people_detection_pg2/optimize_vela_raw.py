@@ -4,7 +4,7 @@ import os
 from optimize_vela import run_vela_command
 
 
-args = argparse.ArgumentParser(description="Run vela commands for best_saved_model and head_saved_model.")
+args = argparse.ArgumentParser(description="Run vela commands for tflite weights.")
 args.add_argument("--weights-path", type=str, help="Path to the directory containing the weights and models.")
 args.add_argument("--output-dir", type=str, default="", help="Output directory for the optimized models.")
 args = args.parse_args()
