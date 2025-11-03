@@ -104,3 +104,11 @@ gw_cpp_version/*.db
 pg1_yolo_evaluator/results*
 
 people_detection_pg2/cam4_revB/val
+people_detection_pg2/softmax_exp/collected_outputs/fp32_boxes.npy
+people_detection_pg2/softmax_exp/collected_outputs/fp32_scores.npy
+people_detection_pg2/softmax_exp/collected_outputs/uint8_boxes.npy
+people_detection_pg2/softmax_exp/collected_outputs/uint8_scores.npy
+people_detection_pg2/softmax_exp/collected_outputs_nano/fp32_boxes.npy
+people_detection_pg2/softmax_exp/collected_outputs_nano/fp32_scores.npy
+people_detection_pg2/softmax_exp/collected_outputs_nano/uint8_boxes.npy
+people_detection_pg2/softmax_exp/collected_outputs_nano/uint8_scores.npy
