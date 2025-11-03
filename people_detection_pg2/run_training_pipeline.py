@@ -59,10 +59,15 @@ def run_export(weights, data, max_ncalib_imgs, separated_head=False, output_fold
     run_cmd(command)
 
 
-def run_vela_command(weights_path):
+def run_vela_command(weights_path, best_saved_model_name=None, skip_head=False):
     command = [
-        "python", "optimize_vela.py", weights_path,
+        "python", "optimize_vela.py", weights_path, 
     ]
+
+    if best_saved_model_name is not None:
+        command.append(best_saved_model_name)
+    if skip_head:
+        command.append("--skip-head")
 
     run_cmd(command)
 
@@ -79,7 +84,6 @@ def main():
     parser.add_argument("--yolo_kwargs", type=str, default="")
 
     parser.add_argument("--max_ncalib_imgs", type=int, default="100", help="calibration image set size")
-    parser.add_argument("--separated_head", action="store_true", help="Use separated head for export")
     parser.add_argument(
         "--converted-output-folder-name",
         type=str, default="best_saved_model", help="Output folder name for converted model"
@@ -97,15 +101,28 @@ def main():
         args.yolo_kwargs,
     )
 
+    # export separated head
     run_export(
         os.path.join(os.getcwd(), "results", args.exp_name, "weights", "best.pt"),
         os.path.join(args.dataset, "project.yaml"),
         args.max_ncalib_imgs,
-        separated_head=args.separated_head,
-        output_folder_name=args.converted_output_folder_name,
+        separated_head=True,
     )
-
     run_vela_command(os.path.join(os.getcwd(), "results", args.exp_name, "weights"))
+
+    # export non-separated head
+    run_export(
+        os.path.join(os.getcwd(), "results", args.exp_name, "weights", "best.pt"),
+        os.path.join(args.dataset, "project.yaml"),
+        args.max_ncalib_imgs,
+        separated_head=False,
+        output_folder_name=args.converted_output_folder_name
+    )
+    run_vela_command(
+        os.path.join(os.getcwd(), "results", args.exp_name, "weights"),
+        best_saved_model_name=args.converted_output_folder_name,
+        skip_head=True,
+    )
 
 if __name__ == "__main__":
     main()

@@ -7,7 +7,7 @@ os.environ["TF_TFLITE_USE_XNNPACK"] = "0"
 import cv2
 import numpy as np
 import tensorflow as tf
-from tflite_inference import TFLiteInference
+from people_detection_pg2.softmax_exp.tflite_inference_debug import TFLiteInference
 
 print("TensorFlow version: ", tf.__version__)
 

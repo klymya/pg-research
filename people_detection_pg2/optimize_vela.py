@@ -35,19 +35,24 @@ def main():
     # Set up argument parsing
     parser = argparse.ArgumentParser(description="Run vela commands for best_saved_model and head_saved_model.")
     parser.add_argument("weights_path", type=str, help="Path to the directory containing the weights and models.")
+    parser.add_argument("saved_model_name", type=str, default="best_saved_model", help="Name of saved_model folder.")
+    parser.add_argument("--skip-head", action="store_true", help="Skip processing head_saved_model.")
     args = parser.parse_args()
 
     weights_path = args.weights_path
+    saved_model_name = args.saved_model_name
+    skip_head = args.skip_head
 
     # Run vela command for best_saved_model
-    best_model_path = os.path.join(weights_path, "best_saved_model", "best_full_integer_quant.tflite")
-    best_output_dir = os.path.join(weights_path, "best_saved_model", "vela_he")
+    best_model_path = os.path.join(weights_path, saved_model_name, "best_full_integer_quant.tflite")
+    best_output_dir = os.path.join(weights_path, saved_model_name, "vela_he")
     run_vela_command(best_model_path, best_output_dir)
 
     # Run vela command for head_saved_model
-    head_model_path = os.path.join(weights_path, "head_saved_model", "head_float32.tflite")
-    head_output_dir = os.path.join(weights_path, "head_saved_model", "vela_he")
-    run_vela_command(head_model_path, head_output_dir)
+    if not skip_head:
+        head_model_path = os.path.join(weights_path, "head_saved_model", "head_float32.tflite")
+        head_output_dir = os.path.join(weights_path, "head_saved_model", "vela_he")
+        run_vela_command(head_model_path, head_output_dir)
 
 if __name__ == "__main__":
     main()

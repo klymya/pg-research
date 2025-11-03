@@ -80,3 +80,7 @@ if __name__ == "__main__":
             print(f"Copied {base_src} to {base_dest}")
         else:
             print(f"Source file {base_src} does not exist.")
+
+    with open(os.path.join(args.dst, "source_paths.txt"), "w") as f:
+        for base_src, base_dest in paths:
+            f.write(f"{base_src}\n")

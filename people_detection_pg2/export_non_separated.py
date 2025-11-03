@@ -44,10 +44,18 @@ def get_input_data(data_pth: str, max_ncalib_imgs: int, imgsz: int) -> np.ndarra
     Load input data from the specified path and return it as a numpy array.
     """
     base_pth = os.path.dirname(data_pth)
-    images_pth = os.path.join(base_pth, "images/val")
-    img_pths = glob.glob(os.path.join(images_pth, "*.jpg"))[:max_ncalib_imgs]
-    imgs = [cv2.cvtColor(cv2.imread(i), cv2.COLOR_BGR2RGB) for i in img_pths]
+    train_img_pths = glob.glob(os.path.join(base_pth, "images/train/*.jpg"))
+    val_img_pths = glob.glob(os.path.join(base_pth, "images/val/*.jpg"))
+    test_img_pths = glob.glob(os.path.join(base_pth, "images/holdout/*.jpg"))
 
+    np.random.seed(42)
+    np.random.shuffle(train_img_pths)
+    np.random.shuffle(val_img_pths)
+    np.random.shuffle(test_img_pths)
+    n = max_ncalib_imgs // 3
+    img_pths = train_img_pths[:n] + val_img_pths[:n] + test_img_pths[:n]
+
+    imgs = [cv2.cvtColor(cv2.imread(i), cv2.COLOR_BGR2RGB) for i in img_pths]
     inferer = TFLiteInferer(imgsz=imgsz)
     img_processed = [inferer.pre_process(img) for img in imgs]
 
