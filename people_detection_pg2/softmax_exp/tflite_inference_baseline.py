@@ -1,3 +1,5 @@
+import json
+
 import cv2
 import numpy as np
 import tensorflow as tf
@@ -7,7 +9,7 @@ print("TensorFlow version: ", tf.__version__)
 class TFLiteInferer:
     def __init__(
             self, yolo_pth: str | None = None, head_pth: str | None = None, imgsz: int = 320, conf_th: float = 0.35,
-            iou_th = 0.5, idxs: list | None = None, separated_head: bool = False, head_int8: bool = False, use_bias: bool = False
+            iou_th = 0.5, idxs: list | None = None, separated_head: bool = False, head_int8: bool = False, bias_pth: str = None
     ) -> None:
         self.yolo_pth = yolo_pth
         if self.yolo_pth is not None:
@@ -45,14 +47,16 @@ class TFLiteInferer:
         self.iou_th = iou_th
         self.conf_th = conf_th
 
-        if use_bias:
+        if bias_pth is not None:
+            with open(bias_pth, 'r') as f:
+                biases = json.load(f)
             # coefficients and intercepts for bias correction
-            self.dx = (0.990000, 0.941895)
-            self.dy = (0.984094, 0.826164)
-            self.dw = (0.705880, 15.310123)
-            self.dh = (0.645475, 17.121759)
-            self.dx_coord = (1.003390, -0.931152)
-            self.dy_coord = (1.002818, -0.651833)
+            self.dx = (biases["dx"]["coef"], biases["dx"]["intercept"])
+            self.dy = (biases["dy"]["coef"], biases["dy"]["intercept"])
+            self.dw = (biases["dw"]["coef"], biases["dw"]["intercept"])
+            self.dh = (biases["dh"]["coef"], biases["dh"]["intercept"])
+            self.dx_coord = (biases["dx_coord"]["coef"], biases["dx_coord"]["intercept"])
+            self.dy_coord = (biases["dy_coord"]["coef"], biases["dy_coord"]["intercept"])
         else:
             self.dx = (1.0, 0.0)
             self.dy = (1.0, 0.0)
@@ -215,11 +219,11 @@ class TFLiteInferer:
 class TFLiteMerged(TFLiteInferer):
     def __init__(
             self, yolo_pth: str | None = None, imgsz: int = 320, conf_th: float = 0.35,
-            iou_th = 0.5, idxs: list | None = None, separated_head: bool = False, head_int8: bool = False, use_bias: bool = False
+            iou_th = 0.5, idxs: list | None = None, separated_head: bool = False, head_int8: bool = False, bias_pth: str = None
     ) -> None:
         super().__init__(
             yolo_pth=yolo_pth, head_pth=None, imgsz=imgsz, conf_th=conf_th, iou_th=iou_th, idxs=idxs,
-            separated_head=separated_head, head_int8=head_int8, use_bias=use_bias,
+            separated_head=separated_head, head_int8=head_int8, bias_pth=bias_pth,
         )
 
     def infer(self, img: np.ndarray):
