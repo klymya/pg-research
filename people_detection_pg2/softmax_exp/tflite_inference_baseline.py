@@ -58,12 +58,12 @@ class TFLiteInferer:
             self.dx_coord = (biases["dx_coord"]["coef"], biases["dx_coord"]["intercept"])
             self.dy_coord = (biases["dy_coord"]["coef"], biases["dy_coord"]["intercept"])
         else:
-            self.dx = (1.0, 0.0)
-            self.dy = (1.0, 0.0)
-            self.dw = (1.0, 0.0)
-            self.dh = (1.0, 0.0)
-            self.dx_coord = (1.0, 0.0)
-            self.dy_coord = (1.0, 0.0)
+            self.dx = ([1.0, 0.0, 0.0, 0.0, 0.0, 0.0], 0.0)
+            self.dy = ([0.0, 1.0, 0.0, 0.0, 0.0, 0.0], 0.0)
+            self.dw = ([0.0, 0.0, 1.0, 0.0, 0.0, 0.0], 0.0)
+            self.dh = ([0.0, 0.0, 0.0, 1.0, 0.0, 0.0], 0.0)
+            self.dx_coord = ([0.0, 0.0, 0.0, 0.0, 1.0, 0.0], 0.0)
+            self.dy_coord = ([0.0, 0.0, 0.0, 0.0, 0.0, 1.0], 0.0)
 
     def pre_process(self, img: np.ndarray) -> np.ndarray:
         if img.shape == self.input_shape:
@@ -162,18 +162,30 @@ class TFLiteInferer:
             (minScore, maxScore, minClassLoc, (x, maxClassIndex)) = cv2.minMaxLoc(classes_scores)
             if maxScore >= self.conf_th:
                 box = [
-                    head_output[0][i][0] / self.ratio * self.dx[0] + self.dx[1], # - (0.5 * outputs[0][i][2]),
-                    head_output[0][i][1] / self.ratio * self.dx[0] + self.dy[1], # - (0.5 * outputs[0][i][3]),
-                    head_output[0][i][2] / self.ratio * self.dx[0] + self.dw[1],
-                    head_output[0][i][3] / self.ratio * self.dx[0] + self.dh[1],
+                    head_output[0][i][0] / self.ratio, # - (0.5 * outputs[0][i][2]),
+                    head_output[0][i][1] / self.ratio, # - (0.5 * outputs[0][i][3]),
+                    head_output[0][i][2] / self.ratio,
+                    head_output[0][i][3] / self.ratio,
                 ]
-                boxes.append(box)
+                kp = [
+                    head_output[0][i][5] / self.ratio,
+                    head_output[0][i][6] / self.ratio,
+                ]
                 scores.append(maxScore)
                 class_ids.append(maxClassIndex)
-                kps.append([
-                    head_output[0][i][5] / self.ratio * self.dx_coord[0] + self.dx_coord[1],
-                    head_output[0][i][6] / self.ratio * self.dy_coord[0] + self.dy_coord[1],
-                ])
+
+                box_corrected = [
+                    sum([a * b for a, b in zip(box, self.dx[0][:4])] + [a * b for a, b in zip(kp, self.dx[0][4:])]) + self.dx[1],
+                    sum([a * b for a, b in zip(box, self.dy[0][:4])] + [a * b for a, b in zip(kp, self.dy[0][4:])]) + self.dy[1],
+                    sum([a * b for a, b in zip(box, self.dw[0][:4])] + [a * b for a, b in zip(kp, self.dw[0][4:])]) + self.dw[1],
+                    sum([a * b for a, b in zip(box, self.dh[0][:4])] + [a * b for a, b in zip(kp, self.dh[0][4:])]) + self.dh[1],
+                ]
+                kp_corrected = [
+                    sum([a * b for a, b in zip(box, self.dx_coord[0][:4])] + [a * b for a, b in zip(kp, self.dx_coord[0][4:])]) + self.dx_coord[1],
+                    sum([a * b for a, b in zip(box, self.dy_coord[0][:4])] + [a * b for a, b in zip(kp, self.dy_coord[0][4:])]) + self.dy_coord[1],
+                ]
+                boxes.append(box_corrected)
+                kps.append(kp_corrected)
 
         # Apply NMS (Non-maximum suppression)
         result_boxes = cv2.dnn.NMSBoxes(boxes, scores, self.conf_th, self.iou_th, 0.5)
