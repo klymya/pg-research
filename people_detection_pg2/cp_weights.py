@@ -83,4 +83,4 @@ if __name__ == "__main__":
 
     with open(os.path.join(args.dst, "source_paths.txt"), "w") as f:
         for base_src, base_dest in paths:
-            f.write(f"{base_src}\n")
+            f.write(f"{os.path.join(args.src, base_src).replace('/home/klymy/projects/', '')}\n")

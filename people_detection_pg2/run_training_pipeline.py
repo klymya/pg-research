@@ -108,7 +108,7 @@ def main():
         args.max_ncalib_imgs,
         separated_head=True,
     )
-    run_vela_command(os.path.join(os.getcwd(), "results", args.exp_name, "weights"))
+    run_vela_command(os.path.join(os.getcwd(), "results", args.exp_name, "weights"), "best_saved_model")
 
     # export non-separated head
     run_export(

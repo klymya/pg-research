@@ -62,6 +62,7 @@ def parse_and_merge_annotations(xml_file):
 
 # Function to draw annotations on the image
 def draw_annotations(image_path, annotations):
+    radius = 4
     image = Image.open(image_path)
     draw = ImageDraw.Draw(image)
 
@@ -72,7 +73,7 @@ def draw_annotations(image_path, annotations):
 
         draw.rectangle(bounding_box, outline=color, width=2)
         for p in points:
-            draw.ellipse([p[0]-3, p[1]-3, p[0]+3, p[1]+3], fill=color)
+            draw.ellipse([p[0]-radius, p[1]-radius, p[0]+radius, p[1]+radius], fill=color)
 
     return image
 
