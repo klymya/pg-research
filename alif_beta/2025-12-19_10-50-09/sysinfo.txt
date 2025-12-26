@@ -1,0 +1,243 @@
+*** OS version ***:
+Debian GNU/Linux 11 (bullseye)
+
+*** Device cert ***
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 4131 (0x1023)
+        Signature Algorithm: sha256WithRSAEncryption
+        Issuer: C = IL, ST = Center, O = Pointgrab, OU = SW, CN = PG1-Device, emailAddress = sergeys@pointgrab.com
+        Validity
+            Not Before: Dec  2 09:18:22 2025 GMT
+            Not After : Nov  6 09:18:22 2030 GMT
+        Subject: CN = 5000000-4725-000007-4040
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                RSA Public-Key: (2048 bit)
+                Modulus:
+                    00:d1:a9:27:45:ac:36:e2:b1:ab:c1:82:8d:0a:23:
+                    7b:35:21:d7:c7:8b:8b:97:1f:73:b3:d3:f9:81:f3:
+                    f0:d9:03:43:3a:46:11:10:38:93:bf:be:98:04:eb:
+                    fc:fe:e2:78:72:d8:6b:33:31:50:6b:40:25:83:6b:
+                    98:ec:63:b6:14:e1:4b:c5:d4:9a:3d:df:bc:64:07:
+                    a0:6c:9e:6a:8f:be:38:1a:14:f3:62:7f:57:be:dc:
+                    5f:1c:90:bd:06:23:4b:14:12:14:02:f1:d7:3b:c5:
+                    6c:5e:b7:da:66:af:5b:8c:ba:8c:88:27:36:e0:f9:
+                    fa:fe:8d:4a:cb:36:a4:bb:5f:ac:0a:a3:76:b4:e8:
+                    f0:a2:03:64:9f:85:95:2c:ab:cc:1a:a7:7b:17:ac:
+                    d4:1d:f7:1b:0f:0c:fb:28:7a:a1:42:0d:e4:80:57:
+                    a5:b3:5f:de:99:83:6a:6e:ce:c7:8b:56:32:ce:a2:
+                    11:1d:ea:b8:c4:74:ee:59:d6:d5:70:fc:e1:16:d6:
+                    98:1d:31:18:f0:2c:1d:da:cc:88:90:98:ff:7e:ca:
+                    9d:d9:0c:a3:be:88:22:01:a4:85:b1:9d:73:c8:45:
+                    8f:81:66:d7:50:ca:af:48:c1:a5:06:ae:4c:0e:e8:
+                    08:31:dc:72:c9:8e:9d:3d:ce:e1:60:f8:30:30:7b:
+                    38:cf
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            X509v3 Subject Key Identifier: 
+                AA:D3:74:95:E8:FE:B3:6A:9E:72:1E:94:97:35:84:A3:F4:BF:C2:3F
+            X509v3 Authority Key Identifier: 
+                keyid:2A:F2:85:DE:F1:A0:E8:EF:49:86:09:2A:B2:95:BE:68:AF:81:50:9D
+
+            X509v3 Key Usage: critical
+                Digital Signature, Non Repudiation, Key Encipherment
+            X509v3 Extended Key Usage: 
+                TLS Web Client Authentication, E-mail Protection
+    Signature Algorithm: sha256WithRSAEncryption
+         0a:fe:fc:99:1b:e0:4f:6b:48:9a:96:9d:6f:28:9e:e3:b5:0a:
+         6e:f2:de:88:c2:80:02:3a:fd:9f:af:73:3c:15:4d:3a:95:ba:
+         23:d2:8f:d1:dc:79:18:66:14:12:69:6d:bf:26:2c:9a:f6:9d:
+         05:e0:7a:93:85:e9:fd:9a:96:0c:47:d4:e3:2c:c9:58:e5:20:
+         e1:e6:4d:02:ad:9f:d7:6d:2e:ea:e6:a0:8b:39:f2:9b:84:5d:
+         e7:d5:de:5b:6c:c5:89:29:31:36:d8:8c:3d:df:03:9b:70:97:
+         80:39:ae:57:4f:e3:30:a1:2c:5f:f5:8b:b8:47:02:b4:36:7b:
+         2e:15:2f:cb:b0:37:f8:9f:b1:1f:1d:26:8c:aa:8a:8a:ed:94:
+         3d:a5:06:d1:f5:1e:8d:ef:ae:a0:2e:c9:6f:9d:ca:8e:e0:c2:
+         24:dc:85:7f:c2:25:f5:4e:47:26:39:b0:2f:58:ba:f8:fe:85:
+         16:24:01:88:0c:e0:c0:75:e1:cc:29:d5:8c:dc:4c:da:8e:df:
+         19:37:23:c9:18:c0:e9:72:32:eb:06:d9:9c:05:17:86:97:34:
+         fe:42:36:66:64:cf:5e:43:c0:55:4b:98:59:31:1f:dd:d4:5f:
+         32:22:4f:58:44:1c:09:1a:91:c6:7e:5c:cb:d8:03:77:c7:7a:
+         fa:01:1e:7e:25:bf:f5:e5:30:fd:55:e2:eb:f5:1d:93:9f:e1:
+         22:35:40:41:7a:50:f8:a3:86:49:ae:f3:ce:16:f3:9e:a0:61:
+         76:b5:1f:90:66:4c:48:18:16:e5:4b:f9:f7:01:35:0d:79:7f:
+         c0:25:21:ac:5c:62:95:96:36:83:57:8a:3a:ce:c1:cd:5c:e8:
+         84:b5:8d:5c:94:0b:c2:76:ed:17:3a:21:c9:e7:e9:62:ec:82:
+         b6:7e:40:c6:fb:c0:b9:9c:6e:d3:f9:6f:5e:49:fe:82:40:0b:
+         74:5d:a4:ca:0f:9f:09:05:ad:26:9b:1c:96:6c:72:23:22:b8:
+         53:86:7e:32:9d:e5:b5:98:fc:17:60:be:f5:bb:e6:f4:d1:2b:
+         c3:c9:54:a3:ed:de:d5:7f:cf:54:05:04:2b:17:07:1a:d2:77:
+         2f:c8:17:f2:2a:9d:5d:90:0f:67:ad:6b:b4:7c:aa:3f:63:3b:
+         3f:18:fc:c9:a7:38:8a:f7:0c:a7:81:f5:77:ce:5b:47:87:ef:
+         ca:b0:1e:70:a1:f4:b6:3f:98:ed:00:62:10:e3:df:7a:9f:21:
+         aa:1f:7a:04:59:60:e7:dd:90:dc:6a:fc:6f:bc:f5:00:c0:2b:
+         f8:c8:8e:3c:70:78:a0:6b:e3:e6:74:6a:09:94:35:aa:8c:68:
+         b7:f3:16:12:9d:2b:e4:0c
+SHA1 Fingerprint=5F:DA:DC:35:BF:5A:75:FC:AF:DE:B2:E6:A0:7B:F8:BD:C7:23:0F:5A
+
+*** cp-em config files ***
+/etc/pg-em/iot-endpoint
+PG_CPEM_IOT_ENDPOINT=iot.tst2.pointgrab.com
+PG_CPEM_IOT_SERVERNAME=iot2.tst2.pointgrab.com
+/etc/pg-em/sensor-id
+PG_CPEM_SENSOR_ID=PG2GW-5000000-4725-000007-4040
+
+*** System uptime ***:
+ 10:50:10 up 20:06,  0 users,  load average: 0.31, 0.28, 0.17
+
+*** Disk usage ***:
+Filesystem     1K-blocks    Used Available Use% Mounted on
+/dev/root       14784916 3613380  10825052  26% /
+devtmpfs         1002764       0   1002764   0% /dev
+tmpfs            1003340       0   1003340   0% /dev/shm
+tmpfs             401340    1056    400284   1% /run
+tmpfs               5120       0      5120   0% /run/lock
+tmpfs               4096       0      4096   0% /sys/fs/cgroup
+
+*** Memory usage ***:
+               total        used        free      shared  buff/cache   available
+Mem:         2006684      145368      978448        1056      882868     1837592
+Swap:              0           0           0
+
+*** Thermal info ***:
+soc-thermal
+55454
+
+*** Network info ***:
+eth0: connected to eth0
+	"eth0"
+	ethernet (rk_gmac-dwmac), 30:AE:7B:EB:D2:3A, hw, mtu 1500
+	ip4 default
+	inet4 192.168.129.49/23
+	route4 0.0.0.0/0
+	route4 192.168.128.0/23
+
+wpan0: connected (externally) to wpan0
+	"wpan0"
+	tun, sw, mtu 1280
+	inet6 fdde:ad00:beef::ff:fe00:7000/64
+	inet6 fdde:ad00:beef::ff:fe00:fc00/64
+	inet6 fdde:ad00:beef::ff:fe00:fc10/64
+	inet6 fdde:ad00:beef::ff:fe00:fc11/64
+	inet6 fdde:ad00:beef::ff:fe00:fc38/64
+	inet6 fdde:ad00:beef:0:9ee5:f616:1d91:577/64
+	inet6 fe80::4cbd:1a36:65bf:62b6/64
+	route6 fdde:ad00:beef::/64
+	route6 fe80::/64
+	route6 ff00::/8
+
+wlan0: disconnected
+	"wlan0"
+	1 connection available
+	wifi (rtl8821cs), 12:BA:DD:DB:56:FB, hw, mtu 1500
+
+wlan1: disconnected
+	"wlan1"
+	wifi (rtl8821cs), CE:2F:C0:84:9D:35, hw, mtu 1500
+
+p2p-dev-wlan0: disconnected
+	"p2p-dev-wlan0"
+	wifi-p2p, hw
+
+p2p-dev-wlan1: disconnected
+	"p2p-dev-wlan1"
+	wifi-p2p, hw
+
+ip6gre0: unmanaged
+	"ip6gre0"
+	iptunnel (ip6gre), 00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00, sw, mtu 1448
+
+ip6tnl0: unmanaged
+	"ip6tnl0"
+	iptunnel (ip6tnl), 00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00, sw, mtu 1452
+
+sit0: unmanaged
+	"sit0"
+	iptunnel (sit), 00:00:00:00, sw, mtu 1480
+
+lo: unmanaged
+	"lo"
+	loopback (unknown), 00:00:00:00:00:00, sw, mtu 65536
+
+DNS configuration:
+	servers: 192.168.128.1
+	domains: home
+	interface: eth0
+
+Use "nmcli device show" to get complete information about known devices and
+"nmcli connection show" to get an overview on active connection profiles.
+
+Consult nmcli(1) and nmcli-examples(7) manual pages for complete usage details.
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+2: ip6_vti0@NONE: <NOARP> mtu 1500 qdisc noop state DOWN group default qlen 1
+    link/tunnel6 :: brd ::
+3: sit0@NONE: <NOARP> mtu 1480 qdisc noop state DOWN group default qlen 1
+    link/sit 0.0.0.0 brd 0.0.0.0
+4: ip6tnl0@NONE: <NOARP> mtu 1452 qdisc noop state DOWN group default qlen 1
+    link/tunnel6 :: brd ::
+5: ip6gre0@NONE: <NOARP> mtu 1448 qdisc noop state DOWN group default qlen 1
+    link/gre6 :: brd ::
+6: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UNKNOWN group default qlen 1000
+    link/ether 30:ae:7b:eb:d2:3a brd ff:ff:ff:ff:ff:ff
+    inet 192.168.129.49/23 brd 192.168.129.255 scope global dynamic noprefixroute eth0
+       valid_lft 6830sec preferred_lft 6830sec
+7: wlan0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc mq state DOWN group default qlen 1000
+    link/ether 12:ba:dd:db:56:fb brd ff:ff:ff:ff:ff:ff
+8: wlan1: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc mq state DOWN group default qlen 1000
+    link/ether ce:2f:c0:84:9d:35 brd ff:ff:ff:ff:ff:ff
+15: wpan0: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 1280 qdisc pfifo_fast state UNKNOWN group default qlen 500
+    link/none 
+    inet6 fdde:ad00:beef::ff:fe00:fc11/64 scope global nodad deprecated 
+       valid_lft forever preferred_lft 0sec
+    inet6 fdde:ad00:beef::ff:fe00:fc38/64 scope global nodad deprecated 
+       valid_lft forever preferred_lft 0sec
+    inet6 fdde:ad00:beef::ff:fe00:fc10/64 scope global nodad deprecated 
+       valid_lft forever preferred_lft 0sec
+    inet6 fdde:ad00:beef::ff:fe00:fc00/64 scope global nodad deprecated 
+       valid_lft forever preferred_lft 0sec
+    inet6 fdde:ad00:beef::ff:fe00:7000/64 scope global nodad deprecated 
+       valid_lft forever preferred_lft 0sec
+    inet6 fdde:ad00:beef:0:9ee5:f616:1d91:577/64 scope global nodad deprecated 
+       valid_lft forever preferred_lft 0sec
+    inet6 fe80::4cbd:1a36:65bf:62b6/64 scope link nodad deprecated 
+       valid_lft forever preferred_lft 0sec
+default via 192.168.128.1 dev eth0 proto dhcp metric 100 
+192.168.128.0/23 dev eth0 proto kernel scope link src 192.168.129.49 metric 100 
+
+*** pg2gw status ***:
+● pg2gw.service - PointGrab Gateway
+     Loaded: loaded (/lib/systemd/system/pg2gw.service; enabled; vendor preset: enabled)
+     Active: active (running) since Thu 2025-12-18 14:43:56 GMT; 20h ago
+   Main PID: 442 (pg2gw)
+      Tasks: 1 (limit: 2350)
+     Memory: 2.0M
+     CGroup: /system.slice/pg2gw.service
+             └─442 /usr/bin/pg2gw
+
+CPU usage: 0%
+MEM vsize: 12728
+MEM rssize: 6868
+
+*** NTP status ***:
+     remote           refid      st t when poll reach   delay   offset  jitter
+==============================================================================
+ pool.ntp.org    .POOL.          16 p    -   64    0    0.000   +0.000   0.001
+*225.15-121-193. .PPS.            1 u  497 1024  377    4.324   +0.977   0.742
+-185.77.12.9     253.98.235.249   2 u  467 1024  377    7.087   +0.666   0.569
++178.215.228.24  189.97.54.122    2 u  376 1024  377   12.069   +0.953   0.464
+-time.cloudflare 10.16.8.4        3 u  188 1024  377    4.035   -0.602   0.468
+-time.cloudflare 10.16.8.4        3 u  202 1024  377    4.042   -0.692   0.454
+-ntp.rack66.net  193.67.79.202    2 u  856 1024  377    4.270   +2.818   0.253
++ntp.devrandom.b 244.220.219.218  2 u  275 1024  377    4.401   +1.289   0.486
++45.87.78.35     244.220.219.218  2 u  596 1024  377    4.285   +1.086   0.424
+-ntp2.unix-solut 244.220.219.218  2 u  430 1024  377    4.481   +1.242   0.610
+
