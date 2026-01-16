@@ -3,12 +3,12 @@ import os
 import glob
 
 
+BATHCH_NUMBERS = [11]
 ROOT_PTH = "/home/klymy/data/cam4_revB"
 DATA_TEMPLATE = "4.2_batch{number}"
 ANNOTATION_TEMPLATE = "batch{number}_corrected"
 JSON_TEMPLATE = "batch{number}_corrected.json"
 XML_TEMPLATE = "batch{number}_corrected.xml"
-BATHCH_NUMBERS = list(range(8, 11))
 BASE_XML_NAME = "annotations.xml"
 BASE_JSON_NAME = "instances_default.json"
 

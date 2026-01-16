@@ -1,5 +1,6 @@
 # Pipeline of processing new batches injection
 
+0. `../../annotation_poc/init_fix_batches_8_10.py` + `../../annotation_poc/annotation_viz_cam4_revB.ipynb`
 1. `find_intersection_batch1_3_vs_4_5.ipynb`
 2. `subsets_splitting_batch4_5.ipynb`
 3. `cvat2yolo.ipynb`
