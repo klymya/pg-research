@@ -467,7 +467,7 @@ if __name__ == "__main__":
     # Example:
     # merge_cvat_xml_annotations(["annotations.xml", "annotations 2.xml"], "merged_annotations.xml")
     # merge_coco_instances_json(["instances_default.json", "instances_default_2.json"], "merged_instances.json")
-    ROOT_PTH = "/home/klymy/Downloads/b11_annotation"
+    ROOT_PTH = "/home/klymy/Downloads/b12_annotations"
     xml_names = glob.glob(os.path.join(ROOT_PTH, "*/*.xml"))
     json_names = glob.glob(os.path.join(ROOT_PTH, "*/*/*.json"))
     print(len(xml_names))

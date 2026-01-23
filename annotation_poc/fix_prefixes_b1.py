@@ -194,25 +194,24 @@ def replace_prefixes_cvat_xml(
 if __name__ == "__main__":
     # Example: "2em/4.2_H_cam_229_Kitchen_1039.tif" -> "tmp/4.2_H_cam_229_Kitchen_1039.tif"
     old_prefixes = [
-        "1er",
-        "2em",
-        "3em",
-        "4em",
-        "5em",
-        "6em",
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "P5",
     ]
-    new_prefix = "4.2_batch11/"
+    new_prefix = "4.2_batch12/"
 
-    BASE_PTH = "/home/klymy/data/cam4_revB/4.2_batch11"
-    CORRECTED_PTH = "/home/klymy/data/cam4_revB/batch11_corrected"
+    BASE_PTH = "/home/klymy/data/cam4_revB/4.2_batch12"
+    CORRECTED_PTH = "/home/klymy/data/cam4_revB/batch12_corrected"
 
     replace_prefixes_coco_json(
         os.path.join(BASE_PTH, "instances_default.json"),
-        os.path.join(CORRECTED_PTH, "batch11_corrected.json"),
+        os.path.join(CORRECTED_PTH, "batch12_corrected.json"),
         old_prefixes, new_prefix
     )
     replace_prefixes_cvat_xml(
         os.path.join(BASE_PTH, "annotations.xml"),
-        os.path.join(CORRECTED_PTH, "batch11_corrected.xml"),
+        os.path.join(CORRECTED_PTH, "batch12_corrected.xml"),
         old_prefixes, new_prefix
     )
