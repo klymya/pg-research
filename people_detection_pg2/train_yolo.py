@@ -12,6 +12,8 @@ parser.add_argument("--weights", type=str, default="yolov8s-pose.pt")
 parser.add_argument("--device", nargs="+", type=int, default=[0])
 parser.add_argument("--batch", type=int, default=32)
 parser.add_argument("--kwargs", type=str, default="")
+parser.add_argument("--epochs", type=int, default=1000)
+parser.add_argument("--patience", type=int, default=50)
 args = parser.parse_args()
 
 if args.cfg == "":
@@ -24,8 +26,8 @@ kwargs = eval(args.kwargs) if args.kwargs else {}
 # Train the model
 results = model.train(
     data=os.path.join(args.dataset, "project.yaml"),
-    epochs=1000,
-    patience=50,
+    epochs=args.epochs,
+    patience=args.patience,
     imgsz=320,
     batch=args.batch * len(args.device),
     device=args.device,

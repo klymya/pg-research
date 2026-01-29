@@ -19,7 +19,7 @@ def run_cmd(command: list) -> None:
         print(e.stderr)
 
 
-def run_yolo(dataset, cfg, weights, exp_name, device, batch, yolo_kwargs):
+def run_yolo(dataset, cfg, weights, exp_name, device, batch, yolo_kwargs, epochs=1000, patience=50):
     command = [
         "python", "train_yolo.py",
         "--dataset", dataset,
@@ -28,6 +28,8 @@ def run_yolo(dataset, cfg, weights, exp_name, device, batch, yolo_kwargs):
         "--device", ' '.join([str(d) for d in device]),
         "--batch", str(batch),
         "--kwargs", yolo_kwargs,
+        "--epochs", str(epochs),
+        "--patience", str(patience),
     ]
 
     if cfg != "":
@@ -88,6 +90,9 @@ def main():
         "--converted-output-folder-name",
         type=str, default="best_saved_model", help="Output folder name for converted model"
     )
+    
+    parser.add_argument("--epochs", type=int, default=1000)
+    parser.add_argument("--patience", type=int, default=50)
 
     args = parser.parse_args()
 
@@ -99,6 +104,8 @@ def main():
         args.device,
         args.batch,
         args.yolo_kwargs,
+        epochs=args.epochs,
+        patience=args.patience,
     )
 
     # export separated head

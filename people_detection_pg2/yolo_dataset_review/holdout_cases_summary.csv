@@ -1,0 +1,21 @@
+name,location_type,frame_position,background_complexity,heights,num_images,detections.min,detections.max,detections.average
+spacesbooth,Meeting Room (4 seats),Center of DA,Medium,"[234, 272]",29,4,6,4.9
+MenivimDesk,Office Room (1 2 desks),On edge of DA,Strong,"[257, 260]",15,0,7,1.2
+menivimOS_1,"Open Space (big area, 3 desks)",Center of DA,Strong,[250],6,1,1,1.0
+me,"Open Space (big area, 3 desks)",Center of DA,Strong,[250],1,2,2,2.0
+spacesMR,Meeting Room (4 seats),Center of DA,Medium,"[234, 257]",11,5,5,5.0
+riv,Small Meeting Room (4 seats),Center of DA,Simple,"[243, 277, 278, 279, 281]",15,2,6,3.73
+menivimOS,"Open Space (big area, 3 desks)",Center of DA,Strong,"[229, 230, 250, 277, 291, 295, 328]",14,0,1,0.93
+spacesdesk,"Open Space (big area, 3 desks)",Near edge of DA,Strong,"[243, 277]",10,5,5,5.0
+menivimdesk,Office Room (1 2 desks),Center of DA,Medium,[250],5,2,2,2.0
+menivimOS_2,"Open Space (big area, 3 desks)",On edge of DA,Strong,[250],2,1,2,1.5
+menivimlobby,Reception Area,On edge of DA,Medium,"[291, 295]",11,1,2,1.45
+menivim,"Open Space (big area, 3 desks)",Center of DA,Strong,"[230, 250, 277, 291, 295]",8,0,2,1.25
+MenivimOS_desk,"Open Space (big area, 3 desks)",Center of DA,Strong,[250],2,1,1,1.0
+menivimos_MR_1,"Open Space (big area, 3 desks)",Center of DA,Strong,[250],5,1,1,1.0
+menivim_1,"Open Space (big area, 3 desks)",On edge of DA,Strong,[250],2,1,1,1.0
+MevinimDesk,Office Room (1 2 desks),On edge of DA,Strong,"[257, 260]",3,1,1,1.0
+menivim_OS,"Open Space (big area, 3 desks)",On edge of DA,Strong,"[230, 277]",2,1,1,1.0
+mevinimmr,Small Meeting Room (4 seats),Center of DA,Medium,[281],3,1,2,1.67
+MenivimRec,Reception Area,On edge of DA,Simple,[260],1,2,2,2.0
+menivimos,"Open Space (big area, 3 desks)",Center of DA,Strong,"[229, 230, 250, 277, 291, 295, 328]",1,5,5,5.0

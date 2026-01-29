@@ -1,0 +1,1985 @@
+[
+  {
+    "name": "Kitchen",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Near edge of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      229
+    ]
+  },
+  {
+    "name": "MenivimCart",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      250
+    ]
+  },
+  {
+    "name": "MenivimDesk",
+    "location_type": "Office Room (1\u20132 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      257,
+      258,
+      260
+    ]
+  },
+  {
+    "name": "MenivimEnt",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Near edge of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      239
+    ]
+  },
+  {
+    "name": "MenivimFUN",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      255,
+      275
+    ]
+  },
+  {
+    "name": "MenivimMR",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      228,
+      237,
+      247,
+      248,
+      250,
+      251,
+      253
+    ]
+  },
+  {
+    "name": "MenivimMR_1",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_100",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_101",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_102",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_103",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_104",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_107",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_108",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_11",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_114",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_115",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_116",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_117",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_118",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_119",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_123",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_124",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_127",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_128",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_129",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_13",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_135",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_143",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_144",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_147",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_148",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_15",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_152",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_153",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_155",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_157",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_161",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_166",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_167",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_171",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_172",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_174",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_175",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_176",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_179",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_18",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_181",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_183",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_184",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_19",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_191",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_192",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_195",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_198",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_199",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_2",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_29",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_30",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_31",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_34",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_37",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_39",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_42",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_46",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_47",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_48",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_49",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_53",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_58",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_59",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_6",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_63",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_68",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_69",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_79",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_8",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_80",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_82",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_85",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_86",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_87",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_9",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_90",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_94",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_95",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_98",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimMR_99",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "MenivimOS",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      295,
+      296
+    ]
+  },
+  {
+    "name": "MenivimOS_2HO_dasks",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      240
+    ]
+  },
+  {
+    "name": "MenivimOS_3HO",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      285
+    ]
+  },
+  {
+    "name": "MenivimOS_4HO",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      282
+    ]
+  },
+  {
+    "name": "MenivimOS_desk",
+    "location_type": "Office Room (1\u20132 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      256
+    ]
+  },
+  {
+    "name": "MevinimOS",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      234
+    ]
+  },
+  {
+    "name": "ViaSDesk",
+    "location_type": "Office Room (1\u20132 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      248
+    ]
+  },
+  {
+    "name": "ViaSMR",
+    "location_type": "Office Room (1\u20132 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      255,
+      258
+    ]
+  },
+  {
+    "name": "ViaSdesks",
+    "location_type": "Office Room (1\u20132 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      250
+    ]
+  },
+  {
+    "name": "ViaSroom",
+    "location_type": "Office Room (1\u20132 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      249
+    ]
+  },
+  {
+    "name": "elevator",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Near edge of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      239
+    ]
+  },
+  {
+    "name": "em12",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      248
+    ]
+  },
+  {
+    "name": "emp11",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      286
+    ]
+  },
+  {
+    "name": "emp14",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      243
+    ]
+  },
+  {
+    "name": "emp17",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      250
+    ]
+  },
+  {
+    "name": "empty",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      239,
+      240
+    ]
+  },
+  {
+    "name": "empty1",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      248
+    ]
+  },
+  {
+    "name": "empty10",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      283
+    ]
+  },
+  {
+    "name": "empty2",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      248
+    ]
+  },
+  {
+    "name": "empty3",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "empty4",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      247
+    ]
+  },
+  {
+    "name": "empty5",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      287
+    ]
+  },
+  {
+    "name": "empty6",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      234
+    ]
+  },
+  {
+    "name": "empty7",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      239
+    ]
+  },
+  {
+    "name": "empty8",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "empty9",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      247
+    ]
+  },
+  {
+    "name": "lobby",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Near edge of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      315
+    ]
+  },
+  {
+    "name": "lobbyele",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Near edge of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      315
+    ]
+  },
+  {
+    "name": "menivimCS",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      236,
+      238
+    ]
+  },
+  {
+    "name": "menivimLobby",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Near edge of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      336
+    ]
+  },
+  {
+    "name": "menivimOS",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      79,
+      289,
+      320
+    ]
+  },
+  {
+    "name": "menivimOS_1",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      250
+    ]
+  },
+  {
+    "name": "menivimOS_MR_2",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      260
+    ]
+  },
+  {
+    "name": "menivimdesk",
+    "location_type": "Office Room (1\u20132 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      238,
+      247,
+      253
+    ]
+  },
+  {
+    "name": "menivimelevators",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      267
+    ]
+  },
+  {
+    "name": "menivimkit",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      261,
+      262
+    ]
+  },
+  {
+    "name": "menivimkitchen",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      247,
+      250
+    ]
+  },
+  {
+    "name": "menivimkneset",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      246
+    ]
+  },
+  {
+    "name": "menivimlob",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Near edge of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      294
+    ]
+  },
+  {
+    "name": "menivimmr",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      24,
+      239,
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_105",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_106",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_109",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_110",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_112",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_113",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_12",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_122",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_125",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_126",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_131",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_132",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_133",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_134",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_137",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_140",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_142",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_154",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_156",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_162",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_164",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_165",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_169",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_17",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_178",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_180",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_182_1",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_185",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_188",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_189",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_190",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_194",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_20",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_200",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_21",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_23",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_24",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_26",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_27",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_28",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_38",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_4",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_41",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_5",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_50",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_52",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_54",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_56",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_60",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_61",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_66",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_67",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_70",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_71",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_72",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_75",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_76",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_77",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_78",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_89",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_91",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimmr_96",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      251
+    ]
+  },
+  {
+    "name": "menivimrec",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      254,
+      276,
+      299,
+      301
+    ]
+  },
+  {
+    "name": "menivimrnd",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      270
+    ]
+  },
+  {
+    "name": "menivlobby",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Near edge of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      336
+    ]
+  },
+  {
+    "name": "office",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      250
+    ]
+  },
+  {
+    "name": "rec",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      253
+    ]
+  },
+  {
+    "name": "rivullis",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      234
+    ]
+  },
+  {
+    "name": "rivullisMR",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      248,
+      254
+    ]
+  },
+  {
+    "name": "rivullisOS",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      282,
+      295,
+      324
+    ]
+  },
+  {
+    "name": "rivulliskit",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      290
+    ]
+  },
+  {
+    "name": "roomos",
+    "location_type": "Office Room (1\u20132 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      244
+    ]
+  },
+  {
+    "name": "spacesMR",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      253,
+      262,
+      302
+    ]
+  },
+  {
+    "name": "spacesMR_189",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      262
+    ]
+  },
+  {
+    "name": "spacesMR_436",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      262
+    ]
+  },
+  {
+    "name": "spacesMR_65",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      262
+    ]
+  },
+  {
+    "name": "spacesOS",
+    "location_type": "Open Space (big area, \u22653 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      330
+    ]
+  },
+  {
+    "name": "spacesdesk",
+    "location_type": "Office Room (1\u20132 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      252
+    ]
+  },
+  {
+    "name": "spacesmr",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      262
+    ]
+  },
+  {
+    "name": "spacesmr_100",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      262
+    ]
+  },
+  {
+    "name": "spacesmr_15",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      262
+    ]
+  },
+  {
+    "name": "spacesmr_363",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      262
+    ]
+  },
+  {
+    "name": "spacesmr_454",
+    "location_type": "Small Meeting Room (\u22644 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      262
+    ]
+  },
+  {
+    "name": "viasCEO",
+    "location_type": "Office Room (1\u20132 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      248
+    ]
+  },
+  {
+    "name": "viasOS",
+    "location_type": "Office Room (1\u20132 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      296
+    ]
+  },
+  {
+    "name": "viasdes",
+    "location_type": "Office Room (1\u20132 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      256
+    ]
+  },
+  {
+    "name": "viasdesk",
+    "location_type": "Office Room (1\u20132 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      253
+    ]
+  },
+  {
+    "name": "viaskit",
+    "location_type": "Office Room (1\u20132 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      257
+    ]
+  },
+  {
+    "name": "viasos",
+    "location_type": "Office Room (1\u20132 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      259,
+      292
+    ]
+  }
+]

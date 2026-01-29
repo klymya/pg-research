@@ -1,0 +1,329 @@
+[
+  {
+    "name": "spacesbooth",
+    "location_type": "Meeting Room (4 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      234,
+      272
+    ],
+    "num_images": 29,
+    "detections": {
+      "min": 4,
+      "max": 6,
+      "average": 4.9
+    }
+  },
+  {
+    "name": "MenivimDesk",
+    "location_type": "Office Room (1 2 desks)",
+    "frame_position": "On edge of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      257,
+      260
+    ],
+    "num_images": 15,
+    "detections": {
+      "min": 0,
+      "max": 7,
+      "average": 1.2
+    }
+  },
+  {
+    "name": "menivimOS_1",
+    "location_type": "Open Space (big area, 3 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      250
+    ],
+    "num_images": 6,
+    "detections": {
+      "min": 1,
+      "max": 1,
+      "average": 1.0
+    }
+  },
+  {
+    "name": "me",
+    "location_type": "Open Space (big area, 3 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      250
+    ],
+    "num_images": 1,
+    "detections": {
+      "min": 2,
+      "max": 2,
+      "average": 2.0
+    }
+  },
+  {
+    "name": "spacesMR",
+    "location_type": "Meeting Room (4 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      234,
+      257
+    ],
+    "num_images": 11,
+    "detections": {
+      "min": 5,
+      "max": 5,
+      "average": 5.0
+    }
+  },
+  {
+    "name": "riv",
+    "location_type": "Small Meeting Room (4 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Simple",
+    "heights": [
+      243,
+      277,
+      278,
+      279,
+      281
+    ],
+    "num_images": 15,
+    "detections": {
+      "min": 2,
+      "max": 6,
+      "average": 3.73
+    }
+  },
+  {
+    "name": "menivimOS",
+    "location_type": "Open Space (big area, 3 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      229,
+      230,
+      250,
+      277,
+      291,
+      295,
+      328
+    ],
+    "num_images": 14,
+    "detections": {
+      "min": 0,
+      "max": 1,
+      "average": 0.93
+    }
+  },
+  {
+    "name": "spacesdesk",
+    "location_type": "Open Space (big area, 3 desks)",
+    "frame_position": "Near edge of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      243,
+      277
+    ],
+    "num_images": 10,
+    "detections": {
+      "min": 5,
+      "max": 5,
+      "average": 5.0
+    }
+  },
+  {
+    "name": "menivimdesk",
+    "location_type": "Office Room (1 2 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      250
+    ],
+    "num_images": 5,
+    "detections": {
+      "min": 2,
+      "max": 2,
+      "average": 2.0
+    }
+  },
+  {
+    "name": "menivimOS_2",
+    "location_type": "Open Space (big area, 3 desks)",
+    "frame_position": "On edge of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      250
+    ],
+    "num_images": 2,
+    "detections": {
+      "min": 1,
+      "max": 2,
+      "average": 1.5
+    }
+  },
+  {
+    "name": "menivimlobby",
+    "location_type": "Reception Area",
+    "frame_position": "On edge of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      291,
+      295
+    ],
+    "num_images": 11,
+    "detections": {
+      "min": 1,
+      "max": 2,
+      "average": 1.45
+    }
+  },
+  {
+    "name": "menivim",
+    "location_type": "Open Space (big area, 3 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      230,
+      250,
+      277,
+      291,
+      295
+    ],
+    "num_images": 8,
+    "detections": {
+      "min": 0,
+      "max": 2,
+      "average": 1.25
+    }
+  },
+  {
+    "name": "MenivimOS_desk",
+    "location_type": "Open Space (big area, 3 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      250
+    ],
+    "num_images": 2,
+    "detections": {
+      "min": 1,
+      "max": 1,
+      "average": 1.0
+    }
+  },
+  {
+    "name": "menivimos_MR_1",
+    "location_type": "Open Space (big area, 3 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      250
+    ],
+    "num_images": 5,
+    "detections": {
+      "min": 1,
+      "max": 1,
+      "average": 1.0
+    }
+  },
+  {
+    "name": "menivim_1",
+    "location_type": "Open Space (big area, 3 desks)",
+    "frame_position": "On edge of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      250
+    ],
+    "num_images": 2,
+    "detections": {
+      "min": 1,
+      "max": 1,
+      "average": 1.0
+    }
+  },
+  {
+    "name": "MevinimDesk",
+    "location_type": "Office Room (1 2 desks)",
+    "frame_position": "On edge of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      257,
+      260
+    ],
+    "num_images": 3,
+    "detections": {
+      "min": 1,
+      "max": 1,
+      "average": 1.0
+    }
+  },
+  {
+    "name": "menivim_OS",
+    "location_type": "Open Space (big area, 3 desks)",
+    "frame_position": "On edge of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      230,
+      277
+    ],
+    "num_images": 2,
+    "detections": {
+      "min": 1,
+      "max": 1,
+      "average": 1.0
+    }
+  },
+  {
+    "name": "mevinimmr",
+    "location_type": "Small Meeting Room (4 seats)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Medium",
+    "heights": [
+      281
+    ],
+    "num_images": 3,
+    "detections": {
+      "min": 1,
+      "max": 2,
+      "average": 1.67
+    }
+  },
+  {
+    "name": "MenivimRec",
+    "location_type": "Reception Area",
+    "frame_position": "On edge of DA",
+    "background_complexity": "Simple",
+    "heights": [
+      260
+    ],
+    "num_images": 1,
+    "detections": {
+      "min": 2,
+      "max": 2,
+      "average": 2.0
+    }
+  },
+  {
+    "name": "menivimos",
+    "location_type": "Open Space (big area, 3 desks)",
+    "frame_position": "Center of DA",
+    "background_complexity": "Strong",
+    "heights": [
+      229,
+      230,
+      250,
+      277,
+      291,
+      295,
+      328
+    ],
+    "num_images": 1,
+    "detections": {
+      "min": 5,
+      "max": 5,
+      "average": 5.0
+    }
+  }
+]
