@@ -9,6 +9,7 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import pandas as pd
+from dotenv import load_dotenv
 
 
 COLOR_GT_TP = "blue"
@@ -68,20 +69,26 @@ def _draw_point(ax, x, y, img_w, img_h, color, label=None):
 
 
 def main() -> int:
+    env_path = os.getenv("ENV_PATH", ".env")
+    load_dotenv(env_path)
+
     ap = argparse.ArgumentParser(description="Visualize GT/Pred detections with TP/FP/FN coloring.")
-    ap.add_argument("--yolo-holdout", required=True, help="Path to YOLO dataset root (with images/holdout & labels/holdout).")
-    ap.add_argument("--metrics-per-img", required=True, help="Path to metrics_per_img.csv.")
-    ap.add_argument("--metrics-per-gt", required=True, help="Path to metrics_per_gt_detection.csv.")
-    ap.add_argument("--metrics-per-pred", required=True, help="Path to metrics_per_pred_detections.csv.")
+    ap.add_argument("--yolo-holdout", default=os.getenv("YOLO_HOLDOUT", ""), help="Path to YOLO dataset root (with images/holdout & labels/holdout).")
+    ap.add_argument("--metrics-per-img", default=os.getenv("METRICS_PER_IMG", ""), help="Path to metrics_per_img.csv.")
+    ap.add_argument("--metrics-per-gt", default=os.getenv("METRICS_PER_GT", ""), help="Path to metrics_per_gt_detection.csv.")
+    ap.add_argument("--metrics-per-pred", default=os.getenv("METRICS_PER_PRED", ""), help="Path to metrics_per_pred_detections.csv.")
     ap.add_argument(
         "--frames-attrs",
-        default="frames_attributes.csv",
+        default=os.getenv("FRAMES_ATTRS", "frames_attributes.csv"),
         help="Optional frames_attributes.csv for camera_height (default: %(default)s)",
     )
     # leg position is expected directly in metrics_per_gt CSV (columns x,y)
-    ap.add_argument("--out-dir", required=True, help="Output folder for rendered images.")
+    ap.add_argument("--out-dir", default=os.getenv("VIZ_OUT_DIR", ""), help="Output folder for rendered images.")
     ap.add_argument("--limit", type=int, default=0, help="Optional limit on number of images to render.")
     args, _unknown = ap.parse_known_args()
+
+    if not args.yolo_holdout or not args.metrics_per_img or not args.metrics_per_gt or not args.metrics_per_pred or not args.out_dir:
+        raise SystemExit("Missing required paths. Set them in .env or pass as args.")
 
     yolo_root = Path(args.yolo_holdout)
     imgs_dir = yolo_root / "images" / "holdout"

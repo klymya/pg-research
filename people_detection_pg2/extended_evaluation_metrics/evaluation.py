@@ -108,31 +108,44 @@ def _greedy_match(iou_mat: np.ndarray, iou_th: float) -> list[tuple[int, int, fl
     return matches
 
 
+def _load_env() -> None:
+    env_path = os.getenv("ENV_PATH", ".env")
+    load_dotenv(env_path)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Run YOLO validation and per-frame metrics export.")
     ap.add_argument(
         "--env-file",
-        default=".env",
-        help="Path to .env file with evaluation parameters.",
+        default="",
+        help="(Optional) Path to .env file. If empty, uses ENV_PATH.",
     )
     ap.add_argument(
         "--out-csv",
-        default="metrics_per_img.csv",
-        help="Output CSV path (default: %(default)s)",
+        default="",
+        help="Output CSV path (default: from env METRICS_PER_IMG).",
     )
     ap.add_argument(
         "--out-gt-csv",
-        default="metrics_per_gt.csv",
-        help="Optional GT-level CSV path (default: from env METRICS_PER_GT_CSV or none).",
+        default="",
+        help="Optional GT-level CSV path (default: from env METRICS_PER_GT).",
     )
     ap.add_argument(
         "--out-pred-csv",
-        default="metrics_per_pred.csv",
-        help="Optional prediction-level CSV path (default: from env METRICS_PER_PRED_CSV or none).",
+        default="",
+        help="Optional prediction-level CSV path (default: from env METRICS_PER_PRED).",
+    )
+    ap.add_argument(
+        "--out-global-json",
+        default="",
+        help="Optional global metrics JSON path (default: from env GLOBAL_METRICS_PTH).",
     )
     args, _unknown = ap.parse_known_args()
 
-    load_dotenv(args.env_file)
+    if args.env_file:
+        load_dotenv(args.env_file)
+    else:
+        _load_env()
 
     input_w = int(_env("INPUT_WIDTH", "320"))
     input_h = int(_env("INPUT_HEIGHT", "320"))
@@ -165,22 +178,27 @@ def main() -> int:
     project_dir = _env("PROJECT", os.path.join(os.getcwd(), "val"))
     exp_name = _env("EXP_NAME", os.path.basename(base_experiment_dir))
     predictions_pth = _env("PREDICTIONS_PTH", os.path.join(project_dir, exp_name, "predictions.json"))
+    global_metrics_pth = args.out_global_json or _env("GLOBAL_METRICS_PTH", "")
 
     detections_attr_csv = _env(
-        "DETECTIONS_ATTRIBUTES_CSV",
+        "DETECTIONS_ATTRS",
         "people_detection_pg2/extended_evaluation_metrics/holdout_data/detections_attributes.csv",
     )
     detections_attr_csv = _resolve_path(detections_attr_csv) if detections_attr_csv else detections_attr_csv
-    out_gt_csv = args.out_gt_csv or _env("METRICS_PER_GT_CSV", "")
-    out_pred_csv = args.out_pred_csv or _env("METRICS_PER_PRED_CSV", "")
+    out_csv = args.out_csv or _env("METRICS_PER_IMG", "metrics_per_img.csv")
+    out_gt_csv = args.out_gt_csv or _env("METRICS_PER_GT", "")
+    out_pred_csv = args.out_pred_csv or _env("METRICS_PER_PRED", "")
 
     device = _parse_device(_env("DEVICE", None))
     batch = int(_env("BATCH", "64"))
 
     model = YOLO(weights_pth, task="pose")
 
-    if not os.path.exists(predictions_pth):
-        model.val(
+    force_val = _env("FORCE_VAL", "0") == "1"
+    print(f"Force validation: {force_val}")
+    val_result = None
+    if force_val or not os.path.exists(predictions_pth):
+        val_result = model.val(
             data=dataset_pth,
             task="pose",
             device=device,
@@ -193,6 +211,16 @@ def main() -> int:
             exist_ok=True,
             save_json=True,
         )
+        print(f"Validation completed. Predictions saved to: {predictions_pth}")
+    if val_result is not None:
+        try:
+            gm = val_result.results_dict if hasattr(val_result, "results_dict") else {}
+            Path(global_metrics_pth).parent.mkdir(parents=True, exist_ok=True)
+            with open(global_metrics_pth, "w") as f:
+                json.dump(gm, f, indent=2)
+            print(f"Wrote global metrics: {global_metrics_pth}")
+        except Exception as e:
+            print(f"Warning: failed to save global metrics: {e}")
 
     with open(predictions_pth, "rt") as f:
         predictions = json.load(f)
@@ -268,10 +296,10 @@ def main() -> int:
 
     metrics_df = pd.DataFrame(metrics_rows)
     metrics_df.fillna(0.0, inplace=True)
-    Path(args.out_csv).parent.mkdir(parents=True, exist_ok=True)
-    metrics_df.to_csv(args.out_csv, index=False)
+    Path(out_csv).parent.mkdir(parents=True, exist_ok=True)
+    metrics_df.to_csv(out_csv, index=False)
 
-    print(f"Wrote per-image metrics: {args.out_csv}")
+    print(f"Wrote per-image metrics: {out_csv}")
     print(metrics_df[["P", "R", "F1", "AP"]].mean())
 
     if out_gt_csv or out_pred_csv:
