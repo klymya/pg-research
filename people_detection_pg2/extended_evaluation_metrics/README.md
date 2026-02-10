@@ -68,16 +68,38 @@ python people_detection_pg2/extended_evaluation_metrics/export_holdout_attribute
 
 ### `evaluation.py`
 
-Runs YOLO validation (if needed), saves:
+Runs validation and exports evaluation artifacts. Supports PT and TFLite backends:
+- `ultralytics_pt` (default): standard `YOLO(...).val(...)`
+- `tflite_mixed`: INT8 backbone + FP32 head
+- `tflite_backbone_only`: fully INT8 backbone (no separate head), optional output correction model
+
+Outputs:
 - `metrics_per_img.csv` (per-frame metrics)
 - `metrics_per_gt.csv` (GT-centric detections, with TP/FN and match ids)
 - `metrics_per_pred.csv` (Pred-centric detections, with TP/FP and match ids)
-- `metrics_global.json` (YOLO global metrics from `val_result.results_dict`)
+- `metrics_global.json` (global metrics dict from validator)
+- `predictions.json` (Ultralytics-compatible schema used by downstream CSV logic)
 
 Example:
 ```bash
 python people_detection_pg2/extended_evaluation_metrics/evaluation.py --env-file people_detection_pg2/extended_evaluation_metrics/.env
 ```
+
+Required `.env` keys for backend selection:
+- Common:
+  - `EVAL_BACKEND=ultralytics_pt|tflite_mixed|tflite_backbone_only`
+  - `DATASET_PTH`, `PROJECT`, `PROJECT_NAME`, `PREDICTIONS_PTH`, `GLOBAL_METRICS_PTH`
+  - `CONF_TH`, `IOU_TH`, `INPUT_WIDTH`, `BATCH`, `DEVICE`
+- PT backend:
+  - `WEIGHTS_PTH`
+- TFLite mixed:
+  - `WEIGHTS_PTH` (used only for Ultralytics validator metadata/class names)
+  - `TFLITE_BACKBONE_PTH`
+  - `TFLITE_HEAD_PTH`
+- TFLite backbone-only:
+  - `WEIGHTS_PTH`
+  - `TFLITE_BACKBONE_PTH`
+  - `TFLITE_OUTPUT_CORRECTION_MODEL_PTH` (optional)
 
 ### `visualize_detections.py`
 

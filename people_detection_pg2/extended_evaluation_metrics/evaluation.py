@@ -2,8 +2,11 @@
 from __future__ import annotations
 
 import argparse
+import functools
 import json
 import os
+import shutil
+import inspect
 from pathlib import Path
 
 import numpy as np
@@ -113,6 +116,175 @@ def _load_env() -> None:
     load_dotenv(env_path)
 
 
+def _normalize_validator_device(device):
+    if isinstance(device, list):
+        return device
+    if device is None:
+        return ["cpu"]
+    return [device]
+
+
+def _resolve_image_filename(raw_image_id: str, imgs_pth: str, cache: dict[str, str]) -> str:
+    if raw_image_id in cache:
+        return cache[raw_image_id]
+
+    p = Path(imgs_pth) / raw_image_id
+    if p.exists():
+        cache[raw_image_id] = raw_image_id
+        return raw_image_id
+
+    stem = Path(raw_image_id).stem
+    matches = sorted(Path(imgs_pth).glob(f"{stem}.*"))
+    if matches:
+        rel = matches[0].name
+        cache[raw_image_id] = rel
+        return rel
+
+    # Fallback for common case from validator where image_id is stem without extension.
+    guess = f"{raw_image_id}.jpg"
+    cache[raw_image_id] = guess
+    return guess
+
+
+def _run_pt_validation(
+    model: YOLO,
+    dataset_pth: str,
+    device,
+    batch: int,
+    tuned_conf: float,
+    tuned_iou: float,
+    project_dir: str,
+    project_name: str,
+):
+    return model.val(
+        data=dataset_pth,
+        task="pose",
+        device=device,
+        batch=batch,
+        verbose=True,
+        conf=tuned_conf,
+        iou=tuned_iou,
+        project=project_dir,
+        name=project_name,
+        exist_ok=True,
+        save_json=True,
+    )
+
+
+def _build_tflite_inferer(
+    backend: str,
+    tuned_conf: float,
+    tuned_iou: float,
+    input_w: int,
+    tflite_backbone_pth: str,
+    tflite_head_pth: str,
+    tflite_output_correction_model_pth: str,
+):
+    inferer_cls = None
+    emulator_src = "/home/klymy/projects/algo_system_emulator/src"
+    if Path(emulator_src).exists():
+        if emulator_src not in sys.path:
+            sys.path.append(emulator_src)
+        try:
+            from alif.tflite_inference import TFLiteInferer as _Inferer
+
+            inferer_cls = _Inferer
+        except Exception as e:
+            print(f"Warning: failed to import emulator TFLiteInferer ({e}), using local inferer.")
+
+    if inferer_cls is None:
+        people_det_root = str(Path(__file__).resolve().parents[1])
+        if people_det_root not in sys.path:
+            sys.path.append(people_det_root)
+        from tflite_inference import TFLiteInferer as _Inferer
+
+        inferer_cls = _Inferer
+
+    head_pth = tflite_head_pth if backend == "tflite_mixed" else None
+    kwargs = dict(
+        yolo_pth=tflite_backbone_pth,
+        head_pth=head_pth,
+        conf_th=tuned_conf,
+        iou_th=tuned_iou,
+        imgsz=input_w,
+        separated_head=False,
+        head_int8=False,
+    )
+
+    if backend == "tflite_backbone_only" and tflite_output_correction_model_pth:
+        sig = inspect.signature(inferer_cls.__init__)
+        if "output_correction_model_path" in sig.parameters:
+            kwargs["output_correction_model_path"] = tflite_output_correction_model_pth
+        else:
+            raise ValueError(
+                "Selected TFLite inferer does not support output_correction_model_path, "
+                "but TFLITE_OUTPUT_CORRECTION_MODEL_PTH is set."
+            )
+
+    return inferer_cls(**kwargs)
+
+
+def _run_tflite_validation(
+    model: YOLO,
+    dataset_pth: str,
+    project_dir: str,
+    project_name: str,
+    batch: int,
+    device,
+    input_w: int,
+    tuned_conf: float,
+    tuned_iou: float,
+    backend: str,
+    tflite_backbone_pth: str,
+    tflite_head_pth: str,
+    tflite_output_correction_model_pth: str,
+):
+    people_det_root = str(Path(__file__).resolve().parents[1])
+    if people_det_root not in sys.path:
+        sys.path.append(people_det_root)
+    import ultralytics_validator_wrapper
+
+    inferer = _build_tflite_inferer(
+        backend=backend,
+        tuned_conf=tuned_conf,
+        tuned_iou=tuned_iou,
+        input_w=input_w,
+        tflite_backbone_pth=tflite_backbone_pth,
+        tflite_head_pth=tflite_head_pth,
+        tflite_output_correction_model_pth=tflite_output_correction_model_pth,
+    )
+
+    val_args = dict(
+        task="pose",
+        device=_normalize_validator_device(device),
+        batch=batch,
+        verbose=True,
+        conf=tuned_conf,
+        iou=tuned_iou,
+        imgsz=input_w,
+        model="val",
+        rect=False,
+        single_cls=False,
+        save_json=True,
+        save_txt=False,
+        plots=False,
+        split="val",
+        project=project_dir,
+        name=project_name,
+        exist_ok=True,
+        data=dataset_pth,
+        val=True,
+    )
+
+    stats = ultralytics_validator_wrapper.validate_model(
+        val_args,
+        model,
+        functools.partial(ultralytics_validator_wrapper.predict_tflite, inferer, val_args),
+        draw=False,
+    )
+    return stats if isinstance(stats, dict) else {}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Run YOLO validation and per-frame metrics export.")
     ap.add_argument(
@@ -163,8 +335,21 @@ def main() -> int:
         "BASE_EXPERIMENT_DIR",
         "../results/cam3_revB_batch1_12_margin_15_wb_alif_clahe_box_01_dfl_01_2nd",
     )
+    eval_backend = (_env("EVAL_BACKEND", "ultralytics_pt") or "ultralytics_pt").strip().lower()
     base_weights_dir = os.path.join(base_experiment_dir, "weights")
-    weights_pth = _env("WEIGHTS_PTH", os.path.join(base_weights_dir, "best.pt"))
+    pt_weights_default = os.path.join(base_weights_dir, "best.pt")
+    tflite_backbone_only_default = os.path.join(
+        base_weights_dir, "best_non_separated_saved_model", "best_full_integer_quant.tflite"
+    )
+    tflite_mixed_backbone_default = os.path.join(
+        base_weights_dir, "best_saved_model", "best_full_integer_quant.tflite"
+    )
+    tflite_mixed_head_default = os.path.join(
+        base_weights_dir, "head_saved_model", "head_float32.tflite"
+    )
+
+    # Keep WEIGHTS_PTH optional as an override for validator metadata model.
+    weights_pth = _env("WEIGHTS_PTH", pt_weights_default)
 
     if os.path.exists(os.path.join(base_experiment_dir, "inference_params.json")):
         with open(os.path.join(base_experiment_dir, "inference_params.json"), "r") as f:
@@ -176,8 +361,9 @@ def main() -> int:
         tuned_iou = float(_env("IOU_TH", "0.50"))
 
     project_dir = _env("PROJECT", os.path.join(os.getcwd(), "val"))
+    project_name = _env("PROJECT_NAME", f"{os.path.basename(base_experiment_dir)}__{eval_backend}")
     exp_name = _env("EXP_NAME", os.path.basename(base_experiment_dir))
-    predictions_pth = _env("PREDICTIONS_PTH", os.path.join(project_dir, exp_name, "predictions.json"))
+    predictions_pth = _env("PREDICTIONS_PTH", os.path.join(project_dir, project_name, "predictions.json"))
     global_metrics_pth = args.out_global_json or _env("GLOBAL_METRICS_PTH", "")
 
     detections_attr_csv = _env(
@@ -189,32 +375,90 @@ def main() -> int:
     out_gt_csv = args.out_gt_csv or _env("METRICS_PER_GT", "")
     out_pred_csv = args.out_pred_csv or _env("METRICS_PER_PRED", "")
 
+    if eval_backend == "tflite_mixed":
+        tflite_backbone_pth = _env("TFLITE_BACKBONE_PTH", tflite_mixed_backbone_default)
+        tflite_head_pth = _env("TFLITE_HEAD_PTH", tflite_mixed_head_default)
+    elif eval_backend == "tflite_backbone_only":
+        tflite_backbone_pth = _env("TFLITE_BACKBONE_PTH", tflite_backbone_only_default)
+        tflite_head_pth = ""
+    else:
+        tflite_backbone_pth = _env("TFLITE_BACKBONE_PTH", "")
+        tflite_head_pth = _env("TFLITE_HEAD_PTH", "")
+    tflite_output_correction_model_pth = _env("TFLITE_OUTPUT_CORRECTION_MODEL_PTH", "")
+
     device = _parse_device(_env("DEVICE", None))
     batch = int(_env("BATCH", "64"))
 
+    if not os.path.exists(weights_pth):
+        raise FileNotFoundError(
+            f"Validator PT weights not found: {weights_pth}. "
+            "Set BASE_EXPERIMENT_DIR correctly or override WEIGHTS_PTH."
+        )
     model = YOLO(weights_pth, task="pose")
 
     force_val = _env("FORCE_VAL", "0") == "1"
-    print(f"Force validation: {force_val}")
+    print(f"Force validation: {force_val}; backend: {eval_backend}")
     val_result = None
+    gm = {}
     if force_val or not os.path.exists(predictions_pth):
-        val_result = model.val(
-            data=dataset_pth,
-            task="pose",
-            device=device,
-            batch=batch,
-            verbose=True,
-            conf=tuned_conf,
-            iou=tuned_iou,
-            project=project_dir,
-            name=exp_name,
-            exist_ok=True,
-            save_json=True,
-        )
-        print(f"Validation completed. Predictions saved to: {predictions_pth}")
-    if val_result is not None:
-        try:
+        if eval_backend == "ultralytics_pt":
+            val_result = _run_pt_validation(
+                model=model,
+                dataset_pth=dataset_pth,
+                device=device,
+                batch=batch,
+                tuned_conf=tuned_conf,
+                tuned_iou=tuned_iou,
+                project_dir=project_dir,
+                project_name=project_name,
+            )
             gm = val_result.results_dict if hasattr(val_result, "results_dict") else {}
+        elif eval_backend in {"tflite_mixed", "tflite_backbone_only"}:
+            if not tflite_backbone_pth:
+                raise ValueError("TFLITE_BACKBONE_PTH is required for TFLite backends.")
+            if not os.path.exists(tflite_backbone_pth):
+                raise FileNotFoundError(f"TFLite backbone model not found: {tflite_backbone_pth}")
+            if eval_backend == "tflite_mixed" and not tflite_head_pth:
+                raise ValueError("TFLITE_HEAD_PTH is required for tflite_mixed backend.")
+            if eval_backend == "tflite_mixed" and not os.path.exists(tflite_head_pth):
+                raise FileNotFoundError(f"TFLite head model not found: {tflite_head_pth}")
+            if eval_backend == "tflite_backbone_only":
+                if tflite_output_correction_model_pth:
+                    if not os.path.exists(tflite_output_correction_model_pth):
+                        raise FileNotFoundError(
+                            f"Output correction model not found: {tflite_output_correction_model_pth}"
+                        )
+                    print(f"Using output correction model: {tflite_output_correction_model_pth}")
+                else:
+                    print("No output correction model provided; running without correction.")
+
+            gm = _run_tflite_validation(
+                model=model,
+                dataset_pth=dataset_pth,
+                project_dir=project_dir,
+                project_name=project_name,
+                batch=batch,
+                device=device,
+                input_w=input_w,
+                tuned_conf=tuned_conf,
+                tuned_iou=tuned_iou,
+                backend=eval_backend,
+                tflite_backbone_pth=tflite_backbone_pth,
+                tflite_head_pth=tflite_head_pth,
+                tflite_output_correction_model_pth=tflite_output_correction_model_pth,
+            )
+        else:
+            raise ValueError(f"Unsupported EVAL_BACKEND: {eval_backend}")
+
+        generated_predictions_pth = os.path.join(project_dir, project_name, "predictions.json")
+        if generated_predictions_pth != predictions_pth and os.path.exists(generated_predictions_pth):
+            Path(predictions_pth).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(generated_predictions_pth, predictions_pth)
+            print(f"Copied predictions to: {predictions_pth}")
+
+        print(f"Validation completed. Predictions saved to: {predictions_pth}")
+    if gm:
+        try:
             Path(global_metrics_pth).parent.mkdir(parents=True, exist_ok=True)
             with open(global_metrics_pth, "w") as f:
                 json.dump(gm, f, indent=2)
@@ -226,11 +470,13 @@ def main() -> int:
         predictions = json.load(f)
 
     predictions_by_id: dict[str, list] = {}
+    image_id_cache: dict[str, str] = {}
     for pred in predictions:
-        img_id = pred["image_id"]
-        predictions_by_id.setdefault(img_id, []).append(pred)
-
-    frames_attrs = None
+        raw_img_id = str(pred["image_id"])
+        img_id = _resolve_image_filename(raw_img_id, imgs_pth, image_id_cache)
+        pred_norm = dict(pred)
+        pred_norm["image_id"] = img_id
+        predictions_by_id.setdefault(img_id, []).append(pred_norm)
 
     metrics_rows = []
     img_sizes: dict[str, tuple[int, int]] = {}

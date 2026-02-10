@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from ultralytics.models.yolo.pose import PoseValidator
 from ultralytics.data.utils import check_det_dataset
-from ultralytics.utils import TQDM
+from ultralytics.utils import TQDM, LOGGER, colorstr
 
 
 def print_metrics(metrics, conf_th=0, draw=True):
@@ -56,9 +56,7 @@ def validate_model(args, ultralytics_model, predict_f, draw=True):
     validator = PoseValidator(args=args)
     validator.data = check_det_dataset(args["data"])
 
-    # model.eval()
-
-    validator.device = args["device"][0]
+    validator.device = args["device"][0] if isinstance(args["device"], (list, tuple)) else args["device"]
     validator.stride = 32
     dataloader = validator.get_dataloader(validator.data.get(validator.args.split), validator.args.batch)
 
@@ -75,7 +73,22 @@ def validate_model(args, ultralytics_model, predict_f, draw=True):
     validator.finalize_metrics()
     validator.print_results()
 
+    # Keep behavior aligned with ultralytics BaseValidator.__call__ non-training path:
+    # persist predictions.json (if requested) and optionally run json evaluation hook.
+    if validator.args.save_json and validator.jdict:
+        pred_json = validator.save_dir / "predictions.json"
+        with open(str(pred_json), "w", encoding="utf-8") as f:
+            LOGGER.info(f"Saving {f.name}...")
+            import json
+
+            json.dump(validator.jdict, f)
+        stats = validator.eval_json(stats)
+
+    if validator.args.plots or validator.args.save_json:
+        LOGGER.info(f"Results saved to {colorstr('bold', validator.save_dir)}")
+
     print_metrics(validator.metrics, args["conf"], draw)
+    return stats
 
 
 def predict_ultralytics(model, args, batch):
@@ -99,7 +112,10 @@ def predict_tflite(model, args, batch):
     for i in batch["img"]:
         input_data = i.detach().cpu().numpy()
         input_data = (np.transpose(input_data, (1, 2, 0)) * 255).astype(np.uint8)
-        dets = model.infer(input_data[None]).astype(np.float32)
+        if getattr(model, "head_pth", None):
+            dets = model.infer(input_data[None]).astype(np.float32)
+        else:
+            dets = model.infer_bottleneck(input_data).astype(np.float32)
         if dets.shape[0] == 0:
             dets = np.empty((0, 8), dtype=np.float32)
         else:
