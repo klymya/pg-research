@@ -6,6 +6,14 @@ import os
 from pathlib import Path
 from tqdm import tqdm
 
+import matplotlib
+
+# This script renders and saves images; using a GUI backend (TkAgg/QtAgg/...) can be
+# dramatically slower depending on the environment. Default to the non-interactive
+# Agg backend unless the user explicitly selects a backend via MPLBACKEND.
+if os.environ.get("MPLBACKEND") is None:
+    matplotlib.use("Agg")
+
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import pandas as pd
