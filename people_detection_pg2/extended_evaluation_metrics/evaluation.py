@@ -451,10 +451,22 @@ def main() -> int:
             raise ValueError(f"Unsupported EVAL_BACKEND: {eval_backend}")
 
         generated_predictions_pth = os.path.join(project_dir, project_name, "predictions.json")
-        if generated_predictions_pth != predictions_pth and os.path.exists(generated_predictions_pth):
-            Path(predictions_pth).parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(generated_predictions_pth, predictions_pth)
-            print(f"Copied predictions to: {predictions_pth}")
+        if os.path.exists(generated_predictions_pth):
+            src = Path(generated_predictions_pth)
+            dst = Path(predictions_pth)
+            same = False
+            try:
+                if dst.exists():
+                    same = os.path.samefile(src, dst)
+                else:
+                    same = src.resolve(strict=False) == dst.resolve(strict=False)
+            except OSError:
+                same = src.resolve(strict=False) == dst.resolve(strict=False)
+
+            if not same:
+                dst.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(str(src), str(dst))
+                print(f"Copied predictions to: {predictions_pth}")
 
         print(f"Validation completed. Predictions saved to: {predictions_pth}")
     if gm:
