@@ -146,6 +146,14 @@ def _resolve_image_filename(raw_image_id: str, imgs_pth: str, cache: dict[str, s
     return guess
 
 
+def _list_image_files(imgs_pth: str) -> list[str]:
+    img_exts = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff"}
+    p = Path(imgs_pth)
+    if not p.exists():
+        return []
+    return sorted([x.name for x in p.iterdir() if x.is_file() and x.suffix.lower() in img_exts])
+
+
 def _run_pt_validation(
     model: YOLO,
     dataset_pth: str,
@@ -493,7 +501,19 @@ def main() -> int:
     metrics_rows = []
     img_sizes: dict[str, tuple[int, int]] = {}
 
-    for img_id, preds in tqdm(predictions_by_id.items(), total=len(predictions_by_id)):
+    all_img_ids = _list_image_files(imgs_pth)
+    if not all_img_ids:
+        all_img_ids = sorted(predictions_by_id.keys())
+
+    n_missing_preds = sum(1 for img_id in all_img_ids if img_id not in predictions_by_id)
+    if n_missing_preds:
+        print(
+            f"Warning: {n_missing_preds}/{len(all_img_ids)} images have no entries in predictions.json; "
+            "treating them as zero-detection frames."
+        )
+
+    for img_id in tqdm(all_img_ids, total=len(all_img_ids)):
+        preds = predictions_by_id.get(img_id, [])
         evaluator = MetricsEvaluator(
             is_relative_coordinates=True,
             is_xywh_coordinates=True,
@@ -508,7 +528,7 @@ def main() -> int:
         else:
             img_h, img_w = img_size
 
-        label_pth = os.path.join(labels_pth, img_id.replace(".jpg", ".txt"))
+        label_pth = os.path.join(labels_pth, str(Path(img_id).with_suffix(".txt")))
         with open(label_pth, "rt") as f:
             lines = f.readlines()
         for line in lines:
@@ -567,9 +587,10 @@ def main() -> int:
 
         gt_rows = []
         pred_rows = []
-        for img_id, preds in tqdm(predictions_by_id.items(), total=len(predictions_by_id), desc="Det-level"):
+        for img_id in tqdm(all_img_ids, total=len(all_img_ids), desc="Det-level"):
+            preds = predictions_by_id.get(img_id, [])
             yolo_id = _yolo_id_from_img_id(img_id)
-            label_pth = os.path.join(labels_pth, img_id.replace(".jpg", ".txt"))
+            label_pth = os.path.join(labels_pth, str(Path(img_id).with_suffix(".txt")))
             if not os.path.exists(label_pth):
                 continue
 
