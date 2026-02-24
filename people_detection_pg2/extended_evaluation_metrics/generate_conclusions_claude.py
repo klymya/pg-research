@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 import re
+import json
 import argparse
 from pathlib import Path
 
@@ -272,6 +273,65 @@ def analyze_report(notebook_path: str | Path, system_prompt: str) -> str:
     return response.text
 
 
+def parse_llm_output(raw_text: str) -> dict:
+    """Parse the LLM JSON response into a dict with ``conclusions`` and
+    ``data_collection_requirements`` keys.
+
+    Handles cases where the model wraps JSON in markdown code fences.
+    """
+    text = raw_text.strip()
+    # Strip optional ```json ... ``` wrapping
+    fence_match = re.search(r"```(?:json)?\s*(\{.*\})\s*```", text, re.DOTALL)
+    if fence_match:
+        text = fence_match.group(1)
+
+    data = json.loads(text)
+    for key in ("conclusions", "data_collection_requirements"):
+        if key not in data:
+            raise KeyError(f"LLM output missing required key: {key!r}")
+    return data
+
+
+def inject_into_notebook(
+    notebook_path: str | Path,
+    conclusions: str,
+    data_collection_requirements: str,
+) -> None:
+    """Replace placeholder cells in a .ipynb notebook.
+
+    Finds markdown cells whose source is exactly ``[conclusions]`` or
+    ``[data_collection_requirements]`` and replaces them with the provided
+    content.
+    """
+    notebook_path = Path(notebook_path)
+    with open(notebook_path, "r", encoding="utf-8") as f:
+        nb = json.load(f)
+
+    placeholders = {
+        "[conclusions]": conclusions,
+        "[data_collection_requirements]": data_collection_requirements,
+    }
+    replaced = set()
+
+    for cell in nb.get("cells", []):
+        if cell.get("cell_type") != "markdown":
+            continue
+        source = "".join(cell["source"]).strip()
+        if source in placeholders:
+            # Notebook stores source as a list of lines
+            cell["source"] = [placeholders[source]]
+            replaced.add(source)
+
+    missing = set(placeholders) - replaced
+    if missing:
+        print(f"Warning: placeholders not found in notebook: {missing}")
+
+    with open(notebook_path, "w", encoding="utf-8") as f:
+        json.dump(nb, f, ensure_ascii=False, indent=1)
+
+    print(f"Injected {len(replaced)} cell(s) into {notebook_path.name}")
+
+
 def main():
     ap = argparse.ArgumentParser(
         description="Generate conclusions and data collection requirements "
@@ -293,10 +353,17 @@ def main():
     project_path = _env("PROJECT_PTH", "")
     if project_path.startswith("/") and not project_path.startswith("/home/"):
         project_path = project_path[1:]
-    notebook_path = Path.home() / project_path / NOTEBOOK_NAME
+    html_path = Path.home() / project_path / NOTEBOOK_NAME
+    notebook_path = html_path.with_suffix(".ipynb")
 
-    result = analyze_report(notebook_path, SYSTEM_PROMT)
-    print(result)
+    raw_output = analyze_report(html_path, SYSTEM_PROMT)
+
+    data = parse_llm_output(raw_output)
+    inject_into_notebook(
+        notebook_path,
+        data["conclusions"],
+        data["data_collection_requirements"],
+    )
 
 
 if __name__ == "__main__":

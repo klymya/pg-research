@@ -70,11 +70,12 @@ NOTEBOOK_DST="${OUT_DIR}/extended_report.ipynb"
 cp -f "${NOTEBOOK_SRC}" "${NOTEBOOK_DST}"
 echo "Copied notebook to: ${NOTEBOOK_DST}"
 
-if command -v jupyter >/dev/null 2>&1; then
-  # jupyter nbconvert --to html --execute "${NOTEBOOK_DST}" \
-  #   --output "extended_report.html" \
-  #   --output-dir "${OUT_DIR}" \
-  #   --ExecutePreprocessor.timeout=600
+execute_and_export_notebook() {
+  if ! command -v jupyter >/dev/null 2>&1; then
+    echo "Warning: 'jupyter' not found; skipping notebook execution/export." >&2
+    return 1
+  fi
+
   jupyter nbconvert --execute --to notebook --inplace "${NOTEBOOK_DST}" \
     --ExecutePreprocessor.timeout=600
 
@@ -82,6 +83,13 @@ if command -v jupyter >/dev/null 2>&1; then
     --output "extended_report.html" \
     --output-dir "${OUT_DIR}"
   echo "Exported HTML to: ${OUT_DIR}/extended_report.html"
-else
-  echo "Warning: 'jupyter' not found; skipping notebook execution/export." >&2
-fi
+}
+
+# 1st pass: execute notebook and export HTML for Claude to analyze
+execute_and_export_notebook
+
+# Generate conclusions and inject them into the .ipynb
+python "${SCRIPT_DIR}/generate_conclusions_claude.py"
+
+# 2nd pass: re-execute notebook (now with conclusions) and export final HTML
+execute_and_export_notebook

@@ -78,14 +78,10 @@ def draw_annotations(image_path, annotations):
     return image
 
 
-def draw_test_sample(annotations: dict, root_img_pth: str):
+def draw_test_sample(annotations: dict, root_img_pth: str, n=9, n_rows=3, n_cols=3):
     count = 0
-    N = 9
 
-    n_rows = 3
-    n_cols = 3
-
-    plt.figure(figsize=(17, 12))
+    plt.figure(figsize=(n_cols * 5 + 2, n_rows * 4))
     for image_name, annotation in annotations.items():
         image_path = os.path.join(root_img_pth, image_name)  # Adjust this if images are in a different directory
         annotated_image = draw_annotations(image_path, annotation)
@@ -95,5 +91,5 @@ def draw_test_sample(annotations: dict, root_img_pth: str):
         plt.title(image_name, fontsize=7)
         plt.axis('off')
         count += 1
-        if count == N:
+        if count == n:
             break
