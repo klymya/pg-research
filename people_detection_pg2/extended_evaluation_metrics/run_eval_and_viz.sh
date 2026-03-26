@@ -7,10 +7,11 @@ Usage:
   run_eval_and_viz.sh /path/to/.env
 
 Runs sequentially:
-  1) evaluation.py
+  1) evaluation.py (single run or full parameter sweep from scratch)
   2) visualize_detections.py
   3) copy extended_report.ipynb into ${PROJECT_PTH}
   4) execute notebook + export HTML (nbconvert)
+  5) optionally generate conclusions via Claude and re-export final HTML
 
 The provided env file path is passed via ENV_PATH, and both Python scripts load
 their parameters from that file.
@@ -48,6 +49,8 @@ set -a
 source "${ENV_FILE}"
 set +a
 
+RUN_CONCLUSIONS_AGENT="${RUN_CONCLUSIONS_AGENT:-1}"
+
 OUT_DIR="${PROJECT_PTH-}"
 if [[ -z "${OUT_DIR}" ]]; then
   if [[ -n "${PROJECT-}" && -n "${PROJECT_NAME-}" ]]; then
@@ -63,7 +66,17 @@ if [[ "${OUT_DIR}" != /* ]]; then
   OUT_DIR="${ENV_DIR}/${OUT_DIR}"
 fi
 
+BEST_PARAMS_PTH="${BEST_PARAMS_PTH:-${OUT_DIR}/best_params.json}"
+SWEEP_RESULTS_PTH="${SWEEP_RESULTS_PTH:-${OUT_DIR}/sweep_results.csv}"
+
 mkdir -p "${OUT_DIR}"
+
+if [[ -f "${BEST_PARAMS_PTH}" ]]; then
+  echo "Selected params summary: ${BEST_PARAMS_PTH}"
+fi
+if [[ -f "${SWEEP_RESULTS_PTH}" ]]; then
+  echo "Sweep results: ${SWEEP_RESULTS_PTH}"
+fi
 
 NOTEBOOK_SRC="${SCRIPT_DIR}/extended_report.ipynb"
 NOTEBOOK_DST="${OUT_DIR}/extended_report.ipynb"
@@ -88,8 +101,12 @@ execute_and_export_notebook() {
 # 1st pass: execute notebook and export HTML for Claude to analyze
 execute_and_export_notebook
 
-# Generate conclusions and inject them into the .ipynb
-python "${SCRIPT_DIR}/generate_conclusions_claude.py"
+if [[ "${RUN_CONCLUSIONS_AGENT}" == "1" || "${RUN_CONCLUSIONS_AGENT,,}" == "true" || "${RUN_CONCLUSIONS_AGENT,,}" == "yes" ]]; then
+  # Generate conclusions and inject them into the .ipynb
+  python "${SCRIPT_DIR}/generate_conclusions_claude.py"
 
-# 2nd pass: re-execute notebook (now with conclusions) and export final HTML
-execute_and_export_notebook
+  # 2nd pass: re-execute notebook (now with conclusions) and export final HTML
+  execute_and_export_notebook
+else
+  echo "Skipping conclusions generation because RUN_CONCLUSIONS_AGENT=${RUN_CONCLUSIONS_AGENT}"
+fi

@@ -3,7 +3,7 @@ import os
 import glob
 
 
-BATHCH_NUMBERS = ["_testAccuracy"]
+BATHCH_NUMBERS = ["_H270_16-44-09"]
 ROOT_PTH = "/home/klymy/data/cam4_revB"
 DATA_TEMPLATE = "4.2_batch{number}"
 ANNOTATION_TEMPLATE = "batch{number}_corrected"

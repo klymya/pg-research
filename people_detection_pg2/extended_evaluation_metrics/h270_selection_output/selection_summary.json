@@ -1,0 +1,2090 @@
+{
+  "config": {
+    "selection_budget": 90,
+    "max_per_group": 15,
+    "min_per_group": 1,
+    "val_group_count": 2,
+    "val_fraction_groups": null,
+    "weight_f1": 0.35,
+    "weight_fn": 0.35,
+    "weight_fp": 0.15,
+    "weight_loc": 0.1,
+    "weight_conf": 0.05,
+    "pr_tolerance": 1e-06,
+    "drop_inconsistent_frames": true,
+    "posture_cap": null,
+    "position_cap": null,
+    "density_cap": null,
+    "materialize_dataset": true,
+    "materialize_output_root": "/home/klymy/data/cam4_revB/yolo_dataset/batch_H270_16-44-09_selected"
+  },
+  "input_files": {
+    "metrics_per_img": "/home/klymy/projects/researches/people_detection_pg2/extended_evaluation_metrics/val_H270_16-44-09/cam3_revB_batch1_12_margin_15_wb_alif_clahe_box_01_dfl_01_2nd__batch_H270_16-44-09_margin_10_wb_alif_clahe__tflite_backbone_only/metrics_per_img.csv",
+    "metrics_per_gt": "/home/klymy/projects/researches/people_detection_pg2/extended_evaluation_metrics/val_H270_16-44-09/cam3_revB_batch1_12_margin_15_wb_alif_clahe_box_01_dfl_01_2nd__batch_H270_16-44-09_margin_10_wb_alif_clahe__tflite_backbone_only/metrics_per_gt.csv",
+    "metrics_per_pred": "/home/klymy/projects/researches/people_detection_pg2/extended_evaluation_metrics/val_H270_16-44-09/cam3_revB_batch1_12_margin_15_wb_alif_clahe_box_01_dfl_01_2nd__batch_H270_16-44-09_margin_10_wb_alif_clahe__tflite_backbone_only/metrics_per_pred.csv",
+    "frames_attributes": "/home/klymy/projects/researches/people_detection_pg2/extended_evaluation_metrics/holdout_H270_16-44-09/frames_attributes.csv",
+    "detections_attributes": "/home/klymy/projects/researches/people_detection_pg2/extended_evaluation_metrics/holdout_H270_16-44-09/detections_attributes.csv",
+    "groups_csv": "/home/klymy/data/cam4_revB/4.2_batch_H270_16-44-09_groups.csv",
+    "subsets_json": "/home/klymy/data/cam4_revB/train_val_holdout_subsets_batches_H270_16-44-09.json",
+    "dataset_root": "/home/klymy/data/cam4_revB/yolo_dataset/batch_H270_16-44-09_margin_10_wb_alif_clahe"
+  },
+  "total_frames": 699,
+  "eligible_frames": 699,
+  "selected_frames": 90,
+  "train_frames": 60,
+  "val_frames": 30,
+  "selected_groups": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "rejected_groups": [],
+  "train_groups": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    7
+  ],
+  "val_groups": [
+    6,
+    8
+  ],
+  "score_stats": {
+    "min": 0.026844833929063408,
+    "max": 0.6438272771826252,
+    "mean": 0.29322793508552286,
+    "selected_mean": 0.4948968438233963
+  },
+  "validation": {
+    "validation_passed": true,
+    "pr_inconsistency_count": 1,
+    "dropped_inconsistent_frames_count": 1,
+    "dropped_inconsistent_frame_ids": [
+      "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_2"
+    ],
+    "drop_inconsistent_frames_enabled": true,
+    "gt_count_mismatch_count": 189,
+    "gt_count_authoritative_source": "metrics_per_gt.csv",
+    "ranked_output_sorted_by": [
+      "usefulness_score_desc",
+      "group_id_asc",
+      "frame_index_asc",
+      "img_id_asc"
+    ]
+  },
+  "exclusions": [
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_689",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_684",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_652",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_650",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_675",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_653",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_545",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_520",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_518",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_550",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_535",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_533",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_551",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_547",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_553",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_522",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_552",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_530",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_538",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_529",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_525",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_500",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_569",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_557",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_531",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_561",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_570",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_668",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_497",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_654",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_563",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_543",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_519",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_556",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_568",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_680",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_671",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_687",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_571",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_540",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_670",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_676",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_660",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_677",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_664",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_694",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_683",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_685",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_697",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_514",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_690",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_688",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_672",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_659",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_691",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_692",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_516",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_663",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_656",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_658",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_662",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_673",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_686",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_674",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_495",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_51",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_36",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_507",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_58",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_32",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_57",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_26",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_3",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_59",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_5",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_7",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_4",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_498",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_508",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_496",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_503",
+      "reason": "max_per_group"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_491",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_232",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_488",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_177",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_268",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_106",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_364",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_510",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_362",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_227",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_492",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_377",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_41",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_396",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_418",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_365",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_50",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_415",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_504",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_40",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_281",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_54",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_86",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_554",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_506",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_33",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_48",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_111",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_85",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_110",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_363",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_157",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_348",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_154",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_392",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_598",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_541",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_398",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_490",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_47",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_196",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_376",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_542",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_566",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_12",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_224",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_226",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_17",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_162",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_230",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_188",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_361",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_225",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_369",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_184",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_263",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_494",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_150",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_588",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_191",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_619",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_45",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_116",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_53",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_305",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_19",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_302",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_38",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_37",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_203",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_299",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_193",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_536",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_346",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_103",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_171",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_117",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_18",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_42",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_616",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_329",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_303",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_24",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_119",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_617",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_201",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_144",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_187",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_27",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_190",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_402",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_524",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_292",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_22",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_143",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_28",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_406",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_31",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_11",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_82",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_179",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_83",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_198",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_638",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_301",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_537",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_13",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_43",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_25",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_300",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_126",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_351",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_401",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_152",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_139",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_639",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_29",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_521",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_124",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_180",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_115",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_614",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_293",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_182",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_16",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_400",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_23",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_340",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_21",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_523",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_331",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_84",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_509",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_243",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_199",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_527",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_181",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_416",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_245",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_140",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_15",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_69",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_6",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_610",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_186",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_327",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_205",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_528",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_68",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_567",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_244",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_155",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_44",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_142",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_517",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_20",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_67",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_185",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_14",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_192",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_146",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_8",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_10",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_148",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_70",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_526",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_9",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_77",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_487",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_419",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_481",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_449",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_456",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_194",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_385",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_430",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_446",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_479",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_195",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_465",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_447",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_448",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_469",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_439",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_424",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_380",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_466",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_444",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_428",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_422",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_458",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_429",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_463",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_426",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_382",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_389",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_307",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_238",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_441",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_290",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_240",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_501",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_241",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_200",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_575",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_583",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_370",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_204",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_513",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_367",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_345",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_344",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_347",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_332",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_81",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_349",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_368",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_637",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_593",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_343",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_91",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_357",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_30",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_169",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_210",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_350",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_218",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_602",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_372",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_78",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_87",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_208",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_220",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_626",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_274",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_371",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_255",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_107",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_173",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_341",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_628",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_596",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_620",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_572",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_246",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_634",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_325",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_178",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_625",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_640",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_284",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_601",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_594",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_175",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_342",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_105",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_493",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_600",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_215",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_209",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_339",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_603",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_216",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_373",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_267",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_270",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_172",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_698",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_272",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_539",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_217",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_109",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_629",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_151",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_219",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_643",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_374",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_75",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_256",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_212",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_624",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_641",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_505",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_163",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_630",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_599",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_258",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_621",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_221",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_699",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_264",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_273",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_164",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_605",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_609",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_278",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_597",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_257",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_118",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_604",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_595",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_127",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_170",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_214",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_631",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_612",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_161",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_131",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_213",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_120",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_145",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_153",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_223",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_189",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_128",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_613",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_129",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_123",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_606",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_121",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_375",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_122",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_104",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_611",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_618",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_125",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_635",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_211",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_622",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_159",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_633",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_132",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_615",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_137",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_176",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_138",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_130",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_160",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_113",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_623",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_136",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_156",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_222",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_183",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_147",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_206",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_133",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_608",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_250",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_158",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_636",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_174",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_114",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_642",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_135",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_141",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_112",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_134",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_632",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_607",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_207",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_149",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_379",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_410",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_417",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_395",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_453",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_478",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_440",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_454",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_411",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_378",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_480",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_452",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_477",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_420",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_450",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_397",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_405",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_451",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_414",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_476",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_468",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_383",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_457",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_436",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_435",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_455",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_393",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_298",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_474",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_431",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_443",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_473",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_413",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_434",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_403",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_394",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_532",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_464",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_467",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_310",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_408",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_381",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_483",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_386",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_475",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_460",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_437",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_399",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_461",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_576",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_471",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_470",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_387",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_239",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_442",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_459",
+      "reason": "budget_exhausted"
+    },
+    {
+      "yolo_id": "4.2_batch_H270_16-44-09____4.2_H_cam_270_menivim10_hallway_472",
+      "reason": "budget_exhausted"
+    }
+  ],
+  "excluded_reason_counts": {
+    "budget_exhausted": 528,
+    "max_per_group": 81
+  }
+}

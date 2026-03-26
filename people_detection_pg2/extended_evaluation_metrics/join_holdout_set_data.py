@@ -88,6 +88,20 @@ def yolo_id_from_cvat_image_name(name: str, prefix: str = "") -> str:
     return f"{prefix}{stem}"
 
 
+def yolo_id_from_label_path(path: str) -> str:
+    # Support labels created from source images whose filename still carries an
+    # image extension, e.g. "frame.png.txt" -> "frame", without breaking ids
+    # that contain dots such as "4.2_batch...".
+    name = Path(path).name
+    if name.endswith(".txt"):
+        name = name[:-4]
+    for ext in (".jpg", ".jpeg", ".png", ".tif", ".tiff"):
+        if name.endswith(ext):
+            name = name[: -len(ext)]
+            break
+    return name
+
+
 def _cvat_obj_id(el: ET.Element) -> str | None:
     attr = el.find("attribute[@name='ID']")
     if attr is None or attr.text is None:
@@ -688,7 +702,7 @@ def main() -> int:
         return {"yolo": y_idx, "xml": x_idx}
 
     for yp in yolo_paths:
-        yolo_id = Path(yp).with_suffix("").name
+        yolo_id = yolo_id_from_label_path(yp)
         xml_rec = by_yolo_id.get(yolo_id)
         yolo_dets = parse_yolo_label_file(yp)
 

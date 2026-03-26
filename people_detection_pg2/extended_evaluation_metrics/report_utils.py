@@ -48,6 +48,7 @@ GT_METRICS = Path(os.getenv("METRICS_PER_GT", str(BASE / "metrics_per_gt.csv")))
 PRED_METRICS = Path(os.getenv("METRICS_PER_PRED", str(BASE / "metrics_per_pred.csv")))
 DET_ATTRS = Path(os.getenv("DETECTIONS_ATTRS", str(HOLDOUT / "detections_attributes.csv")))
 GLOBAL_METRICS = Path(os.getenv("GLOBAL_METRICS_PTH", str(BASE / "val" / "global_metrics.json")))
+BEST_PARAMS = Path(os.getenv("BEST_PARAMS_PTH", str(BASE / "val" / "best_params.json")))
 
 TOP_N = int(os.getenv("TOP_N", "20"))
 F1_BINS = [float(x) for x in os.getenv("F1_BINS", "0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0").split(",")]
@@ -69,10 +70,29 @@ def section_a_global_metrics():
     if GLOBAL_METRICS.exists():
         with open(GLOBAL_METRICS) as f:
             gm = json.load(f)
+    best_params = None
+    if BEST_PARAMS.exists():
+        with open(BEST_PARAMS) as f:
+            best_params = json.load(f)
     if gm is None:
         print('Global metrics not found; falling back to per-image mean')
         metrics_img = pd.read_csv(METRICS_IMG)
         display(metrics_img[['P','R','F1','AP']].mean().to_frame('mean'))
+        if best_params is not None:
+            best_df = pd.DataFrame(
+                [
+                    {
+                        "selection_metric": best_params.get("selection_metric", "f1"),
+                        "selected_metric_value": best_params.get("selected_metric_value"),
+                        "selection_source": best_params.get("selection_source"),
+                        "conf_th": best_params.get("conf_th"),
+                        "iou_th": best_params.get("iou_th"),
+                        "num_candidates": best_params.get("num_candidates"),
+                        "mode": best_params.get("mode"),
+                    }
+                ]
+            )
+            display(best_df)
         return
     def _get(k):
         return gm.get(k, None)
@@ -89,6 +109,21 @@ def section_a_global_metrics():
     }
     df = pd.DataFrame(data).T
     display(df.round(3))
+    if best_params is not None:
+        best_df = pd.DataFrame(
+            [
+                {
+                    "selection_metric": best_params.get("selection_metric", "f1"),
+                    "selected_metric_value": best_params.get("selected_metric_value"),
+                    "selection_source": best_params.get("selection_source"),
+                    "conf_th": best_params.get("conf_th"),
+                    "iou_th": best_params.get("iou_th"),
+                    "num_candidates": best_params.get("num_candidates"),
+                    "mode": best_params.get("mode"),
+                }
+            ]
+        )
+        display(best_df.round(4))
 
 # ===== SECTION B =====
 
