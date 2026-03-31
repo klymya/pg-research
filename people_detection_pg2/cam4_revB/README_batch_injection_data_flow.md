@@ -176,6 +176,7 @@ Notes:
 
 File:
 
+- [filter_small_bboxes.py](/home/klymy/projects/researches/people_detection_pg2/cam4_revB/filter_small_bboxes.py)
 - [filter_small_bboxes_v2.ipynb](/home/klymy/projects/researches/people_detection_pg2/cam4_revB/filter_small_bboxes_v2.ipynb)
 
 Purpose:
@@ -194,7 +195,7 @@ Outputs:
 Key parameters:
 
 - `MARGIN = 0.10`
-- `MIN_INSIDE_RATIO = 0.10`
+- `MIN_INSIDE_RATIO = 0.01`
 
 Logic:
 
@@ -204,7 +205,8 @@ Logic:
   - bbox area
   - intersection area with the inner box
   - `inside_ratio = intersection_area / bbox_area`
-- the annotation is removed when `inside_ratio <= 0.10`
+- the annotation is removed when `inside_ratio < 0.01`
+- invalid boxes with non-positive width or height are also removed and reported separately
 
 Algorithm used:
 
@@ -217,8 +219,9 @@ Why this matters:
 
 Important note:
 
-- this notebook replaces the older `filter_small_bboxes.ipynb`
-- the old version used a `min_margin` heuristic; the v2 version uses true overlap area, which is more correct
+- `filter_small_bboxes.py` is the current production implementation
+- `filter_small_bboxes_v2.ipynb` is the notebook reference for the same step
+- the older `filter_small_bboxes.ipynb` used a `min_margin` heuristic; the v2/script version uses true overlap area, which is more correct
 
 ### 5. Apply image preprocessing
 
