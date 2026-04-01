@@ -233,6 +233,7 @@ Important note:
 
 File:
 
+- [preprocess_dataset.py](/home/klymy/projects/researches/people_detection_pg2/cam4_revB/preprocess_dataset.py)
 - [white_balance_alif.ipynb](/home/klymy/projects/researches/people_detection_pg2/cam4_revB/white_balance_alif.ipynb)
 
 Helpers:
@@ -329,10 +330,16 @@ But it is not used in the executed export loop. The notebook writes only:
 - white balance only
 - white balance + CLAHE
 
+Notes:
+
+- `preprocess_dataset.py` is the current production implementation
+- `white_balance_alif.ipynb` is the notebook reference
+
 ### 6. Merge the processed batch into the accumulated dataset
 
 File:
 
+- [merge_yolo_datasets.py](/home/klymy/projects/researches/people_detection_pg2/cam4_revB/merge_yolo_datasets.py)
 - [update_dataset.ipynb](/home/klymy/projects/researches/people_detection_pg2/cam4_revB/update_dataset.ipynb)
 
 Purpose:
@@ -362,6 +369,7 @@ Algorithms used:
 
 Notes:
 
+- `merge_yolo_datasets.py` is the current production implementation
 - no new image preprocessing is applied here
 - this step defines the final dataset artifact used for training/evaluation
 
