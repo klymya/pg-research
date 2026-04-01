@@ -124,6 +124,7 @@ Notes:
 
 File:
 
+- [cvat2yolo_convert.py](/home/klymy/projects/researches/people_detection_pg2/cam4_revB/cvat2yolo_convert.py)
 - [cvat2yolo.ipynb](/home/klymy/projects/researches/people_detection_pg2/cam4_revB/cvat2yolo.ipynb)
 
 Helpers:
@@ -147,6 +148,8 @@ Outputs:
 - `images/train`, `images/val`, `images/holdout`
 - `labels/train`, `labels/val`, `labels/holdout`
 - `project.yaml` and `project_holdout.yaml`
+- `conversion_summary.json`
+- validation CSVs for skipped images and invalid annotations
 
 Logic:
 
@@ -166,9 +169,12 @@ Algorithms used:
 - coordinate normalization by image width and height
 - bbox conversion from corners to center-width-height
 - no photometric or geometric image enhancement
+- explicit validation of missing images, split mismatches, invalid bbox geometry, and normalized coordinates
 
 Notes:
 
+- `cvat2yolo_convert.py` is the current production implementation.
+- `cvat2yolo.ipynb` is the notebook reference.
 - This is annotation-format conversion plus file export.
 - It establishes the data representation used by later preprocessing.
 
