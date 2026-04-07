@@ -16,6 +16,7 @@ def test_extract_raw_scene_group_id_supports_historical_variants() -> None:
     cases = {
         "/home/klymy/data/cam4_revB/4.2_batch2/4.2_H260_me_2.tif": "4.2_h260_me",
         "/home/klymy/data/cam4_revB/4.2_batch2/4.2_H_cam_300_menivimlobby_22.tif": "4.2_h_cam_300_menivimlobby",
+        "/home/klymy/data/cam4_revB/4.2_batch7/4.2_H_cam_262_spacesMR_324 (1).tif": "4.2_h_cam_262_spacesmr",
         "/home/klymy/data/cam4_revB/yolo_dataset/batch12/images/train/4.2_batch12____4.2_H_cam_248_viasCEO_5.jpg": "4.2_h_cam_248_viasceo",
         "/home/klymy/data/cam4_revB/yolo_dataset/batch8_10_margin_15_wb_alif/images/train/4.2_H_cam_180__5.jpg": "4.2_h_cam_180_",
     }

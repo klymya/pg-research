@@ -1,7 +1,5 @@
 # Anti-Leakage Split Utility
 
-This utility implements the Task 1 split logic described in [task1_antileakage_review.md](/home/klymy/projects/researches/people_detection_pg2/cam4_revB/task1_antileakage_review.md).
-
 Main behaviors:
 
 - parse `raw_scene_group_id` from raw batch paths or YOLO-style filenames

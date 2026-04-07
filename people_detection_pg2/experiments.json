@@ -1,0 +1,110 @@
+[
+    {
+        "exp_name": "dataset_v2_cam4_revB_batch1_10_margin_10_yolov8_wb_alif_clahe",
+        "dataset": "/home/klymy/data/cam4_revB/yolo_dataset_v2/batch1_10_bg_margin_10_wb_alif_clahe",
+        "weights": "/home/klymy/projects/researches/people_detection_pg2/results/filtered_v3_margin_15/weights/best.pt",
+        "cfg": "yolov8-pose-tiny.yaml",
+        "yolo_kwargs": "{'box': 0.1, 'dfl': 0.1}",
+        "max_ncalib_imgs": 300,
+        "converted-output-folder-name": "best_non_separated_saved_model"
+    },
+    {
+        "exp_name": "dataset_v2_cam4_revB_batch1_10_margin_10_yolov8_rq_wb_alif_clahe",
+        "dataset": "/home/klymy/data/cam4_revB/yolo_dataset_v2/batch1_10_bg_margin_10_wb_alif_clahe",
+        "weights": "/home/klymy/projects/researches/people_detection_pg2/results/filtered_v3_margin_15_reduced_quality/weights/best.pt",
+        "cfg": "yolov8-pose-tiny.yaml",
+        "yolo_kwargs": "{'box': 0.1, 'dfl': 0.1}",
+        "max_ncalib_imgs": 300,
+        "converted-output-folder-name": "best_non_separated_saved_model"
+    },
+    {
+        "exp_name": "dataset_v2_cam4_revB_batch1_10_margin_10_yolov8n_wb_alif_clahe",
+        "dataset": "/home/klymy/data/cam4_revB/yolo_dataset_v2/batch1_10_bg_margin_10_wb_alif_clahe",
+        "weights": "/home/klymy/projects/researches/people_detection_pg2/results/filtered_v3_margin_15_yolov8n/weights/best.pt",
+        "cfg": "yolov8-pose.yaml",
+        "yolo_kwargs": "{'box': 0.1, 'dfl': 0.1}",
+        "max_ncalib_imgs": 300,
+        "converted-output-folder-name": "best_non_separated_saved_model"
+    },
+    {
+        "exp_name": "dataset_v2_cam4_revB_batch1_10_margin_10_yolov8n_rq_wb_alif_clahe",
+        "dataset": "/home/klymy/data/cam4_revB/yolo_dataset_v2/batch1_10_bg_margin_10_wb_alif_clahe",
+        "weights": "/home/klymy/projects/researches/people_detection_pg2/results/filtered_v3_margin_15_reduced_quality_yolov8n/weights/best.pt",
+        "cfg": "yolov8-pose.yaml",
+        "yolo_kwargs": "{'box': 0.1, 'dfl': 0.1}",
+        "max_ncalib_imgs": 300,
+        "converted-output-folder-name": "best_non_separated_saved_model"
+    },
+    {
+        "exp_name": "dataset_v2_cam4_revB_batch1_11_margin_10_yolov8_wb_alif_clahe",
+        "dataset": "/home/klymy/data/cam4_revB/yolo_dataset_v2/batch1_11_bg_margin_10_wb_alif_clahe",
+        "weights": "/home/klymy/projects/researches/people_detection_pg2/results/filtered_v3_margin_15/weights/best.pt",
+        "cfg": "yolov8-pose-tiny.yaml",
+        "yolo_kwargs": "{'box': 0.1, 'dfl': 0.1}",
+        "max_ncalib_imgs": 300,
+        "converted-output-folder-name": "best_non_separated_saved_model"
+    },
+    {
+        "exp_name": "dataset_v2_cam4_revB_batch1_11_margin_10_yolov8_rq_wb_alif_clahe",
+        "dataset": "/home/klymy/data/cam4_revB/yolo_dataset_v2/batch1_11_bg_margin_10_wb_alif_clahe",
+        "weights": "/home/klymy/projects/researches/people_detection_pg2/results/filtered_v3_margin_15_reduced_quality/weights/best.pt",
+        "cfg": "yolov8-pose-tiny.yaml",
+        "yolo_kwargs": "{'box': 0.1, 'dfl': 0.1}",
+        "max_ncalib_imgs": 300,
+        "converted-output-folder-name": "best_non_separated_saved_model"
+    },
+    {
+        "exp_name": "dataset_v2_cam4_revB_batch1_11_margin_10_yolov8n_wb_alif_clahe",
+        "dataset": "/home/klymy/data/cam4_revB/yolo_dataset_v2/batch1_11_bg_margin_10_wb_alif_clahe",
+        "weights": "/home/klymy/projects/researches/people_detection_pg2/results/filtered_v3_margin_15_yolov8n/weights/best.pt",
+        "cfg": "yolov8-pose.yaml",
+        "yolo_kwargs": "{'box': 0.1, 'dfl': 0.1}",
+        "max_ncalib_imgs": 300,
+        "converted-output-folder-name": "best_non_separated_saved_model"
+    },
+    {
+        "exp_name": "dataset_v2_cam4_revB_batch1_11_margin_10_yolov8n_rq_wb_alif_clahe",
+        "dataset": "/home/klymy/data/cam4_revB/yolo_dataset_v2/batch1_11_bg_margin_10_wb_alif_clahe",
+        "weights": "/home/klymy/projects/researches/people_detection_pg2/results/filtered_v3_margin_15_reduced_quality_yolov8n/weights/best.pt",
+        "cfg": "yolov8-pose.yaml",
+        "yolo_kwargs": "{'box': 0.1, 'dfl': 0.1}",
+        "max_ncalib_imgs": 300,
+        "converted-output-folder-name": "best_non_separated_saved_model"
+    },
+    {
+        "exp_name": "dataset_v2_cam4_revB_batch1_12_margin_10_yolov8_wb_alif_clahe",
+        "dataset": "/home/klymy/data/cam4_revB/yolo_dataset_v2/batch1_12_bg_margin_10_wb_alif_clahe",
+        "weights": "/home/klymy/projects/researches/people_detection_pg2/results/filtered_v3_margin_15/weights/best.pt",
+        "cfg": "yolov8-pose-tiny.yaml",
+        "yolo_kwargs": "{'box': 0.1, 'dfl': 0.1}",
+        "max_ncalib_imgs": 300,
+        "converted-output-folder-name": "best_non_separated_saved_model"
+    },
+    {
+        "exp_name": "dataset_v2_cam4_revB_batch1_12_margin_10_yolov8_rq_wb_alif_clahe",
+        "dataset": "/home/klymy/data/cam4_revB/yolo_dataset_v2/batch1_12_bg_margin_10_wb_alif_clahe",
+        "weights": "/home/klymy/projects/researches/people_detection_pg2/results/filtered_v3_margin_15_reduced_quality/weights/best.pt",
+        "cfg": "yolov8-pose-tiny.yaml",
+        "yolo_kwargs": "{'box': 0.1, 'dfl': 0.1}",
+        "max_ncalib_imgs": 300,
+        "converted-output-folder-name": "best_non_separated_saved_model"
+    },
+    {
+        "exp_name": "dataset_v2_cam4_revB_batch1_12_margin_10_yolov8n_wb_alif_clahe",
+        "dataset": "/home/klymy/data/cam4_revB/yolo_dataset_v2/batch1_12_bg_margin_10_wb_alif_clahe",
+        "weights": "/home/klymy/projects/researches/people_detection_pg2/results/filtered_v3_margin_15_yolov8n/weights/best.pt",
+        "cfg": "yolov8-pose.yaml",
+        "yolo_kwargs": "{'box': 0.1, 'dfl': 0.1}",
+        "max_ncalib_imgs": 300,
+        "converted-output-folder-name": "best_non_separated_saved_model"
+    },
+    {
+        "exp_name": "dataset_v2_cam4_revB_batch1_12_margin_10_yolov8n_rq_wb_alif_clahe",
+        "dataset": "/home/klymy/data/cam4_revB/yolo_dataset_v2/batch1_12_bg_margin_10_wb_alif_clahe",
+        "weights": "/home/klymy/projects/researches/people_detection_pg2/results/filtered_v3_margin_15_reduced_quality_yolov8n/weights/best.pt",
+        "cfg": "yolov8-pose.yaml",
+        "yolo_kwargs": "{'box': 0.1, 'dfl': 0.1}",
+        "max_ncalib_imgs": 300,
+        "converted-output-folder-name": "best_non_separated_saved_model"
+    }
+]

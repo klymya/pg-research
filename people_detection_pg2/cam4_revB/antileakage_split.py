@@ -10,8 +10,8 @@ from pathlib import Path
 from typing import Any
 
 
-NEW_STYLE_RAW_NAME_RE = re.compile(r"^(4\.2_H_cam_\d+_.*)_(\d+)$")
-LEGACY_STYLE_RAW_NAME_RE = re.compile(r"^(4\.2_H\d+_.+)_(\d+)$")
+NEW_STYLE_RAW_NAME_RE = re.compile(r"^(4\.2_H_cam_\d+_.*)_(\d+)(?: \(\d+\))?$")
+LEGACY_STYLE_RAW_NAME_RE = re.compile(r"^(4\.2_H\d+_.+)_(\d+)(?: \(\d+\))?$")
 
 
 def _stem_without_ext(path_or_name: str) -> str:

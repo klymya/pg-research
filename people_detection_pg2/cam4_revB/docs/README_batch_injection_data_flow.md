@@ -1,7 +1,5 @@
 # Batch Injection Data Flow
 
-This document describes the logic behind the pipeline listed in [batch_injection_pipeline.md](/home/klymy/projects/researches/people_detection_pg2/cam4_revB/batch_injection_pipeline.md).
-
 It focuses on what each step does, which artifacts it reads and writes, and which preprocessing algorithms are actually applied. The pipeline mixes three kinds of work:
 
 - annotation/bootstrap setup
