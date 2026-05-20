@@ -150,12 +150,13 @@ def main() -> int:
             print(f"Warning: image not found in XML: {image_name}", file=sys.stderr)
             continue
 
-        image_path = images_dir / image_name
+        # Strip any directory prefix from image_name to get just the filename
+        image_path = images_dir / Path(image_name).name
         if not image_path.is_file():
             missing_images.append(image_name)
             continue
 
-        output_path = output_dir / image_name.replace(".tif", ".jpg")
+        output_path = output_dir / Path(image_name).name.replace(".tif", ".jpg")
         render_image(
             image_path=image_path,
             output_path=output_path,

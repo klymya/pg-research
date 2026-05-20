@@ -178,7 +178,7 @@ def main() -> None:
     enforce_review_gate(args)
 
     root_path = Path(args.root_pth).resolve(strict=False)
-    yolo_base_path = root_path / "yolo_dataset"
+    yolo_base_path = root_path / "yolo_dataset_v2"
     run_dir = root_path / "batch_injection_runs" / args.run_name
     run_dir.mkdir(parents=True, exist_ok=True)
     manifest_path = run_dir / "batch_injection_run_manifest.json"

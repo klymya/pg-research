@@ -19,13 +19,14 @@ from pipeline_dataset_utils import (
 
 DEFAULT_BASE_PTH = Path("/home/klymy/data/cam4_revB/yolo_dataset")
 DEFAULT_MAX_WORKERS = 8
-VALID_MODES = {"wb_alif", "wb_alif_clahe"}
+VALID_MODES = {"wb_alif", "wb_alif_clahe", "clahe_only"}
 
 
 def build_output_dataset_name(base_dataset: str, mode: str) -> str:
     suffix = {
         "wb_alif": "_wb_alif",
         "wb_alif_clahe": "_wb_alif_clahe",
+        "clahe_only": "_clahe",
     }[mode]
     return f"{base_dataset}{suffix}"
 
@@ -41,9 +42,18 @@ def apply_clahe(image_rgb):
 
 def transform_image(image_bgr, mode: str):
     image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
-    result = white_balance_vectorized(image_rgb)
-    if mode == "wb_alif_clahe":
+
+    # Apply white balance only for wb_alif and wb_alif_clahe modes
+    # (clahe_only assumes images already have white balance)
+    if mode in {"wb_alif", "wb_alif_clahe"}:
+        result = white_balance_vectorized(image_rgb)
+    else:
+        result = image_rgb
+
+    # Apply CLAHE for wb_alif_clahe and clahe_only modes
+    if mode in {"wb_alif_clahe", "clahe_only"}:
         result = apply_clahe(result)
+
     return cv2.cvtColor(result, cv2.COLOR_RGB2BGR)
 
 
