@@ -1,0 +1,67 @@
+
+May 20 09:32:09 DUSUN pg2gw[141971]: Received telemetry data, length: 60, from thing 6000037-1221-012345-4040
+May 20 09:32:09 DUSUN pg2gw[141971]: Received telemetry data, length: 81, from thing 6000099-1221-012345-4040
+May 20 09:32:09 DUSUN pg2gw[141971]: Detection translated for sensor 6000099-1221-012345-4040: pixel(102,78) -> cm(-116,93). conf = 0.500000; box: x = 61, y = 33, w = 62, h = 60
+May 20 09:32:17 DUSUN pg2gw[141971]: Received telemetry data, length: 105, from thing 6000015-1221-012345-4040
+May 20 09:32:17 DUSUN pg2gw[141971]: Detection translated for sensor 6000015-1221-012345-4040: pixel(52,159) -> cm(-246,-77). conf = 0.420746; box: x = 0, y = 144, w = 62, h = 60
+May 20 09:32:20 DUSUN pg2gw[141971]: Received telemetry data, length: 123, from thing 6000037-1221-012345-4040
+May 20 09:32:20 DUSUN pg2gw[141971]: Detection translated for sensor 6000037-1221-012345-4040: pixel(228,82) -> cm(136,86). conf = 0.839844; box: x = 217, y = 57, w = 80, h = 41
+May 20 09:32:20 DUSUN pg2gw[141971]: Detection translated for sensor 6000037-1221-012345-4040: pixel(124,64) -> cm(-71,119). conf = 0.500000; box: x = 91, y = 30, w = 62, h = 60
+May 20 09:32:20 DUSUN pg2gw[141971]: Received telemetry data, length: 79, from thing 6000099-1221-012345-4040
+May 20 09:32:20 DUSUN pg2gw[141971]: Detection translated for sensor 6000099-1221-012345-4040: pixel(206,79) -> cm(88,89). conf = 0.839844; box: x = 187, y = 34, w = 81, h = 59
+May 20 09:32:20 DUSUN pg2gw[141971]: Detection translated for sensor 6000099-1221-012345-4040: pixel(102,78) -> cm(-116,93). conf = 0.582031; box: x = 61, y = 33, w = 62, h = 60
+May 20 09:32:28 DUSUN pg2gw[141971]: Received telemetry data, length: 83, from thing 6000015-1221-012345-4040
+May 20 09:32:30 DUSUN pg2gw[141971]: Received telemetry data, length: 102, from thing 6000037-1221-012345-4040
+May 20 09:32:30 DUSUN pg2gw[141971]: Detection translated for sensor 6000037-1221-012345-4040: pixel(124,64) -> cm(-71,119). conf = 0.500000; box: x = 91, y = 30, w = 62, h = 60
+May 20 09:32:30 DUSUN pg2gw[141971]: Received telemetry data, length: 58, from thing 6000099-1221-012345-4040
+May 20 09:32:30 DUSUN pg2gw[141971]: Detection translated for sensor 6000099-1221-012345-4040: pixel(102,78) -> cm(-116,93). conf = 0.500000; box: x = 61, y = 33, w = 62, h = 60
+May 20 09:32:39 DUSUN pg2gw[141971]: Received telemetry data, length: 60, from thing 6000015-1221-012345-4040
+May 20 09:32:39 DUSUN pg2gw[141971]: Detection translated for sensor 6000015-1221-012345-4040: pixel(52,159) -> cm(-246,-77). conf = 0.500000; box: x = 0, y = 145, w = 60, h = 59
+May 20 09:32:41 DUSUN pg2gw[141971]: Received telemetry data, length: 102, from thing 6000037-1221-012345-4040
+May 20 09:32:41 DUSUN pg2gw[141971]: Detection translated for sensor 6000037-1221-012345-4040: pixel(80,165) -> cm(-166,-83). conf = 0.730469; box: x = 30, y = 150, w = 62, h = 60
+May 20 09:32:41 DUSUN pg2gw[141971]: Detection translated for sensor 6000037-1221-012345-4040: pixel(124,64) -> cm(-71,119). conf = 0.417969; box: x = 91, y = 30, w = 62, h = 60
+May 20 09:32:41 DUSUN pg2gw[141971]: Received telemetry data, length: 58, from thing 6000099-1221-012345-4040
+May 20 09:32:41 DUSUN pg2gw[141971]: Detection translated for sensor 6000099-1221-012345-4040: pixel(102,78) -> cm(-116,93). conf = 0.582031; box: x = 61, y = 33, w = 62, h = 60
+May 20 09:32:50 DUSUN pg2gw[141971]: Received telemetry data, length: 60, from thing 6000015-1221-012345-4040
+May 20 09:32:50 DUSUN pg2gw[141971]: Detection translated for sensor 6000015-1221-012345-4040: pixel(48,162) -> cm(-261,-86). conf = 0.500000; box: x = 0, y = 147, w = 57, h = 57
+May 20 09:32:51 DUSUN pg2gw[141971]: Received telemetry data, length: 102, from thing 6000037-1221-012345-4040
+May 20 09:32:51 DUSUN pg2gw[141971]: Detection translated for sensor 6000037-1221-012345-4040: pixel(124,64) -> cm(-71,119). conf = 0.500000; box: x = 91, y = 30, w = 62, h = 60
+May 20 09:32:51 DUSUN pg2gw[141971]: Received telemetry data, length: 58, from thing 6000099-1221-012345-4040
+May 20 09:32:51 DUSUN pg2gw[141971]: Detection translated for sensor 6000099-1221-012345-4040: pixel(102,78) -> cm(-116,93). conf = 0.500000; box: x = 61, y = 33, w = 62, h = 60
+May 20 09:33:01 DUSUN pg2gw[141971]: Received telemetry data, length: 83, from thing 6000015-1221-012345-4040
+May 20 09:33:01 DUSUN pg2gw[141971]: Detection translated for sensor 6000015-1221-012345-4040: pixel(52,159) -> cm(-246,-77). conf = 0.500000; box: x = 0, y = 144, w = 62, h = 60
+May 20 09:33:02 DUSUN pg2gw[141971]: Received telemetry data, length: 102, from thing 6000037-1221-012345-4040
+May 20 09:33:02 DUSUN pg2gw[141971]: Detection translated for sensor 6000037-1221-012345-4040: pixel(124,64) -> cm(-71,119). conf = 0.417969; box: x = 91, y = 30, w = 62, h = 60
+May 20 09:33:02 DUSUN pg2gw[141971]: Received telemetry data, length: 58, from thing 6000099-1221-012345-4040
+May 20 09:33:02 DUSUN pg2gw[141971]: Detection translated for sensor 6000099-1221-012345-4040: pixel(119,78) -> cm(-80,90). conf = 0.500000; box: x = 64, y = 32, w = 61, h = 59
+May 20 09:33:12 DUSUN pg2gw[141971]: Received telemetry data, length: 102, from thing 6000037-1221-012345-4040
+May 20 09:33:12 DUSUN pg2gw[141971]: Detection translated for sensor 6000037-1221-012345-4040: pixel(124,64) -> cm(-71,119). conf = 0.582031; box: x = 91, y = 30, w = 62, h = 60
+May 20 09:33:12 DUSUN pg2gw[141971]: Received telemetry data, length: 39, from thing 6000015-1221-012345-4040
+May 20 09:33:12 DUSUN pg2gw[141971]: Received telemetry data, length: 58, from thing 6000099-1221-012345-4040
+May 20 09:33:12 DUSUN pg2gw[141971]: Detection translated for sensor 6000099-1221-012345-4040: pixel(102,78) -> cm(-116,93). conf = 0.582031; box: x = 61, y = 33, w = 62, h = 60
+May 20 09:33:23 DUSUN pg2gw[141971]: Received telemetry data, length: 102, from thing 6000037-1221-012345-4040
+May 20 09:33:23 DUSUN pg2gw[141971]: Detection translated for sensor 6000037-1221-012345-4040: pixel(124,64) -> cm(-71,119). conf = 0.660156; box: x = 91, y = 30, w = 62, h = 60
+May 20 09:33:23 DUSUN pg2gw[141971]: Received telemetry data, length: 58, from thing 6000099-1221-012345-4040
+May 20 09:33:23 DUSUN pg2gw[141971]: Detection translated for sensor 6000099-1221-012345-4040: pixel(102,78) -> cm(-116,93). conf = 0.582031; box: x = 61, y = 33, w = 62, h = 60
+May 20 09:33:23 DUSUN pg2gw[141971]: Received telemetry data, length: 58, from thing 6000015-1221-012345-4040
+May 20 09:33:33 DUSUN pg2gw[141971]: Received telemetry data, length: 102, from thing 6000037-1221-012345-4040
+May 20 09:33:33 DUSUN pg2gw[141971]: Detection translated for sensor 6000037-1221-012345-4040: pixel(124,64) -> cm(-71,119). conf = 0.417969; box: x = 91, y = 30, w = 62, h = 60
+May 20 09:33:33 DUSUN pg2gw[141971]: Received telemetry data, length: 58, from thing 6000099-1221-012345-4040
+May 20 09:33:33 DUSUN pg2gw[141971]: Detection translated for sensor 6000099-1221-012345-4040: pixel(119,78) -> cm(-80,90). conf = 0.500000; box: x = 64, y = 32, w = 61, h = 59
+May 20 09:33:34 DUSUN pg2gw[141971]: Received telemetry data, length: 83, from thing 6000015-1221-012345-4040
+May 20 09:33:34 DUSUN pg2gw[141971]: Detection translated for sensor 6000015-1221-012345-4040: pixel(52,158) -> cm(-246,-75). conf = 0.420746; box: x = 0, y = 144, w = 60, h = 61
+May 20 09:33:44 DUSUN pg2gw[141971]: Received telemetry data, length: 102, from thing 6000037-1221-012345-4040
+May 20 09:33:44 DUSUN pg2gw[141971]: Detection translated for sensor 6000037-1221-012345-4040: pixel(124,64) -> cm(-71,119). conf = 0.582031; box: x = 91, y = 30, w = 62, h = 60
+May 20 09:33:44 DUSUN pg2gw[141971]: Received telemetry data, length: 58, from thing 6000099-1221-012345-4040
+May 20 09:33:44 DUSUN pg2gw[141971]: Detection translated for sensor 6000099-1221-012345-4040: pixel(102,78) -> cm(-116,93). conf = 0.582031; box: x = 61, y = 33, w = 62, h = 60
+May 20 09:33:45 DUSUN pg2gw[141971]: Received telemetry data, length: 60, from thing 6000015-1221-012345-4040
+May 20 09:33:45 DUSUN pg2gw[141971]: Detection translated for sensor 6000015-1221-012345-4040: pixel(52,159) -> cm(-246,-77). conf = 0.500000; box: x = 0, y = 145, w = 61, h = 58
+May 20 09:33:54 DUSUN pg2gw[141971]: Received telemetry data, length: 102, from thing 6000037-1221-012345-4040
+May 20 09:33:54 DUSUN pg2gw[141971]: Detection translated for sensor 6000037-1221-012345-4040: pixel(124,64) -> cm(-71,119). conf = 0.500000; box: x = 91, y = 30, w = 62, h = 60
+May 20 09:33:54 DUSUN pg2gw[141971]: Received telemetry data, length: 58, from thing 6000099-1221-012345-4040
+May 20 09:33:54 DUSUN pg2gw[141971]: Detection translated for sensor 6000099-1221-012345-4040: pixel(102,78) -> cm(-116,93). conf = 0.500000; box: x = 61, y = 33, w = 62, h = 60
+May 20 09:33:56 DUSUN pg2gw[141971]: Received telemetry data, length: 62, from thing 6000015-1221-012345-4040
+May 20 09:34:05 DUSUN pg2gw[141971]: Received telemetry data, length: 102, from thing 6000037-1221-012345-4040
+May 20 09:34:05 DUSUN pg2gw[141971]: Detection translated for sensor 6000037-1221-012345-4040: pixel(124,64) -> cm(-71,119). conf = 0.660156; box: x = 91, y = 30, w = 62, h = 60
+May 20 09:34:05 DUSUN pg2gw[141971]: Received telemetry data, length: 58, from thing 6000099-1221-012345-4040
+May 20 09:34:05 DUSUN pg2gw[141971]: Detection translated for sensor 6000099-1221-012345-4040: pixel(119,78) -> cm(-80,90). conf = 0.500000; box: x = 64, y = 32, w = 61, h = 59

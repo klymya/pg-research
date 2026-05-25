@@ -1,0 +1,15 @@
+root@DUSUN:/home/pg# sudo busctl call com.pointgrab.PgGw /com/pointgrab/PgGw com.pointgrab.PgGw getHeight s "6000015-1221-012345-4040"
+u 2690
+
+root@DUSUN:/home/pg# sudo busctl call com.pointgrab.PgGw /com/pointgrab/PgGw com.pointgrab.PgGw getHeight s "6000099-1221-012345-4040"
+u 2690
+
+root@DUSUN:/home/pg# sudo busctl call com.pointgrab.PgGw /com/pointgrab/PgGw com.pointgrab.PgGw getHeight s "6000037-1221-012345-4040"
+u 2690
+
+
+000099 - fixed old camera
+000015 - fp new camera
+000037 - fixed new camera
+
+(new camera - rotated)
