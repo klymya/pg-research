@@ -1,0 +1,57 @@
+# Camera QC default tolerances.
+#
+# Chessboard preset is seeded from sensor_color_comparison_postccm.ipynb
+# section 9: the |Δ| after CCM between the corrected new sensor and the
+# old sensor, expressed as % of the old-sensor reference mean. Those
+# numbers describe "a new sensor we already accepted as good enough".
+#
+# Ceiling preset is seeded at chessboard * 2 — ceiling scenes have more
+# uncontrolled content (occupancy, daylight) and need looser bands.
+# Tune both presets in M6 against ≥10 known-good DUT batches.
+#
+# Tolerance semantics:
+#   higher_better metrics  → fail if dut < ref - tol_pct%
+#   lower_better metrics   → fail if dut > ref + tol_pct%
+#   closer_to_ref metrics  → fail if |dut - ref| > tol_pct%   (% of |ref|)
+
+metric_direction:
+  L: closer_to_ref
+  "a*": closer_to_ref
+  "b*": closer_to_ref
+  R: closer_to_ref
+  G: closer_to_ref
+  B: closer_to_ref
+  sharpness: higher_better
+  noise: lower_better
+  sharpness_fft: higher_better
+
+scenes:
+  chessboard:
+    min_dut_images: 1
+    tolerances_pct:
+      L: 10
+      "a*": 7
+      "b*": 12
+      R: 10
+      G: 10
+      B: 7
+      sharpness: 10       # strict: DUT sharpness must be >= 90% of ref
+      sharpness_fft: 10   # strict: DUT sharpness_fft must be >= 90% of ref
+      noise: 0            # strict: DUT noise must not exceed ref
+  ceiling:
+    min_dut_images: 3
+    tolerances_pct:
+      L: 20
+      "a*": 14
+      "b*": 24
+      R: 20
+      G: 20
+      B: 14
+      sharpness: 10       # same strict floor as chessboard
+      sharpness_fft: 10
+      noise: 0
+
+verdict:
+  fail_if_n_metrics_outside_tol: 2
+  marginal_if_n_metrics_outside_tol: 1
+  aggregation: median   # median | mean | worst_case (across N DUT images)

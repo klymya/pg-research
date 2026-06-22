@@ -2371,3 +2371,9 @@ people_detection_pg2/logs/training_batch_runs/dataset_v2_cam4_revB_batch1_12_mar
 people_detection_pg2/extended_evaluation_metrics/logs
 people_detection_pg2/extended_evaluation_metrics/val*
 people_detection_pg2/extended_evaluation_metrics/generated_envs/
+
+# camera_qc: generated reports + local test inputs
+camera_qc/.report_work/
+camera_qc/*_work/
+camera_qc/captures/
+camera_qc/report.pdf

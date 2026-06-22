@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "camera-qc"
+version = "0.1.0"
+description = "Automated camera module quality evaluation: compare a DUT against a reference and emit a PDF verdict."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.24",
+    "opencv-python>=4.8",
+    "pandas>=2.0",
+    "matplotlib>=3.7",
+    "pyyaml>=6.0",
+    "markdown>=3.5",
+    "weasyprint>=60",
+    "tqdm>=4.66",
+]
+
+[project.scripts]
+camera-qc = "camera_qc.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["camera_qc*"]
+
+[tool.setuptools.package-data]
+camera_qc = ["config.yaml"]
