@@ -1,0 +1,32 @@
+{
+    "yolo_pth": "/home/klymy/projects/rtos_sensor/projects/alif_ml-embedded-evaluation-kit_pg/resources_downloaded/pg_object_detection/int8/yolov8-tiny/clahe/backbone.tflite",
+    "head_pth": null,
+    "output_correction_model_path": "/home/klymy/projects/researches/people_detection_pg2/softmax_exp/ridge_regression_params_cam3_revB_batch1_10_margin_15_wb_alif_box_01_dfl_01_2nd.json",
+
+    "conf_th": 0.2,
+    "iou_th": 0.45,
+    "conf_th_gw": 0.2,
+    "img_size": 320,
+    "fps": 1,
+
+    "source": "/home/klymy/projects/researches/people_detection_pg2/investigations/release_june_26/videos",
+    "sensor_params_pth": "sensor_params.json",
+    "aois_pth": "aois.json",
+    "sensor_height": 270,
+    "sensor_reporting_period_sec": 10,
+
+    "awb": false,
+    "clahe": false,
+
+    "bbox_filter_enabled": false,
+    "bbox_filter_type": "gmm",
+    "bbox_filter_scaler_path": "/home/klymy/projects/PG2_GW/novelty_models_params/scaler.json",
+    "bbox_filter_detector_path": "/home/klymy/projects/PG2_GW/novelty_models_params/gmm_detector_params.json",
+    "bbox_filter_verbose": false,
+
+    "smoothing_enabled": false,
+    "is_da_filtration_enabled": false,
+
+    "save_seq": false,
+    "output_prefix": "int8_regr_b1_10_wb"
+}

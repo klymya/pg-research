@@ -1,0 +1,53 @@
+INFO - ARM ML Embedded Evaluation Kit
+INFO - Version 23.08.0 Build date: Jul  8 2026 @ 19:29:18
+INFO - Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+
+INFO - Added  support to op resolver
+INFO - Creating allocator using tensor arena at 0x574572b130b0
+INFO - Allocating tensors
+INFO - Running inference on image 0 => 6100001-2000-000008-2550.bmp
+Final results:
+Total number of inferences: 1
+Box: [186.29 210.55 80.50 41.94]. Position: [206.78 222.62]. Confidence: 0.66
+INFO - Profile for Detection:
+INFO - Duration: 26009977 microseconds
+INFO - Profile for ModelInit:
+INFO - Duration: 8145 microseconds
+INFO - Running inference on image 1 => 6100002-2000-000008-2550.bmp
+Final results:
+Total number of inferences: 1
+Box: [247.87 152.89 61.27 47.76]. Position: [265.39 173.78]. Confidence: 0.21
+INFO - Profile for Detection:
+INFO - Duration: 26007239 microseconds
+INFO - Running inference on image 2 => 6200001-2000-000008-2550.bmp
+Final results:
+Total number of inferences: 0
+INFO - Profile for Detection:
+INFO - Duration: 26009247 microseconds
+INFO - Running inference on image 3 => img_32.bmp
+Final results:
+Total number of inferences: 5
+Box: [4.14 179.63 81.59 62.60]. Position: [62.86 186.63]. Confidence: 0.66
+Box: [126.40 155.64 83.07 78.04]. Position: [164.56 169.56]. Confidence: 0.58
+Box: [190.53 15.78 104.61 96.72]. Position: [209.12 80.81]. Confidence: 0.50
+Box: [219.73 123.07 81.49 58.59]. Position: [244.08 144.67]. Confidence: 0.42
+Box: [64.07 40.94 84.77 97.38]. Position: [105.20 85.60]. Confidence: 0.21
+INFO - Profile for Detection:
+INFO - Duration: 26044354 microseconds
+INFO - Running inference on image 4 => img_320.bmp
+Final results:
+Total number of inferences: 2
+Box: [187.42 89.60 80.32 42.09]. Position: [206.68 120.84]. Confidence: 0.79
+Box: [122.70 155.73 63.40 76.52]. Position: [162.11 169.08]. Confidence: 0.66
+INFO - Profile for Detection:
+INFO - Duration: 25967077 microseconds
+INFO - Running inference on image 5 => img_320_no_clahe.bmp
+Final results:
+Total number of inferences: 2
+Box: [187.42 89.60 80.32 42.09]. Position: [206.68 120.84]. Confidence: 0.84
+Box: [122.53 133.26 65.08 94.24]. Position: [162.01 166.52]. Confidence: 0.66
+INFO - Profile for Detection:
+INFO - Duration: 25923599 microseconds
+ERROR - Main loop terminated.
+INFO - program terminating...
+
