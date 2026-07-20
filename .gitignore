@@ -130,3 +130,5 @@ people_detection_pg2/softmax_exp/*collected_outputs*/
 *.egg-info
 .claude/settings.json
 camera_qc/RevC_2
+
+background_subtraction/resutls
