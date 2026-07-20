@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package telemetrypayload;
+
+message ReportingObject {
+    uint32 position_x = 1;
+    uint32 position_y = 2;
+    uint32 box_x = 3;
+    uint32 box_y = 4;
+    uint32 box_w = 5;
+    uint32 box_h = 6;
+    float confidence = 7;
+}
+
+message TelemetryNotification {
+    uint32 timestamp = 2;
+    repeated ReportingObject objects = 3;
+}
+
+message AckNotification {
+    uint32 seq_num = 1;
+}
+
+message NackNotification {
+    uint32 seq_num = 1;
+}
+
+message Notification {
+    oneof notification {
+        TelemetryNotification telemetry = 1;
+        AckNotification ack = 2;
+        NackNotification nack = 3;
+    }
+}

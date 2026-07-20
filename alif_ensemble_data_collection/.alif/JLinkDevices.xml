@@ -1,0 +1,8 @@
+<DataBase>
+  <Device>
+    <ChipInfo Vendor="AlifSemiconductor" Name="AE302F80F55D5_HP" Aliases="AE302F80F55D5LE_M55_HP; AE302F80F55D5LE_M55_HP" />
+  </Device>
+  <Device>
+    <ChipInfo Vendor="AlifSemiconductor" Name="AE302F80F55D5_HE" Aliases="AE302F80F55D5LE_M55_HE; AE302F80F55D5LE_M55_HE" />
+  </Device>
+</DataBase>
