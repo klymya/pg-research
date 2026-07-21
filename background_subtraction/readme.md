@@ -107,6 +107,136 @@ slow model. All three combinations below detect the deposited object correctly:
 Consequently `backend_params` is unusable for `pybgs` backends: passing any
 keyword raises `TypeError` from the pybind11 constructor.
 
+## Pipeline walkthrough
+
+`SignOfLifePipeline.process(frame_bgr, person_boxes)` runs one frame through
+the layers below and returns a `PipelineResult`. State (background models,
+warm-up counter, tracks) persists across calls, so frames must be fed in
+temporal order.
+
+```
+raw BGR frame
+  │
+  ├─▶ L0  denoise ─▶ (optional) register to first frame        → Frame(bgr, gray, hsv)
+  │
+  ├─▶ L2  feature transform (gray / LBP / chromaticity)        → feature image
+  │
+  ├─▶ L1  fast model.apply(feature, α_fast) ─▶ shadow veto     → fast mask
+  │       slow model.apply(feature, α_slow) ─▶ shadow veto     → slow mask
+  │
+  ├─▶ L3a static = slow AND NOT fast   (empty during warm-up)  → static mask
+  │
+  ├─▶ L3b morphology (open→close) ─▶ connected components ─▶ area gate → blobs
+  │
+  └─▶ L3c IoU-associate blobs to tracks ─▶ dwell counter ─▶ person veto
+                                                       → events (Sign of Life)
+```
+
+### Layer 0 — preprocessing (`preprocessing.py`)
+
+1. **Denoise.** `gaussian` (default, `kernel_size=5`) or `bilateral`
+   (edge-preserving, `sigma_color=25`, `sigma_space=7`), or `none`.
+2. **Colour views.** The result is wrapped in a `Frame` that lazily derives
+   `gray` and `hsv` on first access and caches them.
+3. **Registration (optional, default `none`).** The first frame becomes the
+   reference; each later frame is aligned to it by a **translation-only** model
+   — `phase_correlation` (FFT, fast) or `ecc` (`cv2.findTransformECC`,
+   `MOTION_TRANSLATION`, 50 iters). Estimates above `max_shift_px=20` are
+   rejected as implausible and the frame passes through unwarped. Rotation and
+   scale drift are out of scope.
+
+### Layers 1 & 2 — rate-parameterized model + illumination invariance
+
+Layer 2 is applied **inside** Layer 1, not as a separate stage:
+
+- **Feature transform** (`features.py`) replaces raw intensity with an
+  illumination-robust metric before modelling:
+  - `gray` — raw grayscale (baseline).
+  - `lbp` — 8-neighbour local binary pattern; invariant to any monotonic
+    intensity change (global lighting shifts), `radius=1`.
+  - `chromaticity` — normalised RGB (`c / (r+g+b)`), discards the intensity
+    component.
+- **Background model** (`bgs_model.py` + `backends.py`) — a
+  `RateParameterizedBGS` wrapping a swappable backend whose learning rate α is
+  an explicit argument. The default `running_average` backend maintains
+  `bg = (1−α)·bg + α·frame` and flags a pixel as foreground when any channel
+  deviates by more than `threshold=25`.
+- **Shadow veto** (`ShadowSuppressor`, on by default) — a post-filter that
+  drops foreground pixels whose HSV signature matches a cast shadow: brightness
+  ratio `V_frame/V_bg ∈ [0.4, 0.95]` with hue and saturation roughly unchanged
+  (`|ΔH| ≤ 12`, `|ΔS| ≤ 40`). The veto compares against an exponentially
+  weighted BGR reference each model keeps at its own α, so it works even for
+  backends that hide their internal model.
+
+### Layer 3 — dual-rate framework, structural filter, FSM
+
+- **L3a dual rate** (`dual_rate.py`) — two Layer-1 models observe every frame:
+  a **fast** model (high α, absorbs a deposited object quickly, so it leaves
+  the fast foreground) and a **slow** model (low α, keeps reporting it). The
+  static-object cue is `static = slow AND NOT fast`
+  (see [the caveat above](#️-the-static-object-rule-is-inverted-in-the-task-description)).
+  During the first `warmup_frames` the static mask is forced empty so the slow
+  model can converge.
+- **L3b structural filter** (`blobs.py`) — morphological **opening**
+  (`open_kernel=3`, removes speckle) then **closing** (`close_kernel=5`,
+  bridges gaps), connected components, and an **area gate**
+  (`min_area=150`, `max_area=None`). Survivors become `Blob`s.
+- **L3c dwell-time FSM** (`fsm.py`) — blobs are associated to existing tracks
+  by bounding-box IoU (`iou_match_threshold=0.3`). A track accumulates *dwell*
+  while it keeps being seen and is promoted to **confirmed** — the Sign-of-Life
+  event — once `dwell ≥ dwell_frames`. A track unseen for more than
+  `max_missing_frames=15` is evicted. Any candidate overlapping an active
+  person box beyond `person_overlap_threshold=0.1` IoU is vetoed and its dwell
+  reset, so a stationary person raises no alarm.
+
+### Background-model initialization & convergence time
+
+The model is **cold-started on frame 0** — the first frame is copied straight
+into the background, so a single frame is enough to begin producing masks (this
+matches the task's "1–6 frame initialisation" for the `median` backend, whose
+window fills in ≤ 6 frames). What takes longer is *convergence*: how fast the
+running-average background absorbs a change, governed entirely by α.
+
+For `bg = (1−α)·bg + α·frame`, the old estimate decays by `(1−α)` per frame:
+
+| Role | Backend | α (default) | Half-life | ~95% converged | Meaning |
+| --- | --- | --- | --- | --- | --- |
+| Fast | `running_average` | `0.1` | ~7 frames | ~28 frames | Absorbs a stopped object in seconds |
+| Slow | `running_average` | `0.001` | ~690 frames | ~3000 frames | Retains it for minutes |
+| — | `median` | window=6 | — | ≤ 6 frames | No α; adaptation set by window length |
+
+The **fast/slow separation is the whole mechanism**: the object must vanish
+from the fast mask (fast α high enough to absorb it within the dwell window)
+while surviving in the slow mask (slow α low enough to keep it for at least
+`dwell_frames`). A useful rule of thumb: `1/α_fast ≪ dwell_frames ≪ 1/α_slow`.
+`warmup_frames` should exceed the slow model's rise time or the whole scene
+reads as a static candidate on the first post-warm-up frames.
+
+### Main parameters at a glance
+
+Library defaults (`PipelineConfig()`); the `main.py` CLI exposes the same
+values under the flags in brackets.
+
+| Parameter | Default | Layer | Effect |
+| --- | --- | --- | --- |
+| `denoise` `[--denoise]` | `gaussian` | 0 | Sensor-noise filter |
+| `registration` `[--registration]` | `none` | 0 | Camera-drift compensation |
+| `feature.kind` `[--feature]` | `gray` | 2 | Differencing metric (`gray`/`lbp`/`chromaticity`) |
+| `shadow.enabled` `[--no-shadow-veto]` | `True` | 2 | HSV moving-shadow veto |
+| `fast.backend` / `slow.backend` `[--fast/slow-backend]` | `running_average` | 1 | Subtraction algorithm |
+| `fast.learning_rate` `[--fast-alpha]` | `0.1` | 1/3 | Fast absorption rate |
+| `slow.learning_rate` `[--slow-alpha]` | `0.001` | 1/3 | Slow absorption rate |
+| `threshold` `[--threshold]` | `25.0` | 1 | Native-backend foreground threshold |
+| `warmup_frames` `[--warmup-frames]` | `30` | 3 | Static cue suppressed until slow model settles |
+| `blob.min_area` `[--min-area]` | `150` | 3 | Smallest accepted blob (px) |
+| `dwell_frames` `[--dwell-frames]` | `60` | 3 | Presence budget before a Sign-of-Life event |
+| `max_missing_frames` `[--max-missing-frames]` | `15` | 3 | Frames a track survives unmatched |
+| `iou_match_threshold` | `0.3` | 3 | Track↔blob association |
+| `person_overlap_threshold` | `0.1` | 3 | IoU with a person box that vetoes a candidate |
+
+Every config validates in `__post_init__`, so an illegal combination (e.g. a
+fast model slower than the slow one) fails at construction, not mid-stream.
+
 ## Installation
 
 Uses the `pgpytrain` pyenv environment:
