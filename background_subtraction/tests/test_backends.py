@@ -228,7 +228,7 @@ class TestBackendRegistry:
         assert isinstance(instance, expected)
 
     def test_rejects_unknown_backend(self) -> None:
-        with pytest.raises(ValueError, match="unknown backend"):
+        with pytest.raises(ValueError, match="unknown lib backend"):
             create_backend(BGSConfig(backend="magic"))
 
     def test_forwards_backend_params(self) -> None:

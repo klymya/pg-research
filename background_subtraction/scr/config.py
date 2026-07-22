@@ -119,6 +119,19 @@ class ShadowConfig:
             raise ValueError("require 0 <= value_ratio_min < value_ratio_max")
 
 
+class Implementation(str, Enum):
+    """Which code path provides a background-subtraction backend.
+
+    ``LIB`` uses the OpenCV/pybgs-backed adapters; ``NATIVE`` uses the
+    pure-NumPy reference models in :mod:`scr.models`. The two share the
+    :class:`~scr.backends.BGSBackend` interface, so a pipeline can be built with
+    either without changing any other stage.
+    """
+
+    LIB = "lib"
+    NATIVE = "native"
+
+
 @dataclass(frozen=True)
 class BGSConfig:
     """Layer 1 parameters of a single rate-parameterized background model.
@@ -130,18 +143,22 @@ class BGSConfig:
         threshold: Per-channel difference threshold used by the native
             running-average and median backends.
         backend_params: Extra keyword arguments forwarded to the backend.
+        implementation: Whether to build the library-backed or the pure-NumPy
+            native backend for ``backend``.
     """
 
     backend: str = "running_average"
     learning_rate: float = 0.01
     threshold: float = 25.0
     backend_params: Mapping[str, Any] = field(default_factory=dict)
+    implementation: Implementation = Implementation.LIB
 
     def __post_init__(self) -> None:
         if not 0.0 <= self.learning_rate <= 1.0:
             raise ValueError("learning_rate must lie in [0, 1]")
         if self.threshold < 0:
             raise ValueError("threshold must be non-negative")
+        object.__setattr__(self, "implementation", Implementation(self.implementation))
         object.__setattr__(
             self, "backend_params", MappingProxyType(dict(self.backend_params))
         )

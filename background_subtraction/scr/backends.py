@@ -23,7 +23,7 @@ from typing import Any, Callable
 import cv2
 import numpy as np
 
-from .config import BGSConfig
+from .config import BGSConfig, Implementation
 from .utils import FOREGROUND, ensure_binary_mask, ensure_three_channels
 
 logger = logging.getLogger(__name__)
@@ -248,6 +248,37 @@ class PybgsBackend(BGSBackend):
         self._subtractor = self._create()
 
 
+class NativeModelBackend(BGSBackend):
+    """Adapter exposing a pure-NumPy :mod:`scr.models` model as a backend.
+
+    The native models set their absorption rate at construction and take no
+    per-call learning rate, so this adapter reports
+    ``supports_learning_rate = False`` and ignores the argument, exactly like
+    :class:`PybgsBackend`. Fast/slow separation therefore comes from the
+    constructor parameters (e.g. a different ``alpha``), not from the pipeline's
+    per-call ``learning_rate``.
+    """
+
+    supports_learning_rate = False
+
+    def __init__(self, model: Any) -> None:
+        """Initialise the adapter.
+
+        Args:
+            model: A :class:`scr.models.base.BackgroundSubtractor` instance.
+        """
+        self._model = model
+
+    def apply(self, image: np.ndarray, learning_rate: float) -> np.ndarray:
+        """Run the wrapped model and return its foreground mask."""
+        del learning_rate  # The model's rate is fixed at construction.
+        return ensure_binary_mask(self._model.apply(image))
+
+    def reset(self) -> None:
+        """Reset the wrapped model."""
+        self._model.reset()
+
+
 def _make_running_average(config: BGSConfig) -> BGSBackend:
     """Build a :class:`RunningAverageBackend` from ``config``."""
     return RunningAverageBackend(threshold=config.threshold, **config.backend_params)
@@ -276,6 +307,75 @@ def _make_pybgs(algorithm: str) -> Callable[[BGSConfig], BGSBackend]:
     return factory
 
 
+def _make_native(builder: Callable[[BGSConfig], Any]) -> Callable[[BGSConfig], BGSBackend]:
+    """Wrap a native-model builder into a :class:`NativeModelBackend` factory.
+
+    Native models live in :mod:`scr.models`, imported lazily so the pure-NumPy
+    code is only loaded when a native backend is actually requested.
+
+    Args:
+        builder: Callable turning a :class:`BGSConfig` into a native model.
+
+    Returns:
+        A factory producing the adapted backend.
+    """
+
+    def factory(config: BGSConfig) -> BGSBackend:
+        return NativeModelBackend(builder(config))
+
+    return factory
+
+
+def _native_running_average(config: BGSConfig) -> Any:
+    from .models import RunningAverageSubtractor
+
+    return RunningAverageSubtractor(
+        alpha=config.learning_rate, threshold=config.threshold, **config.backend_params
+    )
+
+
+def _native_adaptive_median(config: BGSConfig) -> Any:
+    from .models import AdaptiveMedianSubtractor
+
+    return AdaptiveMedianSubtractor(threshold=config.threshold, **config.backend_params)
+
+
+def _native_running_gaussian(config: BGSConfig) -> Any:
+    from .models import RunningGaussianAverage
+
+    return RunningGaussianAverage(alpha=config.learning_rate, **config.backend_params)
+
+
+def _native_mixture_of_gaussians(config: BGSConfig) -> Any:
+    from .models import MixtureOfGaussians
+
+    return MixtureOfGaussians(alpha=config.learning_rate, **config.backend_params)
+
+
+def _native_vibe(config: BGSConfig) -> Any:
+    from .models import ViBe
+
+    return ViBe(**config.backend_params)
+
+
+def _native_frame_difference(config: BGSConfig) -> Any:
+    from .models import FrameDifference
+
+    return FrameDifference(threshold=config.threshold, **config.backend_params)
+
+
+def _native_static_frame_difference(config: BGSConfig) -> Any:
+    from .models import StaticFrameDifference
+
+    return StaticFrameDifference(threshold=config.threshold, **config.backend_params)
+
+
+def _native_eigenbackground(config: BGSConfig) -> Any:
+    from .models import EigenBackground
+
+    return EigenBackground(**config.backend_params)
+
+
 BACKEND_REGISTRY: dict[str, Callable[[BGSConfig], BGSBackend]] = {
     "running_average": _make_running_average,
     "median": _make_median,
@@ -286,22 +386,55 @@ BACKEND_REGISTRY: dict[str, Callable[[BGSConfig], BGSBackend]] = {
     "lobster": _make_pybgs("LOBSTER"),
     "pawcs": _make_pybgs("PAWCS"),
 }
-"""Backend name to factory mapping used by :func:`create_backend`."""
+"""Library-backed (OpenCV/pybgs) backend name to factory mapping."""
+
+NATIVE_REGISTRY: dict[str, Callable[[BGSConfig], BGSBackend]] = {
+    "running_average": _make_native(_native_running_average),
+    "adaptive_median": _make_native(_native_adaptive_median),
+    "median": _make_native(_native_adaptive_median),  # alias
+    "running_gaussian": _make_native(_native_running_gaussian),
+    "wren": _make_native(_native_running_gaussian),  # alias
+    "mixture_of_gaussians": _make_native(_native_mixture_of_gaussians),
+    "mog2": _make_native(_native_mixture_of_gaussians),  # alias
+    "mog": _make_native(_native_mixture_of_gaussians),  # alias
+    "vibe": _make_native(_native_vibe),
+    "frame_difference": _make_native(_native_frame_difference),
+    "static_frame_difference": _make_native(_native_static_frame_difference),
+    "eigenbackground": _make_native(_native_eigenbackground),
+    "eigen": _make_native(_native_eigenbackground),  # alias
+}
+"""Pure-NumPy native model name to factory mapping (see :mod:`scr.models`)."""
 
 
-def available_backends() -> tuple[str, ...]:
-    """List the registered backend names.
+def _registry_for(implementation: Implementation) -> dict[str, Callable[[BGSConfig], BGSBackend]]:
+    """Return the backend registry for an implementation."""
+    if Implementation(implementation) is Implementation.NATIVE:
+        return NATIVE_REGISTRY
+    return BACKEND_REGISTRY
+
+
+def available_backends(
+    implementation: Implementation | str = Implementation.LIB,
+) -> tuple[str, ...]:
+    """List the registered backend names for an implementation.
+
+    Args:
+        implementation: ``LIB`` for the OpenCV/pybgs adapters (default), or
+            ``NATIVE`` for the pure-NumPy models.
 
     Returns:
-        The sorted backend names accepted by :class:`~scr.config.BGSConfig`.
-        Names backed by ``pybgs`` only construct successfully when that
-        optional package is installed.
+        The sorted backend names accepted by :class:`~scr.config.BGSConfig` for
+        that implementation. Library names backed by ``pybgs`` only construct
+        successfully when that optional package is installed.
     """
-    return tuple(sorted(BACKEND_REGISTRY))
+    return tuple(sorted(_registry_for(Implementation(implementation))))
 
 
 def create_backend(config: BGSConfig) -> BGSBackend:
     """Build the backend described by ``config``.
+
+    Dispatches to the library-backed or the native registry according to
+    ``config.implementation``.
 
     Args:
         config: Layer 1 configuration naming the backend and its parameters.
@@ -310,12 +443,14 @@ def create_backend(config: BGSConfig) -> BGSBackend:
         The instantiated backend adapter.
 
     Raises:
-        ValueError: If the backend name is not registered.
+        ValueError: If the backend name is not registered for the selected
+            implementation.
     """
-    factory = BACKEND_REGISTRY.get(config.backend.lower())
+    registry = _registry_for(config.implementation)
+    factory = registry.get(config.backend.lower())
     if factory is None:
         raise ValueError(
-            f"unknown backend {config.backend!r}; "
-            f"expected one of {available_backends()}"
+            f"unknown {config.implementation.value} backend {config.backend!r}; "
+            f"expected one of {available_backends(config.implementation)}"
         )
     return factory(config)

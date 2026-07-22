@@ -11,7 +11,7 @@ import pytest
 from conftest import draw_rectangle, make_background
 
 import main
-from scr.config import DenoiseMethod, FeatureKind, RegistrationMethod
+from scr.config import DenoiseMethod, FeatureKind, Implementation, RegistrationMethod
 from scr.structures import DualRateMasks, Frame, PipelineResult
 
 OBJECT_BBOX = (60, 40, 30, 25)
@@ -187,13 +187,23 @@ class TestDegeneratePairingWarning:
         self, caplog: pytest.LogCaptureFixture
     ) -> None:
         with caplog.at_level(logging.WARNING):
-            main.warn_on_degenerate_pairing("vibe", "vibe")
+            main.warn_on_degenerate_pairing("vibe", "vibe", Implementation.LIB)
+
+        assert "will be empty" in caplog.text
+
+    def test_warns_on_identical_rate_ignoring_native_backends(
+        self, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        with caplog.at_level(logging.WARNING):
+            main.warn_on_degenerate_pairing("vibe", "vibe", Implementation.NATIVE)
 
         assert "will be empty" in caplog.text
 
     def test_silent_for_mixed_backends(self, caplog: pytest.LogCaptureFixture) -> None:
         with caplog.at_level(logging.WARNING):
-            main.warn_on_degenerate_pairing("running_average", "vibe")
+            main.warn_on_degenerate_pairing(
+                "running_average", "vibe", Implementation.LIB
+            )
 
         assert caplog.text == ""
 
@@ -201,7 +211,7 @@ class TestDegeneratePairingWarning:
         self, caplog: pytest.LogCaptureFixture
     ) -> None:
         with caplog.at_level(logging.WARNING):
-            main.warn_on_degenerate_pairing("mog2", "mog2")
+            main.warn_on_degenerate_pairing("mog2", "mog2", Implementation.LIB)
 
         assert caplog.text == ""
 
@@ -280,6 +290,35 @@ class TestRun:
         args = main.parse_args(["-i", str(sequence), "-o", str(output)])
 
         assert main.run(args) == 3
+
+    def test_dump_background_writes_a_subfolder(self, tmp_path: Path) -> None:
+        sequence = tmp_path / "seq"
+        output = tmp_path / "out"
+        _write_sequence(sequence, 5)
+        args = main.parse_args(
+            ["-i", str(sequence), "-o", str(output), "--mask", "slow", "--dump-background"]
+        )
+
+        main.run(args)
+
+        masks = sorted(output.glob("bin*.png"))
+        backgrounds = sorted((output / "background").glob("bg*.png"))
+        assert len(masks) == 5
+        assert len(backgrounds) == 5
+        # A background image is a 3-channel scene, not a binary mask.
+        image = cv2.imread(str(backgrounds[-1]), cv2.IMREAD_UNCHANGED)
+        assert image.ndim == 3
+        assert len(np.unique(image)) > 2
+
+    def test_no_background_subfolder_without_flag(self, tmp_path: Path) -> None:
+        sequence = tmp_path / "seq"
+        output = tmp_path / "out"
+        _write_sequence(sequence, 3)
+        args = main.parse_args(["-i", str(sequence), "-o", str(output)])
+
+        main.run(args)
+
+        assert not (output / "background").exists()
 
 
 class TestMain:
