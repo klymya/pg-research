@@ -237,6 +237,112 @@ values under the flags in brackets.
 Every config validates in `__post_init__`, so an illegal combination (e.g. a
 fast model slower than the slow one) fails at construction, not mid-stream.
 
+## Fast/slow models and the Sign-of-Life signal — design Q&A
+
+Answers grounded in the code (`dual_rate.py`, `bgs_model.py`, `pipeline.py`,
+`fsm.py`, `main.py`) and the experiment artifacts in this folder
+(`results_models/*.csv`, `models_complexity_ranking.md`, `top_model_pairs.ipynb`).
+
+### In what order are the fast and slow models processed?
+
+Per frame, `DualRateBGS.apply()` runs the **fast model first, then the slow
+model** (`fast_mask = fast.apply(frame)`, then `slow_mask = slow.apply(frame)`),
+and finally derives `static = slow AND NOT fast`.
+
+**The order does not matter.** Fast and slow are two *independent*
+`RateParameterizedBGS` instances (`bgs_model.py`), each with its own backend
+state and its own shadow-veto reference. Each consumes the same preprocessed
+frame and updates only itself — neither reads the other — so swapping the two
+`apply()` calls yields identical masks.
+
+Within a single model the order is: feature transform (Layer 2) → subtraction
+backend (Layer 1) → HSV shadow veto (Layer 2 post-filter) → update the BGR
+reference. Whole-frame order (`pipeline.py`): Layer 0 (resize → denoise →
+register) → dual-rate (fast + slow) → `static` → blob filter → dwell-time FSM.
+
+### Do the fast and slow models influence each other?
+
+**No — they are fully independent.** `masks.fast` depends only on the fast
+model and `masks.slow` only on the slow model. This is structural (separate
+objects/state) and was confirmed empirically: in the 64-pair sweep
+(`results_model_pairs`, see `top_model_pairs.ipynb`) every pair's `fast_f1`
+depends only on its fast model and `slow_f1` only on its slow model — the 64
+pairs collapse to 8 unique fast + 8 unique slow results.
+
+They combine **only in the final static cue**, and only after `warmup_frames`:
+
+```python
+static = slow_mask AND NOT fast_mask        # dual_rate.py
+```
+
+`DualRateConfig` enforces `fast.learning_rate ≥ slow.learning_rate`.
+
+### How does the pair produce the final result, and how does each influence it?
+
+- **Fast model** (high α): absorbs a newly deposited object quickly, so the
+  object **leaves the fast foreground** in ~`1/α_fast` frames.
+- **Slow model** (low α): absorbs slowly, so it **keeps reporting** the object
+  for ~`1/α_slow` frames.
+- Their difference `slow AND NOT fast` isolates **newly-static
+  (deposited/abandoned) objects** — present in the slow FG, already gone from
+  the fast FG.
+
+So each side shapes the result differently: the **slow** model supplies the
+candidate foreground; the **fast** model *subtracts* whatever is still moving.
+Too-aggressive a fast α erodes the object out of the static cue; too-slow a fast
+α fails to suppress moving clutter. Rule of thumb: `1/α_fast ≪ dwell_frames ≪
+1/α_slow`. (This is the **corrected** rule — the task text's "present in Fast,
+absent in Slow" is inverted; see the ⚠️ note above.)
+
+### What should be used for the "Sign of Life"?
+
+The Sign-of-Life (left-object) signal is **`static` → structural filter →
+dwell-time FSM**, not the raw fast/slow masks:
+
+```
+masks.static (slow AND NOT fast)
+   → BlobFilter        (opening/closing + area gating, blobs.py)
+   → StaticObjectFSM   (IoU association + dwell counter + person veto, fsm.py)
+   → result.events     (a track promoted to CONFIRMED = a Sign-of-Life event)
+```
+
+A track is confirmed once `dwell ≥ dwell_frames` **without** overlapping an
+active person box. The pipeline computes `result.events` /
+`result.has_sign_of_life` **every frame regardless of `--mask`** — `--mask` only
+selects which mask image is *saved*. To inspect the cue that drives the signal,
+save `--mask filtered` (the FSM's input) or `--mask static` (the raw pre-filter).
+The `fast`/`slow` masks are *moving-foreground segmentation* — use them for
+detection quality, not for the left-object decision. The **person veto**
+(`person_boxes`, IoU ≥ `person_overlap_threshold`) suppresses stationary humans;
+supply boxes through the Python API (the CLI passes none).
+
+### Which backend should the fast/slow models use?
+
+Both must be **rate-honoring** (α actually changes behaviour) so the fast one
+absorbs and the slow one retains: native `running_average`, `running_gaussian`,
+`mixture_of_gaussians`; library `mog2`, `knn`. **Rate-ignoring** backends —
+`vibe`, `frame_difference`, `adaptive_median`, `eigenbackground`, and all
+`pybgs` — cannot form a *self*-pair (two identical instances → identical masks →
+empty static); use them only as the *slow* model against a rate-controlled fast
+model. `main.py` warns on a degenerate self-pair.
+
+On moving-foreground F1 at 0.1 fps QVGA (`results_models/busStation.csv`,
+`canoe.csv`), **`running_gaussian`** was strongest (busStation 0.726, canoe
+0.711); `eigenbackground` scored 0 (needs ≥ `M`=20 frames — unusable at 0.1 fps).
+Combined with cost — `running_gaussian` is `O(P·C)`, ~600 KB, and among the
+fastest (`models_complexity_ranking.md`) — it is the practical default for the
+Sign-of-Life pipeline.
+
+### Why did the Sign-of-Life cue read empty in the low-fps runs?
+
+At 0.1 fps each sequence has only 5–6 frames, fewer than `warmup_frames` (30),
+so `static` is forced empty every frame → no candidates → no events. And
+`static` targets *stopped* objects, whereas the CDNET groundtruth here labels
+*moving* foreground, so even outside warm-up it scores ≈ 0. A meaningful
+Sign-of-Life evaluation needs (a) enough frames for the slow model to retain the
+object and the dwell to accumulate, and (b) `intermittentObjectMotion`-style
+groundtruth (stopped objects labelled foreground).
+
 ## Installation
 
 Uses the `pgpytrain` pyenv environment:
@@ -459,3 +565,63 @@ not implemented here.
   IoU threshold of each other may be merged into a single track.
 * `warmup_frames` must exceed the slow model's convergence time, otherwise the
   entire scene registers as a static candidate on the first post-warmup frames.
+
+## Phase 1 conclusions & next steps
+
+### 1. The dual-rate pipeline is redundant here — a single (fast) model is enough
+
+The best segmentation comes from a **single fast model**, not the fast + slow
+combination. Across the model sweep, the top F1 is `running_gaussian` **fast** —
+0.726 (busStation) / 0.711 (canoe) — and no slow model or dual-rate pairing
+beats it (`results_models/busStation.csv`, `canoe.csv`; full 64-pair matrix in
+`results_model_pairs/` and `top_model_pairs.ipynb`). The dual-rate's distinctive
+output, the static candidate `slow AND NOT fast`, is **sparse and noisy**
+(`top_model_pairs_filtered.ipynb` §4) and empty at low fps (warm-up + a
+moving-foreground groundtruth), so the slow branch adds ~2× per-frame compute
+and model memory without improving results.
+
+**Action for phase 2:** drop to one fast model — a simpler pipeline at roughly
+half the per-frame cost and model memory. The background subtraction itself
+works (foreground objects are segmented), but with **known problems to fix
+next**: dynamic-background speckle (canoe water), camera-jitter streaks
+(busStation), and cast shadows.
+
+### 2. `running_gaussian` is the recommended model
+
+The Wren single-Gaussian model is the best performance-per-resource of the
+eight: **top F1 on both cases** *and* the cheapest tier — `O(P·C)` time, ~600 KB
+state (float32), and ≈1.6× the fastest model (`models_complexity_ranking.md`).
+By contrast MoG is the slowest measured (≈32×), ViBe the heaviest in memory
+(6 000 KB), and EigenBackground scored 0 (needs ≥ 20 frames) — all costlier for
+no accuracy gain.
+
+### 3. Next phases
+
+- **HSV shadow tuning** — the shadow veto already operates in HSV
+  (`ShadowSuppressor`); tune the `value_ratio` / `saturation` / `hue` thresholds
+  against shadowed sequences.
+- **Morphological post-processing** — opening/closing + area gating to remove
+  the dynamic-background speckle and jitter streaks seen in the mask grids.
+- **C port for Alif** — reimplement the chosen model(s) in C99 / C++14 per
+  `alif_syntaxis_standart.md`, guided by the time/memory budgets in
+  `models_complexity_ranking.md` (and its Eigen assessment), then test the C
+  version against this Python reference.
+
+### References & sources
+
+All under `background_subtraction/`:
+
+- `results_models/busStation.csv`, `results_models/canoe.csv` — per-model
+  fast/slow F1 (diagonal sweep).
+- `results_model_pairs/` + `top_model_pairs.ipynb`,
+  `top_model_pairs_filtered.ipynb` — 64-pair F1 matrix, top pairs, and the
+  static-candidate (`slow AND NOT fast`) grids.
+- `models_complexity_ranking.md` — time complexity, measured speed (× fastest),
+  and memory (float32) per model.
+- `alif_syntaxis_standart.md` — C/C++ standards, toolchain, and Eigen assessment
+  for the Alif integration.
+- `lib_vs_native_comparison*.ipynb`, `qvga_vs_original_comparison.ipynb`,
+  `native_mask_comparison*.ipynb` — supporting comparisons (library vs native,
+  resolution, mask visualisation).
+- Produced by `run_model_experiments.py` (sweeps), `evaluate.py` /
+  `summarize_results.py` (F1 scoring), and `main.py` (pipeline runner).

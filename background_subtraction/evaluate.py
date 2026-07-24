@@ -47,6 +47,14 @@ Predictions are treated as foreground where their value exceeds
 maps are accepted. Groundtruth and prediction are matched by the frame number
 embedded in their filenames (``gt000123.png`` <-> ``bin000123.png``), so the
 two folders may use different prefixes.
+
+Resolution
+----------
+The pipeline may emit masks at a different (usually smaller, e.g. QVGA)
+resolution than the native-resolution groundtruth. When the two differ, both
+are resized to the smaller of the two sizes with nearest-neighbour
+interpolation before the confusion matrix is accumulated, preserving the exact
+groundtruth label values and the binary prediction.
 """
 
 from __future__ import annotations
@@ -206,30 +214,61 @@ def index_masks(directory: Path) -> dict[int, Path]:
     return index
 
 
+def resize_to_smallest(
+    groundtruth: np.ndarray, prediction: np.ndarray
+) -> tuple[np.ndarray, np.ndarray]:
+    """Resize both masks to the smaller of the two resolutions.
+
+    The pipeline may emit masks at a different (usually smaller, e.g. QVGA)
+    resolution than the native-resolution CDNET groundtruth. Both are brought to
+    the smaller of the two sizes so the confusion matrix is well defined.
+    Nearest-neighbour interpolation is mandatory: it preserves the exact
+    groundtruth label values (0/50/85/170/255) and the binary prediction, which
+    any smoothing interpolation would corrupt.
+
+    Args:
+        groundtruth: Single-channel groundtruth mask.
+        prediction: Single-channel predicted mask.
+
+    Returns:
+        The two masks, both at the smaller ``(height, width)`` size.
+    """
+    if groundtruth.shape[:2] == prediction.shape[:2]:
+        return groundtruth, prediction
+
+    gt_area = groundtruth.shape[0] * groundtruth.shape[1]
+    pred_area = prediction.shape[0] * prediction.shape[1]
+    height, width = (
+        groundtruth.shape[:2] if gt_area <= pred_area else prediction.shape[:2]
+    )
+
+    def fit(mask: np.ndarray) -> np.ndarray:
+        if mask.shape[:2] == (height, width):
+            return mask
+        return cv2.resize(mask, (width, height), interpolation=cv2.INTER_NEAREST)
+
+    return fit(groundtruth), fit(prediction)
+
+
 def accumulate_counts(
     groundtruth: np.ndarray, prediction: np.ndarray, fg_threshold: int
 ) -> tuple[int, int, int, int]:
     """Accumulate the confusion matrix for one groundtruth/prediction pair.
 
-    Only pixels whose groundtruth value is exactly ``0`` or ``255`` are counted;
-    shadow (50), unknown (170) and outside-ROI (85) pixels are ignored.
+    When the two masks differ in size they are first resized to the smaller
+    resolution via :func:`resize_to_smallest`. Only pixels whose groundtruth
+    value is exactly ``0`` or ``255`` are counted; shadow (50), unknown (170)
+    and outside-ROI (85) pixels are ignored.
 
     Args:
         groundtruth: Single-channel CDNET groundtruth mask.
-        prediction: Single-channel predicted mask, same shape as ``groundtruth``.
+        prediction: Single-channel predicted mask.
         fg_threshold: Prediction values above this are treated as foreground.
 
     Returns:
         The ``(tp, fp, fn, tn)`` pixel counts for this pair.
-
-    Raises:
-        ValueError: If the two masks differ in shape.
     """
-    if groundtruth.shape != prediction.shape:
-        raise ValueError(
-            f"shape mismatch: groundtruth {groundtruth.shape} "
-            f"vs prediction {prediction.shape}"
-        )
+    groundtruth, prediction = resize_to_smallest(groundtruth, prediction)
 
     gt_fg = groundtruth == GT_FOREGROUND
     gt_bg = groundtruth == GT_BACKGROUND

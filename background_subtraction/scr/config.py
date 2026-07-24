@@ -39,9 +39,12 @@ class FeatureKind(str, Enum):
 
 @dataclass(frozen=True)
 class PreprocessConfig:
-    """Layer 0 parameters: denoising and global frame registration.
+    """Layer 0 parameters: resizing, denoising and global frame registration.
 
     Attributes:
+        resize: Target ``(width, height)`` the input is scaled to before any
+            other step; ``None`` disables resizing. Defaults to QVGA
+            ``(320, 240)``.
         denoise: Spatial filter used to attenuate sensor noise.
         kernel_size: Odd kernel size for the Gaussian/bilateral filter.
         bilateral_sigma_color: Colour sigma of the bilateral filter.
@@ -53,6 +56,7 @@ class PreprocessConfig:
             implausible; the frame is then passed through unwarped.
     """
 
+    resize: tuple[int, int] | None = (320, 240)
     denoise: DenoiseMethod = DenoiseMethod.GAUSSIAN
     kernel_size: int = 5
     bilateral_sigma_color: float = 25.0
@@ -67,6 +71,10 @@ class PreprocessConfig:
             raise ValueError("kernel_size must be an odd integer >= 3")
         if self.max_shift_px <= 0:
             raise ValueError("max_shift_px must be positive")
+        if self.resize is not None:
+            width, height = self.resize
+            if width < 1 or height < 1:
+                raise ValueError("resize dimensions must be positive")
 
 
 @dataclass(frozen=True)

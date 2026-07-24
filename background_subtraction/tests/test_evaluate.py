@@ -14,6 +14,7 @@ from evaluate import (
     accumulate_counts,
     frame_number,
     index_masks,
+    resize_to_smallest,
 )
 
 
@@ -103,11 +104,45 @@ class TestAccumulateCounts:
 
         assert (tp, fn) == (1, 1)  # only the 200 pixel clears the threshold
 
-    def test_shape_mismatch_raises(self) -> None:
-        with pytest.raises(ValueError, match="shape mismatch"):
-            accumulate_counts(
-                np.zeros((4, 4), np.uint8), np.zeros((4, 5), np.uint8), 127
-            )
+    def test_mismatched_shapes_are_resized_to_smallest(self) -> None:
+        # A perfect 8x8 prediction against a 4x4 groundtruth: after resizing the
+        # prediction down to 4x4 they agree exactly.
+        groundtruth = np.full((4, 4), 255, dtype=np.uint8)
+        prediction = np.full((8, 8), 255, dtype=np.uint8)
+
+        tp, fp, fn, tn = accumulate_counts(groundtruth, prediction, fg_threshold=127)
+
+        assert (tp, fp, fn, tn) == (16, 0, 0, 0)
+
+
+class TestResizeToSmallest:
+    """Bringing mismatched masks to a common resolution."""
+
+    def test_same_shape_is_a_no_op(self) -> None:
+        a = np.zeros((4, 4), np.uint8)
+        b = np.ones((4, 4), np.uint8)
+
+        out_a, out_b = resize_to_smallest(a, b)
+
+        assert out_a is a and out_b is b
+
+    def test_larger_is_downscaled_to_smaller(self) -> None:
+        groundtruth = np.zeros((4, 6), np.uint8)  # 24 px
+        prediction = np.zeros((4, 5), np.uint8)  # 20 px -> target
+
+        out_gt, out_pred = resize_to_smallest(groundtruth, prediction)
+
+        assert out_gt.shape == (4, 5)
+        assert out_pred.shape == (4, 5)
+
+    def test_preserves_label_values_via_nearest(self) -> None:
+        # Downscaling must not invent intermediate labels (e.g. by averaging).
+        groundtruth = np.array([[0, 50, 85, 170, 255, 255]], dtype=np.uint8)
+        prediction = np.zeros((1, 3), np.uint8)
+
+        out_gt, _ = resize_to_smallest(groundtruth, prediction)
+
+        assert set(np.unique(out_gt)).issubset({0, 50, 85, 170, 255})
 
 
 class TestIndexMasks:

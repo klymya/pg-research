@@ -116,6 +116,7 @@ def score_cell(
     case: str,
     metric: str,
     fg_threshold: int,
+    groundtruth_dataset: Path | None = None,
 ) -> float | None:
     """Score a single (case, variant) cell.
 
@@ -126,12 +127,20 @@ def score_cell(
         case: Sequence name (row).
         metric: Attribute of the evaluation result to return.
         fg_threshold: Foreground threshold forwarded to the evaluator.
+        groundtruth_dataset: When set, every variant is scored against this
+            dataset's groundtruth (``<dataset>/<case>/groundtruth``) instead of
+            deriving the dataset from the variant name. Use this when the
+            variant dimension is something other than a frame-rate (e.g. a model
+            name) but all runs share one groundtruth.
 
     Returns:
         The metric value, or ``None`` when the masks or groundtruth are missing.
     """
     result_dir = results_dir / variant / case
-    groundtruth_dir = data_root / dataset_folder_for(variant) / case / "groundtruth"
+    if groundtruth_dataset is not None:
+        groundtruth_dir = groundtruth_dataset / case / "groundtruth"
+    else:
+        groundtruth_dir = data_root / dataset_folder_for(variant) / case / "groundtruth"
     if not result_dir.is_dir() or not groundtruth_dir.is_dir():
         return None
 
@@ -150,6 +159,7 @@ def build_table(
     cases: list[str],
     metric: str,
     fg_threshold: int,
+    groundtruth_dataset: Path | None = None,
 ) -> dict[tuple[str, str], float]:
     """Score every populated (case, variant) cell.
 
@@ -160,6 +170,8 @@ def build_table(
         cases: Sequence names (rows).
         metric: Attribute of the evaluation result to tabulate.
         fg_threshold: Foreground threshold forwarded to the evaluator.
+        groundtruth_dataset: Optional fixed groundtruth dataset, see
+            :func:`score_cell`.
 
     Returns:
         A mapping of ``(case, variant)`` to metric value for populated cells.
@@ -168,7 +180,13 @@ def build_table(
     for case in cases:
         for variant in variants:
             value = score_cell(
-                results_dir, data_root, variant, case, metric, fg_threshold
+                results_dir,
+                data_root,
+                variant,
+                case,
+                metric,
+                fg_threshold,
+                groundtruth_dataset,
             )
             if value is not None:
                 table[(case, variant)] = value
@@ -246,7 +264,13 @@ def run(args: argparse.Namespace) -> int:
     )
 
     table = build_table(
-        args.results_dir, args.data_root, variants, cases, args.metric, args.fg_threshold
+        args.results_dir,
+        args.data_root,
+        variants,
+        cases,
+        args.metric,
+        args.fg_threshold,
+        args.groundtruth_dataset,
     )
 
     output_path = args.output or args.results_dir / "eval_summary.csv"
@@ -290,6 +314,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         type=Path,
         default=Path("."),
         help="directory holding the source data* datasets (for groundtruth)",
+    )
+    parser.add_argument(
+        "--groundtruth-dataset",
+        type=Path,
+        default=None,
+        help=(
+            "score every variant against this dataset's groundtruth "
+            "(<dataset>/<case>/groundtruth) instead of deriving it from the "
+            "variant name; use when variants are model names, not frame rates"
+        ),
     )
     parser.add_argument(
         "--metric",

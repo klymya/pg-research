@@ -33,7 +33,7 @@ class TestDenoising:
     )
     def test_filters_reduce_noise_variance(self, method: DenoiseMethod) -> None:
         image = make_background()
-        preprocessor = Preprocessor(PreprocessConfig(denoise=method))
+        preprocessor = Preprocessor(PreprocessConfig(resize=None, denoise=method))
 
         result = preprocessor.process(image)
 
@@ -42,7 +42,9 @@ class TestDenoising:
 
     def test_none_preserves_pixels_but_copies(self) -> None:
         image = make_background()
-        preprocessor = Preprocessor(PreprocessConfig(denoise=DenoiseMethod.NONE))
+        preprocessor = Preprocessor(
+            PreprocessConfig(resize=None, denoise=DenoiseMethod.NONE)
+        )
 
         result = preprocessor.process(image)
 
@@ -88,7 +90,9 @@ class TestRegistration:
     ) -> None:
         reference = make_background()
         drifted = self._shifted(reference, dx=3, dy=2)
-        config = PreprocessConfig(denoise=DenoiseMethod.NONE, registration=method)
+        config = PreprocessConfig(
+            resize=None, denoise=DenoiseMethod.NONE, registration=method
+        )
         preprocessor = Preprocessor(config)
 
         preprocessor.process(reference)
@@ -102,7 +106,9 @@ class TestRegistration:
         reference = make_background()
         drifted = self._shifted(reference, dx=3, dy=2)
         config = PreprocessConfig(
-            denoise=DenoiseMethod.NONE, registration=RegistrationMethod.NONE
+            resize=None,
+            denoise=DenoiseMethod.NONE,
+            registration=RegistrationMethod.NONE,
         )
         preprocessor = Preprocessor(config)
 
@@ -115,6 +121,7 @@ class TestRegistration:
         reference = make_background()
         drifted = self._shifted(reference, dx=40, dy=0)
         config = PreprocessConfig(
+            resize=None,
             denoise=DenoiseMethod.NONE,
             registration=RegistrationMethod.PHASE_CORRELATION,
             max_shift_px=5.0,
@@ -129,7 +136,9 @@ class TestRegistration:
     def test_flat_frames_do_not_raise(self) -> None:
         flat = np.full((*FRAME_SIZE, 3), 128, dtype=np.uint8)
         config = PreprocessConfig(
-            denoise=DenoiseMethod.NONE, registration=RegistrationMethod.ECC
+            resize=None,
+            denoise=DenoiseMethod.NONE,
+            registration=RegistrationMethod.ECC,
         )
         preprocessor = Preprocessor(config)
 
@@ -137,3 +146,40 @@ class TestRegistration:
         registered = preprocessor.process(flat)
 
         assert registered.bgr.shape == flat.shape
+
+
+class TestResize:
+    """Input resizing applied before every other Layer 0 step."""
+
+    def test_defaults_to_qvga(self) -> None:
+        preprocessor = Preprocessor()
+        image = make_background(size=(240, 360))  # non-QVGA input
+
+        result = preprocessor.process(image)
+
+        assert result.shape == (240, 320)  # (height, width) of QVGA
+
+    def test_custom_size(self) -> None:
+        preprocessor = Preprocessor(PreprocessConfig(resize=(80, 60)))
+
+        result = preprocessor.process(make_background())
+
+        assert result.shape == (60, 80)
+
+    def test_none_keeps_native_resolution(self) -> None:
+        preprocessor = Preprocessor(PreprocessConfig(resize=None))
+        image = make_background(size=(90, 110))
+
+        result = preprocessor.process(image)
+
+        assert result.shape == (90, 110)
+
+    def test_no_op_when_already_target_size(self) -> None:
+        preprocessor = Preprocessor(
+            PreprocessConfig(resize=(160, 120), denoise=DenoiseMethod.NONE)
+        )
+        image = make_background(size=(120, 160))
+
+        result = preprocessor.process(image)
+
+        np.testing.assert_array_equal(result.bgr, image)

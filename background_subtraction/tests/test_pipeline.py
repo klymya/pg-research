@@ -29,7 +29,7 @@ DWELL_FRAMES = 5
 def _config(dwell_frames: int = DWELL_FRAMES) -> PipelineConfig:
     """Build a pipeline configuration tuned for the synthetic scene."""
     return PipelineConfig(
-        preprocess=PreprocessConfig(denoise=DenoiseMethod.NONE),
+        preprocess=PreprocessConfig(resize=None, denoise=DenoiseMethod.NONE),
         shadow=ShadowConfig(enabled=False),
         dual_rate=DualRateConfig(
             fast=BGSConfig(learning_rate=0.6, threshold=25.0),
@@ -104,6 +104,42 @@ class TestPersonSuppression:
         occupied = draw_rectangle(background, OBJECT_BBOX)
         pipeline = SignOfLifePipeline.from_config(_config())
         person_box = (55, 35, 40, 35)
+
+        results = _run(pipeline, [background] * 6 + [occupied] * 25, [person_box])
+
+        assert not any(result.has_sign_of_life for result in results)
+
+
+class TestResize:
+    """Layer-0 resizing applied through the full pipeline."""
+
+    @staticmethod
+    def _resized_config() -> PipelineConfig:
+        """Config that resizes the 120x160 scene to a smaller frame."""
+        base = _config()
+        return PipelineConfig(
+            preprocess=PreprocessConfig(resize=(80, 60), denoise=DenoiseMethod.NONE),
+            shadow=base.shadow,
+            dual_rate=base.dual_rate,
+            blob=base.blob,
+            dwell=base.dwell,
+        )
+
+    def test_results_are_in_resized_coordinates(self) -> None:
+        pipeline = SignOfLifePipeline.from_config(self._resized_config())
+
+        result = pipeline.process(make_background())
+
+        assert result.frame.shape == (60, 80)
+        assert result.masks.slow.shape == (60, 80)
+
+    def test_person_box_veto_survives_resize(self) -> None:
+        # The person box is given in original 120x160 coordinates; the pipeline
+        # must scale it to the 80x60 frame for the veto to still cover the object.
+        background = make_background()
+        occupied = draw_rectangle(background, OBJECT_BBOX)
+        pipeline = SignOfLifePipeline.from_config(self._resized_config())
+        person_box = (55, 35, 40, 35)  # original-resolution box over the object
 
         results = _run(pipeline, [background] * 6 + [occupied] * 25, [person_box])
 

@@ -28,6 +28,16 @@ class TestPreprocessConfig:
         with pytest.raises(ValueError, match="max_shift_px"):
             PreprocessConfig(max_shift_px=0.0)
 
+    def test_rejects_non_positive_resize(self) -> None:
+        with pytest.raises(ValueError, match="resize dimensions"):
+            PreprocessConfig(resize=(0, 240))
+
+    def test_default_resize_is_qvga(self) -> None:
+        assert PreprocessConfig().resize == (320, 240)
+
+    def test_resize_can_be_disabled(self) -> None:
+        assert PreprocessConfig(resize=None).resize is None
+
     def test_accepts_defaults(self) -> None:
         assert PreprocessConfig().kernel_size == 5
 

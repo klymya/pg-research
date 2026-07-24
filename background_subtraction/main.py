@@ -188,6 +188,7 @@ def build_config(args: argparse.Namespace) -> PipelineConfig:
     """
     return PipelineConfig(
         preprocess=PreprocessConfig(
+            resize=None if args.no_resize else (args.resize[0], args.resize[1]),
             denoise=DenoiseMethod(args.denoise),
             kernel_size=args.denoise_kernel,
             registration=RegistrationMethod(args.registration),
@@ -373,6 +374,19 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
 
     layer0 = parser.add_argument_group("layer 0 - preprocessing")
+    layer0.add_argument(
+        "--resize",
+        type=int,
+        nargs=2,
+        metavar=("WIDTH", "HEIGHT"),
+        default=(320, 240),
+        help="resize every input frame to WIDTH x HEIGHT before preprocessing",
+    )
+    layer0.add_argument(
+        "--no-resize",
+        action="store_true",
+        help="process frames at their native resolution (disables --resize)",
+    )
     layer0.add_argument(
         "--denoise",
         choices=[method.value for method in DenoiseMethod],

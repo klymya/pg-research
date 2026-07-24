@@ -19,6 +19,38 @@ from .preprocessing import Preprocessor
 from .structures import BoundingBox, PipelineResult
 
 
+def _scale_boxes(
+    boxes: Iterable[BoundingBox],
+    from_shape: tuple[int, int],
+    to_shape: tuple[int, int],
+) -> tuple[BoundingBox, ...]:
+    """Scale ``(x, y, w, h)`` boxes from one frame size to another.
+
+    Args:
+        boxes: Boxes in ``from_shape`` coordinates.
+        from_shape: Source frame size as ``(height, width)``.
+        to_shape: Target frame size as ``(height, width)``.
+
+    Returns:
+        The boxes in ``to_shape`` coordinates; returned unchanged when the two
+        sizes match.
+    """
+    boxes = tuple(boxes)
+    if from_shape == to_shape or not boxes:
+        return boxes
+    scale_x = to_shape[1] / from_shape[1]
+    scale_y = to_shape[0] / from_shape[0]
+    return tuple(
+        (
+            round(x * scale_x),
+            round(y * scale_y),
+            round(w * scale_x),
+            round(h * scale_y),
+        )
+        for x, y, w, h in boxes
+    )
+
+
 class SignOfLifePipeline:
     """Chains Layer 0, the dual-rate Layer 1/2 pair and the Layer 3 engine."""
 
@@ -82,17 +114,23 @@ class SignOfLifePipeline:
 
         Args:
             image: Raw ``uint8`` BGR frame of shape ``(H, W, 3)``.
-            person_boxes: Bounding boxes of actively tracked humans, used to
-                veto candidates that belong to a person.
+            person_boxes: Bounding boxes of actively tracked humans in the
+                *original* image coordinates, used to veto candidates that
+                belong to a person. They are scaled internally to match any
+                resize applied by Layer 0.
 
         Returns:
             The per-frame :class:`~scr.structures.PipelineResult`; its
-            ``events`` field carries the "Sign of Life" signal.
+            ``events`` field carries the "Sign of Life" signal. Masks, blobs and
+            track boxes are in the (possibly resized) frame coordinates.
         """
+        original_shape = image.shape[:2]
         frame = self._preprocessor.process(image)
+        scaled_boxes = _scale_boxes(person_boxes, original_shape, frame.shape)
+
         masks = self._dual_rate.apply(frame)
         filtered_mask, blobs = self._blob_filter.filter(masks.static)
-        events = self._fsm.update(blobs, frame.index, person_boxes)
+        events = self._fsm.update(blobs, frame.index, scaled_boxes)
 
         return PipelineResult(
             frame=frame,

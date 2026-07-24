@@ -62,12 +62,34 @@ class Preprocessor:
         if image.dtype != np.uint8:
             raise ValueError("Preprocessor expects a uint8 image")
 
-        denoised = self._denoise(image)
+        resized = self._resize(image)
+        denoised = self._denoise(resized)
         registered = self._register(denoised)
 
         frame = Frame(bgr=registered, index=self._frame_index)
         self._frame_index += 1
         return frame
+
+    def _resize(self, image: np.ndarray) -> np.ndarray:
+        """Scale ``image`` to the configured target size, if any.
+
+        Runs before every other step so denoising, registration and the
+        background models all operate at a fixed resolution. Area interpolation
+        is used, which is preferred for downscaling.
+
+        Args:
+            image: Raw BGR frame.
+
+        Returns:
+            The resized frame, or the input unchanged when resizing is disabled
+            or the frame is already at the target size.
+        """
+        if self._config.resize is None:
+            return image
+        width, height = self._config.resize
+        if (image.shape[1], image.shape[0]) == (width, height):
+            return image
+        return cv2.resize(image, (width, height), interpolation=cv2.INTER_AREA)
 
     def _denoise(self, image: np.ndarray) -> np.ndarray:
         """Apply the configured spatial filter to ``image``."""

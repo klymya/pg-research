@@ -57,7 +57,10 @@ class MixtureOfGaussians(BackgroundSubtractor):
             raise ValueError("background_ratio must lie in (0, 1]")
 
         self._k = int(n_gaussians)
-        self._alpha = float(alpha)
+        # np.float32 (not a Python float) so that ``alpha * onehot`` — a scalar
+        # times a bool array — stays float32 instead of upcasting the whole
+        # mixture state to float64 (NumPy NEP 50 promotion).
+        self._alpha = np.float32(alpha)
         self._threshold = float(threshold)
         self._background_ratio = float(background_ratio)
         self._init_variance = float(init_variance)
