@@ -7510,7 +7510,7 @@ a.anchor-link {
 <!-- End of mermaid configuration --></head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
 <main>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=9f6cafb6">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=9c76985f">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7537,7 +7537,7 @@ port so no logic is reimplemented.</li>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b7cd4b89">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a009da6c">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7557,7 +7557,7 @@ we aim to improve through aggregation, and the ceiling that lower fps erodes.</p
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=e50b510f">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=42ec32f5">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7647,7 +7647,7 @@ we aim to improve through aggregation, and the ceiling that lower fps erodes.</p
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=77c2c9ac">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=1aec1f26">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7676,7 +7676,112 @@ we aim to improve through aggregation, and the ceiling that lower fps erodes.</p
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f57ebe69">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f3678bc0">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="Per-frame-count-accuracy-across-detection-rates">Per-frame count accuracy across detection rates<a class="anchor-link" href="#Per-frame-count-accuracy-across-detection-rates">¶</a></h3><p>Before any aggregation, how often does a <em>single</em> frame's raw detection count
+already equal the ground-truth room count? Simulating slower sensors by
+row-decimation (keep every <em>k</em>-th frame, <code>k = period/10</code>) barely moves this — the
+raw per-frame count is correct <strong>~86–89 %</strong> of the time regardless of rate. This
+is the baseline that time-aggregation later builds on.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=d8c15137">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">pf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ART</span><span class="si">}</span><span class="s2">/per_frame_accuracy.csv"</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">pf</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span>
+    <span class="s2">"fps"</span><span class="p">:</span> <span class="s2">"detection rate"</span><span class="p">,</span> <span class="s2">"row_step"</span><span class="p">:</span> <span class="s2">"every k-th frame"</span><span class="p">,</span>
+    <span class="s2">"frames"</span><span class="p">:</span> <span class="s2">"frames"</span><span class="p">,</span> <span class="s2">"correct"</span><span class="p">:</span> <span class="s2">"correct"</span><span class="p">,</span> <span class="s2">"pct_correct"</span><span class="p">:</span> <span class="s2">"correct (%)"</span><span class="p">})</span>
+    <span class="p">[[</span><span class="s2">"detection rate"</span><span class="p">,</span> <span class="s2">"every k-th frame"</span><span class="p">,</span> <span class="s2">"frames"</span><span class="p">,</span> <span class="s2">"correct"</span><span class="p">,</span> <span class="s2">"correct (%)"</span><span class="p">]]</span>
+    <span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">hide</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">"index"</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">({</span><span class="s2">"correct (%)"</span><span class="p">:</span> <span class="s2">"</span><span class="si">{:.1f}</span><span class="s2">"</span><span class="p">})</span>
+    <span class="o">.</span><span class="n">background_gradient</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s2">"correct (%)"</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"RdYlGn"</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">100</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
+<style type="text/css">
+#T_145fa_row0_col4 {
+  background-color: #bbe278;
+  color: #000000;
+}
+#T_145fa_row1_col4 {
+  background-color: #c1e57b;
+  color: #000000;
+}
+#T_145fa_row2_col4 {
+  background-color: #a0d669;
+  color: #000000;
+}
+#T_145fa_row3_col4 {
+  background-color: #98d368;
+  color: #000000;
+}
+</style>
+<table id="T_145fa">
+<thead>
+<tr>
+<th class="col_heading level0 col0" id="T_145fa_level0_col0">detection rate</th>
+<th class="col_heading level0 col1" id="T_145fa_level0_col1">every k-th frame</th>
+<th class="col_heading level0 col2" id="T_145fa_level0_col2">frames</th>
+<th class="col_heading level0 col3" id="T_145fa_level0_col3">correct</th>
+<th class="col_heading level0 col4" id="T_145fa_level0_col4">correct (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="data row0 col0" id="T_145fa_row0_col0">1/10</td>
+<td class="data row0 col1" id="T_145fa_row0_col1">1</td>
+<td class="data row0 col2" id="T_145fa_row0_col2">594</td>
+<td class="data row0 col3" id="T_145fa_row0_col3">513</td>
+<td class="data row0 col4" id="T_145fa_row0_col4">86.4</td>
+</tr>
+<tr>
+<td class="data row1 col0" id="T_145fa_row1_col0">1/20</td>
+<td class="data row1 col1" id="T_145fa_row1_col1">2</td>
+<td class="data row1 col2" id="T_145fa_row1_col2">297</td>
+<td class="data row1 col3" id="T_145fa_row1_col3">255</td>
+<td class="data row1 col4" id="T_145fa_row1_col4">85.9</td>
+</tr>
+<tr>
+<td class="data row2 col0" id="T_145fa_row2_col0">1/30</td>
+<td class="data row2 col1" id="T_145fa_row2_col1">3</td>
+<td class="data row2 col2" id="T_145fa_row2_col2">198</td>
+<td class="data row2 col3" id="T_145fa_row2_col3">175</td>
+<td class="data row2 col4" id="T_145fa_row2_col4">88.4</td>
+</tr>
+<tr>
+<td class="data row3 col0" id="T_145fa_row3_col0">1/60</td>
+<td class="data row3 col1" id="T_145fa_row3_col1">6</td>
+<td class="data row3 col2" id="T_145fa_row3_col2">99</td>
+<td class="data row3 col3" id="T_145fa_row3_col3">88</td>
+<td class="data row3 col4" id="T_145fa_row3_col4">88.9</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=ae3fb65c">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7706,12 +7811,12 @@ $\text{Accuracy} = \tfrac{4}{5}\times 100\% = 80\%$.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=76496bde">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=d9e539ed">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">res</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ART</span><span class="si">}</span><span class="s2">/sweep/eval_results.csv"</span><span class="p">)</span>
@@ -7740,71 +7845,71 @@ $\text{Accuracy} = \tfrac{4}{5}\times 100\% = 80\%$.</p>
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
 <style type="text/css">
-#T_7982e_row0_col0, #T_7982e_row1_col2 {
+#T_038cf_row0_col0, #T_038cf_row1_col2 {
   background-color: #82c966;
   color: #000000;
 }
-#T_7982e_row0_col1 {
+#T_038cf_row0_col1 {
   background-color: #89cc67;
   color: #000000;
 }
-#T_7982e_row0_col2 {
+#T_038cf_row0_col2 {
   background-color: #1b9950;
   color: #f1f1f1;
 }
-#T_7982e_row0_col3 {
+#T_038cf_row0_col3 {
   background-color: #17934e;
   color: #f1f1f1;
 }
-#T_7982e_row1_col0 {
+#T_038cf_row1_col0 {
   background-color: #addc6f;
   color: #000000;
 }
-#T_7982e_row1_col1 {
+#T_038cf_row1_col1 {
   background-color: #98d368;
   color: #000000;
 }
-#T_7982e_row1_col3, #T_7982e_row3_col3 {
+#T_038cf_row1_col3, #T_038cf_row3_col3 {
   background-color: #5ab760;
   color: #f1f1f1;
 }
-#T_7982e_row2_col0 {
+#T_038cf_row2_col0 {
   background-color: #bfe47a;
   color: #000000;
 }
-#T_7982e_row2_col1 {
+#T_038cf_row2_col1 {
   background-color: #6bbf64;
   color: #000000;
 }
-#T_7982e_row2_col2 {
+#T_038cf_row2_col2 {
   background-color: #51b35e;
   color: #f1f1f1;
 }
-#T_7982e_row2_col3 {
+#T_038cf_row2_col3 {
   background-color: #36a657;
   color: #f1f1f1;
 }
-#T_7982e_row3_col0 {
+#T_038cf_row3_col0 {
   background-color: #e14430;
   color: #f1f1f1;
 }
-#T_7982e_row3_col1 {
+#T_038cf_row3_col1 {
   background-color: #cbe982;
   color: #000000;
 }
-#T_7982e_row3_col2 {
+#T_038cf_row3_col2 {
   background-color: #bde379;
   color: #000000;
 }
 </style>
-<table id="T_7982e">
+<table id="T_038cf">
 <thead>
 <tr>
 <th class="index_name level0">count_period</th>
-<th class="col_heading level0 col0" id="T_7982e_level0_col0">30</th>
-<th class="col_heading level0 col1" id="T_7982e_level0_col1">60</th>
-<th class="col_heading level0 col2" id="T_7982e_level0_col2">90</th>
-<th class="col_heading level0 col3" id="T_7982e_level0_col3">120</th>
+<th class="col_heading level0 col0" id="T_038cf_level0_col0">30</th>
+<th class="col_heading level0 col1" id="T_038cf_level0_col1">60</th>
+<th class="col_heading level0 col2" id="T_038cf_level0_col2">90</th>
+<th class="col_heading level0 col3" id="T_038cf_level0_col3">120</th>
 </tr>
 <tr>
 <th class="index_name level0">det ↓ / count →</th>
@@ -7816,32 +7921,32 @@ $\text{Accuracy} = \tfrac{4}{5}\times 100\% = 80\%$.</p>
 </thead>
 <tbody>
 <tr>
-<th class="row_heading level0 row0" id="T_7982e_level0_row0">10</th>
-<td class="data row0 col0" id="T_7982e_row0_col0">90.2</td>
-<td class="data row0 col1" id="T_7982e_row0_col1">89.7</td>
-<td class="data row0 col2" id="T_7982e_row0_col2">95.8</td>
-<td class="data row0 col3" id="T_7982e_row0_col3">96.3</td>
+<th class="row_heading level0 row0" id="T_038cf_level0_row0">10</th>
+<td class="data row0 col0" id="T_038cf_row0_col0">90.2</td>
+<td class="data row0 col1" id="T_038cf_row0_col1">89.7</td>
+<td class="data row0 col2" id="T_038cf_row0_col2">95.8</td>
+<td class="data row0 col3" id="T_038cf_row0_col3">96.3</td>
 </tr>
 <tr>
-<th class="row_heading level0 row1" id="T_7982e_level0_row1">20</th>
-<td class="data row1 col0" id="T_7982e_row1_col0">87.4</td>
-<td class="data row1 col1" id="T_7982e_row1_col1">88.8</td>
-<td class="data row1 col2" id="T_7982e_row1_col2">90.3</td>
-<td class="data row1 col3" id="T_7982e_row1_col3">92.6</td>
+<th class="row_heading level0 row1" id="T_038cf_level0_row1">20</th>
+<td class="data row1 col0" id="T_038cf_row1_col0">87.4</td>
+<td class="data row1 col1" id="T_038cf_row1_col1">88.8</td>
+<td class="data row1 col2" id="T_038cf_row1_col2">90.3</td>
+<td class="data row1 col3" id="T_038cf_row1_col3">92.6</td>
 </tr>
 <tr>
-<th class="row_heading level0 row2" id="T_7982e_level0_row2">30</th>
-<td class="data row2 col0" id="T_7982e_row2_col0">86.0</td>
-<td class="data row2 col1" id="T_7982e_row2_col1">91.6</td>
-<td class="data row2 col2" id="T_7982e_row2_col2">93.1</td>
-<td class="data row2 col3" id="T_7982e_row2_col3">94.4</td>
+<th class="row_heading level0 row2" id="T_038cf_level0_row2">30</th>
+<td class="data row2 col0" id="T_038cf_row2_col0">86.0</td>
+<td class="data row2 col1" id="T_038cf_row2_col1">91.6</td>
+<td class="data row2 col2" id="T_038cf_row2_col2">93.1</td>
+<td class="data row2 col3" id="T_038cf_row2_col3">94.4</td>
 </tr>
 <tr>
-<th class="row_heading level0 row3" id="T_7982e_level0_row3">60</th>
-<td class="data row3 col0" id="T_7982e_row3_col0">65.4</td>
-<td class="data row3 col1" id="T_7982e_row3_col1">85.0</td>
-<td class="data row3 col2" id="T_7982e_row3_col2">86.1</td>
-<td class="data row3 col3" id="T_7982e_row3_col3">92.6</td>
+<th class="row_heading level0 row3" id="T_038cf_level0_row3">60</th>
+<td class="data row3 col0" id="T_038cf_row3_col0">65.4</td>
+<td class="data row3 col1" id="T_038cf_row3_col1">85.0</td>
+<td class="data row3 col2" id="T_038cf_row3_col2">86.1</td>
+<td class="data row3 col3" id="T_038cf_row3_col3">92.6</td>
 </tr>
 </tbody>
 </table>
@@ -7850,7 +7955,173 @@ $\text{Accuracy} = \tfrac{4}{5}\times 100\% = 80\%$.</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=5f35b9af">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=17f3cd64">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="Aggregation-uplift-vs-the-per-frame-baseline">Aggregation uplift vs the per-frame baseline<a class="anchor-link" href="#Aggregation-uplift-vs-the-per-frame-baseline">¶</a></h3><p>How much does time-aggregation actually help over just trusting a single frame?
+Each cell below is the <strong>aggregated count accuracy minus the raw per-frame
+accuracy at that detection rate</strong> (from the table in §1). Positive (green) means
+aggregation adds accuracy; negative (red) means it hurts. <em>Example:</em> at 1/10 fps
+the per-frame baseline is 86.4 %; a 60 s count period reaches 89.7 %, so <strong>+3.4</strong>.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=8a4f06c1">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">baseline</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ART</span><span class="si">}</span><span class="s2">/per_frame_accuracy.csv"</span><span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">"detection_period_sec"</span><span class="p">)[</span><span class="s2">"pct_correct"</span><span class="p">]</span>
+<span class="n">acc</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s2">"detection_period"</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="s2">"count_period"</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="s2">"accuracy"</span><span class="p">)</span>
+<span class="n">uplift</span> <span class="o">=</span> <span class="n">acc</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">baseline</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">rename_axis</span><span class="p">(</span><span class="s2">"det ↓ / count →"</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Count accuracy − per-frame baseline (pts) — green = aggregation helps"</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">uplift</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"</span><span class="si">{:+.1f}</span><span class="s2">"</span><span class="p">)</span><span class="o">.</span><span class="n">background_gradient</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s2">"RdYlGn"</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=-</span><span class="mi">10</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Count accuracy − per-frame baseline (pts) — green = aggregation helps
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
+<style type="text/css">
+#T_dec86_row0_col0 {
+  background-color: #abdb6d;
+  color: #000000;
+}
+#T_dec86_row0_col1 {
+  background-color: #b5df74;
+  color: #000000;
+}
+#T_dec86_row0_col2 {
+  background-color: #06733d;
+  color: #f1f1f1;
+}
+#T_dec86_row0_col3 {
+  background-color: #006837;
+  color: #f1f1f1;
+}
+#T_dec86_row1_col0 {
+  background-color: #e2f397;
+  color: #000000;
+}
+#T_dec86_row1_col1 {
+  background-color: #c1e57b;
+  color: #000000;
+}
+#T_dec86_row1_col2 {
+  background-color: #98d368;
+  color: #000000;
+}
+#T_dec86_row1_col3 {
+  background-color: #48ae5c;
+  color: #f1f1f1;
+}
+#T_dec86_row2_col0 {
+  background-color: #fed683;
+  color: #000000;
+}
+#T_dec86_row2_col1 {
+  background-color: #b9e176;
+  color: #000000;
+}
+#T_dec86_row2_col2 {
+  background-color: #91d068;
+  color: #000000;
+}
+#T_dec86_row2_col3 {
+  background-color: #63bc62;
+  color: #f1f1f1;
+}
+#T_dec86_row3_col0 {
+  background-color: #a50026;
+  color: #f1f1f1;
+}
+#T_dec86_row3_col1 {
+  background-color: #fdb163;
+  color: #000000;
+}
+#T_dec86_row3_col2 {
+  background-color: #fecc7b;
+  color: #000000;
+}
+#T_dec86_row3_col3 {
+  background-color: #addc6f;
+  color: #000000;
+}
+</style>
+<table id="T_dec86">
+<thead>
+<tr>
+<th class="index_name level0">count_period</th>
+<th class="col_heading level0 col0" id="T_dec86_level0_col0">30</th>
+<th class="col_heading level0 col1" id="T_dec86_level0_col1">60</th>
+<th class="col_heading level0 col2" id="T_dec86_level0_col2">90</th>
+<th class="col_heading level0 col3" id="T_dec86_level0_col3">120</th>
+</tr>
+<tr>
+<th class="index_name level0">det ↓ / count →</th>
+<th class="blank col0"> </th>
+<th class="blank col1"> </th>
+<th class="blank col2"> </th>
+<th class="blank col3"> </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th class="row_heading level0 row0" id="T_dec86_level0_row0">10</th>
+<td class="data row0 col0" id="T_dec86_row0_col0">+3.8</td>
+<td class="data row0 col1" id="T_dec86_row0_col1">+3.4</td>
+<td class="data row0 col2" id="T_dec86_row0_col2">+9.5</td>
+<td class="data row0 col3" id="T_dec86_row0_col3">+9.9</td>
+</tr>
+<tr>
+<th class="row_heading level0 row1" id="T_dec86_level0_row1">20</th>
+<td class="data row1 col0" id="T_dec86_row1_col0">+1.5</td>
+<td class="data row1 col1" id="T_dec86_row1_col1">+2.9</td>
+<td class="data row1 col2" id="T_dec86_row1_col2">+4.4</td>
+<td class="data row1 col3" id="T_dec86_row1_col3">+6.7</td>
+</tr>
+<tr>
+<th class="row_heading level0 row2" id="T_dec86_level0_row2">30</th>
+<td class="data row2 col0" id="T_dec86_row2_col0">-2.4</td>
+<td class="data row2 col1" id="T_dec86_row2_col1">+3.2</td>
+<td class="data row2 col2" id="T_dec86_row2_col2">+4.7</td>
+<td class="data row2 col3" id="T_dec86_row2_col3">+6.1</td>
+</tr>
+<tr>
+<th class="row_heading level0 row3" id="T_dec86_level0_row3">60</th>
+<td class="data row3 col0" id="T_dec86_row3_col0">-23.5</td>
+<td class="data row3 col1" id="T_dec86_row3_col1">-3.8</td>
+<td class="data row3 col2" id="T_dec86_row3_col2">-2.8</td>
+<td class="data row3 col3" id="T_dec86_row3_col3">+3.7</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a4d46bd8">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
