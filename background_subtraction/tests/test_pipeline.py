@@ -10,7 +10,6 @@ from scr.config import (
     BGSConfig,
     BlobConfig,
     DenoiseMethod,
-    DualRateConfig,
     DwellConfig,
     PipelineConfig,
     PreprocessConfig,
@@ -27,15 +26,16 @@ DWELL_FRAMES = 5
 
 
 def _config(dwell_frames: int = DWELL_FRAMES) -> PipelineConfig:
-    """Build a pipeline configuration tuned for the synthetic scene."""
+    """Build a pipeline configuration tuned for the synthetic scene.
+
+    A single background model absorbs a deposited object at its learning rate,
+    so the rate is kept low enough (0.02) that the object stays in the
+    foreground long enough for the dwell FSM to confirm it.
+    """
     return PipelineConfig(
         preprocess=PreprocessConfig(resize=None, denoise=DenoiseMethod.NONE),
         shadow=ShadowConfig(enabled=False),
-        dual_rate=DualRateConfig(
-            fast=BGSConfig(learning_rate=0.6, threshold=25.0),
-            slow=BGSConfig(learning_rate=0.0005, threshold=25.0),
-            warmup_frames=3,
-        ),
+        bgs=BGSConfig(learning_rate=0.02, threshold=25.0),
         blob=BlobConfig(min_area=100, open_kernel=3, close_kernel=5),
         dwell=DwellConfig(dwell_frames=dwell_frames, max_missing_frames=3),
     )
@@ -120,7 +120,7 @@ class TestResize:
         return PipelineConfig(
             preprocess=PreprocessConfig(resize=(80, 60), denoise=DenoiseMethod.NONE),
             shadow=base.shadow,
-            dual_rate=base.dual_rate,
+            bgs=base.bgs,
             blob=base.blob,
             dwell=base.dwell,
         )
@@ -131,7 +131,7 @@ class TestResize:
         result = pipeline.process(make_background())
 
         assert result.frame.shape == (60, 80)
-        assert result.masks.slow.shape == (60, 80)
+        assert result.foreground.shape == (60, 80)
 
     def test_person_box_veto_survives_resize(self) -> None:
         # The person box is given in original 120x160 coordinates; the pipeline
@@ -156,8 +156,7 @@ class TestResultContract:
         result = pipeline.process(background)
 
         assert result.frame.index == 0
-        assert result.masks.fast.shape == background.shape[:2]
-        assert result.masks.slow.shape == background.shape[:2]
+        assert result.foreground.shape == background.shape[:2]
         assert result.filtered_mask.shape == background.shape[:2]
         assert result.blobs == ()
         assert result.has_sign_of_life is False
@@ -198,11 +197,12 @@ class TestReset:
         _run(pipeline, [background] * 6 + [occupied] * 25)
 
         pipeline.reset()
+
+        assert pipeline.model.background_bgr is None
         result = pipeline.process(background)
 
         assert result.frame.index == 0
         assert result.tracked == ()
-        assert pipeline.dual_rate.in_warmup is True
 
     def test_signal_can_be_reproduced_after_reset(self) -> None:
         background = make_background()
@@ -246,7 +246,7 @@ def test_pipeline_runs_with_every_feature(feature_kind: str) -> None:
         preprocess=config.preprocess,
         feature=FeatureConfig(kind=FeatureKind(feature_kind)),
         shadow=config.shadow,
-        dual_rate=config.dual_rate,
+        bgs=config.bgs,
         blob=config.blob,
         dwell=config.dwell,
     )

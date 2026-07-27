@@ -7,8 +7,8 @@ The package implements "Sign of Life" (left-object) detection as four layers:
   chromaticity) plus an HSV shadow veto.
 * Layer 1 - :mod:`scr.bgs_model`: a rate-parameterized background model built
   on a swappable backend from :mod:`scr.backends`.
-* Layer 3 - :mod:`scr.dual_rate`, :mod:`scr.blobs`, :mod:`scr.fsm`: two models
-  at different rates, structural filtering and a dwell-time state machine.
+* Layer 3 - :mod:`scr.blobs`, :mod:`scr.fsm`: structural filtering of the
+  foreground mask and a dwell-time state machine.
 
 :class:`scr.pipeline.SignOfLifePipeline` chains them together.
 """
@@ -29,7 +29,6 @@ from .config import (
     BGSConfig,
     BlobConfig,
     DenoiseMethod,
-    DualRateConfig,
     DwellConfig,
     FeatureConfig,
     FeatureKind,
@@ -39,7 +38,6 @@ from .config import (
     RegistrationMethod,
     ShadowConfig,
 )
-from .dual_rate import DualRateBGS
 from .features import (
     ChromaticityExtractor,
     FeatureExtractor,
@@ -50,12 +48,21 @@ from .features import (
     create_feature_extractor,
 )
 from .fsm import StaticObjectFSM
+from .native_ops import (
+    MorphOp,
+    StructuringShape,
+    bgr_to_hsv,
+    dilate,
+    erode,
+    get_structuring_element,
+    hsv_to_bgr,
+    morphology_ex,
+)
 from .pipeline import SignOfLifePipeline
 from .preprocessing import Preprocessor
 from .structures import (
     Blob,
     BoundingBox,
-    DualRateMasks,
     Frame,
     ObjectState,
     PipelineResult,
@@ -71,9 +78,6 @@ __all__ = [
     "BoundingBox",
     "ChromaticityExtractor",
     "DenoiseMethod",
-    "DualRateBGS",
-    "DualRateConfig",
-    "DualRateMasks",
     "DwellConfig",
     "FeatureConfig",
     "FeatureExtractor",
@@ -83,6 +87,7 @@ __all__ = [
     "Implementation",
     "LocalBinaryPatternExtractor",
     "MedianBackend",
+    "MorphOp",
     "NativeModelBackend",
     "ObjectState",
     "OpenCVBackend",
@@ -98,9 +103,16 @@ __all__ = [
     "ShadowSuppressor",
     "SignOfLifePipeline",
     "StaticObjectFSM",
+    "StructuringShape",
     "TrackedObject",
     "available_backends",
+    "bgr_to_hsv",
     "compute_lbp",
     "create_backend",
     "create_feature_extractor",
+    "dilate",
+    "erode",
+    "get_structuring_element",
+    "hsv_to_bgr",
+    "morphology_ex",
 ]

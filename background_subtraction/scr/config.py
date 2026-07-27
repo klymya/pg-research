@@ -37,6 +37,19 @@ class FeatureKind(str, Enum):
     CHROMATICITY = "chromaticity"
 
 
+class Implementation(str, Enum):
+    """Which code path provides an operation: OpenCV library or pure NumPy.
+
+    ``LIB`` uses OpenCV (and, for the model backends, pybgs); ``NATIVE`` uses the
+    pure-NumPy reference code -- the models in :mod:`scr.models` and the HSV /
+    morphology operations in :mod:`scr.native_ops`. The native path carries no
+    OpenCV dependency for these stages, which is what the C / Alif port targets.
+    """
+
+    LIB = "lib"
+    NATIVE = "native"
+
+
 @dataclass(frozen=True)
 class PreprocessConfig:
     """Layer 0 parameters: resizing, denoising and global frame registration.
@@ -114,6 +127,8 @@ class ShadowConfig:
         value_ratio_max: Upper bound of ``V_frame / V_background``.
         saturation_delta_max: Maximum absolute saturation difference (0-255).
         hue_delta_max: Maximum circular hue difference (OpenCV scale, 0-179).
+        implementation: Whether the BGR->HSV conversion uses OpenCV or the
+            pure-NumPy :mod:`scr.native_ops` equivalent.
     """
 
     enabled: bool = True
@@ -121,23 +136,12 @@ class ShadowConfig:
     value_ratio_max: float = 0.95
     saturation_delta_max: float = 40.0
     hue_delta_max: float = 12.0
+    implementation: Implementation = Implementation.LIB
 
     def __post_init__(self) -> None:
         if not 0.0 <= self.value_ratio_min < self.value_ratio_max:
             raise ValueError("require 0 <= value_ratio_min < value_ratio_max")
-
-
-class Implementation(str, Enum):
-    """Which code path provides a background-subtraction backend.
-
-    ``LIB`` uses the OpenCV/pybgs-backed adapters; ``NATIVE`` uses the
-    pure-NumPy reference models in :mod:`scr.models`. The two share the
-    :class:`~scr.backends.BGSBackend` interface, so a pipeline can be built with
-    either without changing any other stage.
-    """
-
-    LIB = "lib"
-    NATIVE = "native"
+        object.__setattr__(self, "implementation", Implementation(self.implementation))
 
 
 @dataclass(frozen=True)
@@ -173,34 +177,6 @@ class BGSConfig:
 
 
 @dataclass(frozen=True)
-class DualRateConfig:
-    """Layer 3 pair of background models running at different rates.
-
-    Attributes:
-        fast: Model absorbing changes quickly, tracking transient motion.
-        slow: Model absorbing changes slowly, preserving newly static objects.
-        warmup_frames: Number of initial frames during which the static mask is
-            forced empty, letting the slow model converge.
-    """
-
-    fast: BGSConfig = field(
-        default_factory=lambda: BGSConfig(learning_rate=0.1)
-    )
-    slow: BGSConfig = field(
-        default_factory=lambda: BGSConfig(learning_rate=0.001)
-    )
-    warmup_frames: int = 30
-
-    def __post_init__(self) -> None:
-        if self.fast.learning_rate < self.slow.learning_rate:
-            raise ValueError(
-                "fast.learning_rate must be >= slow.learning_rate"
-            )
-        if self.warmup_frames < 0:
-            raise ValueError("warmup_frames must be non-negative")
-
-
-@dataclass(frozen=True)
 class BlobConfig:
     """Structural filtering of the static-candidate mask.
 
@@ -211,6 +187,8 @@ class BlobConfig:
         open_kernel: Odd kernel size of the opening pass; ``0`` disables it.
         close_kernel: Odd kernel size of the closing pass; ``0`` disables it.
         connectivity: Connected-component connectivity, ``4`` or ``8``.
+        implementation: Whether the morphology uses OpenCV or the pure-NumPy
+            :mod:`scr.native_ops` equivalent.
     """
 
     min_area: int = 150
@@ -218,6 +196,7 @@ class BlobConfig:
     open_kernel: int = 3
     close_kernel: int = 5
     connectivity: int = 8
+    implementation: Implementation = Implementation.LIB
 
     def __post_init__(self) -> None:
         if self.min_area < 0:
@@ -230,6 +209,7 @@ class BlobConfig:
                 raise ValueError(f"{name} must be 0 or an odd integer >= 3")
         if self.connectivity not in (4, 8):
             raise ValueError("connectivity must be 4 or 8")
+        object.__setattr__(self, "implementation", Implementation(self.implementation))
 
 
 @dataclass(frozen=True)
@@ -261,6 +241,22 @@ class DwellConfig:
                 raise ValueError(f"{name} must lie in [0, 1]")
 
 
+def _default_bgs() -> BGSConfig:
+    """Phase-2 default background model: the recommended single fast model.
+
+    ``running_gaussian`` (Wren single-Gaussian) is the best performance-per-
+    resource model in the Phase 1 sweep -- top F1 on both cases at the cheapest
+    tier -- so it is the pipeline's default, run native at the fast learning
+    rate. See ``models_complexity_ranking.md`` and the Phase 1 conclusions in
+    ``readme.md``.
+    """
+    return BGSConfig(
+        backend="running_gaussian",
+        learning_rate=0.1,
+        implementation=Implementation.NATIVE,
+    )
+
+
 @dataclass(frozen=True)
 class PipelineConfig:
     """Complete description of a "Sign of Life" pipeline instance."""
@@ -268,6 +264,6 @@ class PipelineConfig:
     preprocess: PreprocessConfig = field(default_factory=PreprocessConfig)
     feature: FeatureConfig = field(default_factory=FeatureConfig)
     shadow: ShadowConfig = field(default_factory=ShadowConfig)
-    dual_rate: DualRateConfig = field(default_factory=DualRateConfig)
+    bgs: BGSConfig = field(default_factory=_default_bgs)
     blob: BlobConfig = field(default_factory=BlobConfig)
     dwell: DwellConfig = field(default_factory=DwellConfig)

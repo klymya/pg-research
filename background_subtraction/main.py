@@ -7,7 +7,7 @@ frame, following the CDNET-14 result convention (``bin%06d.png``).
 Example:
     python main.py --input data/canoe --output results/canoe
     python main.py -i data/traffic/input -o results/traffic \\
-        --fast-backend running_average --slow-backend subsense --feature lbp
+        --backend running_gaussian --alpha 0.1 --feature lbp
 """
 
 from __future__ import annotations
@@ -26,7 +26,6 @@ from scr.config import (
     BGSConfig,
     BlobConfig,
     DenoiseMethod,
-    DualRateConfig,
     DwellConfig,
     FeatureConfig,
     FeatureKind,
@@ -42,7 +41,7 @@ logger = logging.getLogger("background_subtraction")
 IMAGE_SUFFIXES = (".jpg", ".jpeg", ".png", ".bmp")
 """Image extensions recognised when scanning an input directory."""
 
-MASK_SOURCES = ("filtered", "static", "fast", "slow")
+MASK_SOURCES = ("filtered", "foreground")
 """Selectable pipeline outputs, see :func:`select_mask`."""
 
 FRAME_NUMBER_PATTERN = re.compile(r"(\d+)")
@@ -54,30 +53,7 @@ ALL_BACKENDS = tuple(
         | set(available_backends(Implementation.NATIVE))
     )
 )
-"""Union of library and native backend names accepted for --fast/slow-backend."""
-
-RATE_IGNORING_BACKENDS = {
-    Implementation.LIB: frozenset({"vibe", "subsense", "lobster", "pawcs", "median"}),
-    Implementation.NATIVE: frozenset(
-        {
-            "vibe",
-            "adaptive_median",
-            "median",
-            "frame_difference",
-            "static_frame_difference",
-            "eigenbackground",
-            "eigen",
-        }
-    ),
-}
-"""Backends that ignore the learning rate, per implementation.
-
-Two identical instances of one of these produce identical masks, so pairing one
-with itself makes the ``slow AND NOT fast`` static cue empty.
-"""
-
-PYBGS_BACKENDS = frozenset({"vibe", "subsense", "lobster", "pawcs"})
-"""Backends that ignore the learning rate and cannot be paired with themselves."""
+"""Union of library and native backend names accepted for --backend."""
 
 
 def discover_frames(input_path: Path) -> list[Path]:
@@ -135,22 +111,22 @@ def output_name(frame_path: Path, index: int, prefix: str = "bin") -> str:
 
 
 def select_background(pipeline: SignOfLifePipeline, source: str) -> np.ndarray | None:
-    """Return the background-model image of the model backing ``source``.
+    """Return the background-model image of the pipeline's model.
 
-    The background is the exponentially-weighted BGR reference each dual-rate
-    model maintains, i.e. a picture of the estimated empty scene (not the
-    foreground mask). The fast model's background is returned for the fast mask,
-    otherwise the slow model's.
+    The background is the exponentially-weighted BGR reference the model
+    maintains, i.e. a picture of the estimated empty scene (not the foreground
+    mask). It is the same regardless of ``source``.
 
     Args:
         pipeline: The pipeline that produced the current result.
-        source: The selected mask source (see :data:`MASK_SOURCES`).
+        source: The selected mask source (see :data:`MASK_SOURCES`); unused, kept
+            for a symmetric call site.
 
     Returns:
         The ``uint8`` background image, or ``None`` before the first frame.
     """
-    model = pipeline.dual_rate.fast if source == "fast" else pipeline.dual_rate.slow
-    return model.background_bgr
+    del source
+    return pipeline.model.background_bgr
 
 
 def select_mask(result: PipelineResult, source: str):
@@ -168,12 +144,8 @@ def select_mask(result: PipelineResult, source: str):
     """
     if source == "filtered":
         return result.filtered_mask
-    if source == "static":
-        return result.masks.static
-    if source == "fast":
-        return result.masks.fast
-    if source == "slow":
-        return result.masks.slow
+    if source == "foreground":
+        return result.foreground
     raise ValueError(f"unknown mask source {source!r}; expected one of {MASK_SOURCES}")
 
 
@@ -194,56 +166,25 @@ def build_config(args: argparse.Namespace) -> PipelineConfig:
             registration=RegistrationMethod(args.registration),
         ),
         feature=FeatureConfig(kind=FeatureKind(args.feature)),
-        shadow=ShadowConfig(enabled=not args.no_shadow_veto),
-        dual_rate=DualRateConfig(
-            fast=BGSConfig(
-                backend=args.fast_backend,
-                learning_rate=args.fast_alpha,
-                threshold=args.threshold,
-                implementation=Implementation(args.implementation),
-            ),
-            slow=BGSConfig(
-                backend=args.slow_backend,
-                learning_rate=args.slow_alpha,
-                threshold=args.threshold,
-                implementation=Implementation(args.implementation),
-            ),
-            warmup_frames=args.warmup_frames,
+        shadow=ShadowConfig(
+            enabled=not args.no_shadow_veto,
+            implementation=Implementation(args.implementation),
         ),
-        blob=BlobConfig(min_area=args.min_area, max_area=args.max_area),
+        bgs=BGSConfig(
+            backend=args.backend,
+            learning_rate=args.alpha,
+            threshold=args.threshold,
+            implementation=Implementation(args.implementation),
+        ),
+        blob=BlobConfig(
+            min_area=args.min_area,
+            max_area=args.max_area,
+            implementation=Implementation(args.implementation),
+        ),
         dwell=DwellConfig(
             dwell_frames=args.dwell_frames,
             max_missing_frames=args.max_missing_frames,
         ),
-    )
-
-
-def warn_on_degenerate_pairing(
-    fast_backend: str, slow_backend: str, implementation: Implementation
-) -> None:
-    """Warn when the dual-rate pair cannot produce a static cue.
-
-    Some backends ignore the learning rate (pybgs algorithms, and native models
-    such as ViBe or frame differencing). Two identical instances of one produce
-    identical masks, so ``slow AND NOT fast`` is always empty and no output
-    frame carries a static object.
-
-    Args:
-        fast_backend: Name of the fast backend.
-        slow_backend: Name of the slow backend.
-        implementation: Whether library or native backends are in use.
-    """
-    if fast_backend.lower() != slow_backend.lower():
-        return
-    if fast_backend.lower() not in RATE_IGNORING_BACKENDS[implementation]:
-        return
-    logger.warning(
-        "Both models use the %s backend %r, which ignores the learning rate; "
-        "the fast and slow masks will be identical and every output mask will "
-        "be empty. Pair it with a rate-controlled fast backend such as "
-        "running_average or mog2 instead.",
-        implementation.value,
-        fast_backend,
     )
 
 
@@ -264,9 +205,6 @@ def run(args: argparse.Namespace) -> int:
     background_dir = args.output / "background" if args.dump_background else None
     if background_dir is not None:
         background_dir.mkdir(parents=True, exist_ok=True)
-    warn_on_degenerate_pairing(
-        args.fast_backend, args.slow_backend, Implementation(args.implementation)
-    )
 
     pipeline = SignOfLifePipeline.from_config(build_config(args))
     logger.info(
@@ -416,33 +354,26 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     layer12.add_argument(
         "--implementation",
         choices=[member.value for member in Implementation],
-        default=Implementation.LIB.value,
-        help="use the OpenCV/pybgs library backends or the pure-NumPy native models",
+        default=Implementation.NATIVE.value,
+        help=(
+            "OpenCV/pybgs library path or the pure-NumPy native path; applies to "
+            "the model backend, the HSV shadow veto and the morphology"
+        ),
     )
     layer12.add_argument(
-        "--fast-backend",
+        "--backend",
         choices=ALL_BACKENDS,
-        default="running_average",
-        help="backend of the fast model (must exist for the chosen implementation)",
+        default="running_gaussian",
+        help="background model backend (must exist for the chosen implementation)",
     )
     layer12.add_argument(
-        "--slow-backend",
-        choices=ALL_BACKENDS,
-        default="running_average",
-        help="backend of the slow model (must exist for the chosen implementation)",
-    )
-    layer12.add_argument(
-        "--fast-alpha", type=float, default=0.1, help="fast learning rate"
-    )
-    layer12.add_argument(
-        "--slow-alpha", type=float, default=0.001, help="slow learning rate"
+        "--alpha", type=float, default=0.1, help="model learning rate"
     )
     layer12.add_argument(
         "--threshold", type=float, default=25.0, help="native backend difference threshold"
     )
 
-    layer3 = parser.add_argument_group("layer 3 - dual rate and dwell time")
-    layer3.add_argument("--warmup-frames", type=int, default=30)
+    layer3 = parser.add_argument_group("layer 3 - dwell time")
     layer3.add_argument("--min-area", type=int, default=150)
     layer3.add_argument("--max-area", type=int, default=None)
     layer3.add_argument("--dwell-frames", type=int, default=60)

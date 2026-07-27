@@ -98,28 +98,14 @@ class TrackedObject:
 
 
 @dataclass(frozen=True)
-class DualRateMasks:
-    """Foreground masks produced by the dual-rate stage.
-
-    Attributes:
-        fast: Foreground of the fast model, ``uint8`` with values ``0``/``255``.
-        slow: Foreground of the slow model, same encoding.
-        static: Static-object candidates, ``slow AND NOT fast``.
-    """
-
-    fast: np.ndarray
-    slow: np.ndarray
-    static: np.ndarray
-
-
-@dataclass(frozen=True)
 class PipelineResult:
     """Everything the pipeline produced for a single frame.
 
     Attributes:
         frame: The preprocessed frame the result refers to.
-        masks: Fast, slow and static masks of the dual-rate stage.
-        filtered_mask: Static mask after morphology and area gating.
+        foreground: Foreground mask of the single background model, ``uint8``
+            with values ``0``/``255``.
+        filtered_mask: Foreground mask after morphology and area gating.
         blobs: Structurally valid static-object candidates.
         tracked: All live tracks known to the FSM after this frame.
         events: Tracks that reached the confirmed state on this frame; a
@@ -127,7 +113,7 @@ class PipelineResult:
     """
 
     frame: Frame
-    masks: DualRateMasks
+    foreground: np.ndarray
     filtered_mask: np.ndarray
     blobs: tuple[Blob, ...] = ()
     tracked: tuple[TrackedObject, ...] = ()

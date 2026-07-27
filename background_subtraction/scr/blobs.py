@@ -10,7 +10,8 @@ from __future__ import annotations
 import cv2
 import numpy as np
 
-from .config import BlobConfig
+from .config import BlobConfig, Implementation
+from .native_ops import MorphOp, StructuringShape, get_structuring_element, morphology_ex
 from .structures import Blob
 from .utils import FOREGROUND, ensure_binary_mask
 
@@ -83,13 +84,17 @@ class BlobFilter:
         """Run the configured opening and closing passes over ``mask``."""
         cfg = self._config
         if cfg.open_kernel:
-            kernel = cv2.getStructuringElement(
-                cv2.MORPH_ELLIPSE, (cfg.open_kernel, cfg.open_kernel)
-            )
-            mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+            mask = self._morphology(mask, "open", cfg.open_kernel)
         if cfg.close_kernel:
-            kernel = cv2.getStructuringElement(
-                cv2.MORPH_ELLIPSE, (cfg.close_kernel, cfg.close_kernel)
-            )
-            mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+            mask = self._morphology(mask, "close", cfg.close_kernel)
         return mask
+
+    def _morphology(self, mask: np.ndarray, operation: str, ksize: int) -> np.ndarray:
+        """Apply one elliptical opening/closing via the configured backend."""
+        if self._config.implementation is Implementation.NATIVE:
+            kernel = get_structuring_element(StructuringShape.ELLIPSE, (ksize, ksize))
+            op = MorphOp.OPEN if operation == "open" else MorphOp.CLOSE
+            return morphology_ex(mask, op, kernel)
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (ksize, ksize))
+        op = cv2.MORPH_OPEN if operation == "open" else cv2.MORPH_CLOSE
+        return cv2.morphologyEx(mask, op, kernel)

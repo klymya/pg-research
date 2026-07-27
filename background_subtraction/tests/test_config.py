@@ -7,9 +7,9 @@ import pytest
 from scr.config import (
     BGSConfig,
     BlobConfig,
-    DualRateConfig,
     DwellConfig,
     FeatureConfig,
+    Implementation,
     PipelineConfig,
     PreprocessConfig,
     ShadowConfig,
@@ -89,25 +89,6 @@ class TestBGSConfig:
         assert config.backend_params["history"] == 10
 
 
-class TestDualRateConfig:
-    """Validation of the dual-rate pairing."""
-
-    def test_rejects_slower_fast_model(self) -> None:
-        with pytest.raises(ValueError, match="fast.learning_rate"):
-            DualRateConfig(
-                fast=BGSConfig(learning_rate=0.001),
-                slow=BGSConfig(learning_rate=0.1),
-            )
-
-    def test_rejects_negative_warmup(self) -> None:
-        with pytest.raises(ValueError, match="warmup_frames"):
-            DualRateConfig(warmup_frames=-1)
-
-    def test_defaults_are_ordered(self) -> None:
-        config = DualRateConfig()
-        assert config.fast.learning_rate > config.slow.learning_rate
-
-
 class TestBlobConfig:
     """Validation of the structural filter parameters."""
 
@@ -122,6 +103,26 @@ class TestBlobConfig:
     def test_rejects_unsupported_connectivity(self) -> None:
         with pytest.raises(ValueError, match="connectivity"):
             BlobConfig(connectivity=6)
+
+    def test_coerces_implementation_string(self) -> None:
+        assert BlobConfig(implementation="native").implementation is Implementation.NATIVE
+
+    def test_defaults_to_library_morphology(self) -> None:
+        assert BlobConfig().implementation is Implementation.LIB
+
+
+class TestShadowConfig:
+    """Validation of the shadow-veto parameters."""
+
+    def test_rejects_inverted_value_ratio(self) -> None:
+        with pytest.raises(ValueError, match="value_ratio_min"):
+            ShadowConfig(value_ratio_min=0.9, value_ratio_max=0.4)
+
+    def test_coerces_implementation_string(self) -> None:
+        assert ShadowConfig(implementation="native").implementation is Implementation.NATIVE
+
+    def test_defaults_to_library_hsv(self) -> None:
+        assert ShadowConfig().implementation is Implementation.LIB
 
 
 class TestDwellConfig:
@@ -143,7 +144,14 @@ class TestPipelineConfig:
     def test_builds_with_defaults(self) -> None:
         config = PipelineConfig()
         assert config.preprocess.kernel_size == 5
-        assert config.dual_rate.fast.learning_rate > 0
+        assert config.bgs.learning_rate > 0
+
+    def test_default_model_is_the_recommended_single_fast_model(self) -> None:
+        # Phase 2: one native running_gaussian model at the fast rate.
+        config = PipelineConfig()
+        assert config.bgs.backend == "running_gaussian"
+        assert config.bgs.implementation is Implementation.NATIVE
+        assert config.bgs.learning_rate == 0.1
 
     def test_defaults_are_not_shared_between_instances(self) -> None:
         assert PipelineConfig().blob is not PipelineConfig().blob

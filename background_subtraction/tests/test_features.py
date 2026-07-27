@@ -181,3 +181,25 @@ class TestShadowSuppressor:
             ShadowSuppressor().suppress(
                 self._full_mask(), Frame(bgr=make_background()), smaller
             )
+
+    def test_shadow_mask_marks_shadow_pixels(self) -> None:
+        # The shadow map (255 where shadow) is the complement of what survives
+        # suppression, so the two must agree pixel for pixel.
+        background = make_background()
+        shadowed = (background.astype(np.float32) * 0.7).astype(np.uint8)
+        suppressor = ShadowSuppressor()
+        frame = Frame(bgr=shadowed)
+
+        shadow = suppressor.shadow_mask(frame, background)
+        suppressed = suppressor.suppress(self._full_mask(), frame, background)
+
+        assert set(np.unique(shadow)).issubset({0, 255})
+        np.testing.assert_array_equal(shadow > 0, suppressed == 0)
+
+    def test_shadow_mask_is_empty_without_background(self) -> None:
+        frame = Frame(bgr=make_background())
+
+        shadow = ShadowSuppressor().shadow_mask(frame, None)
+
+        assert shadow.shape == FRAME_SIZE
+        assert not shadow.any()

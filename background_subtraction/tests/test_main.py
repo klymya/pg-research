@@ -11,8 +11,8 @@ import pytest
 from conftest import draw_rectangle, make_background
 
 import main
-from scr.config import DenoiseMethod, FeatureKind, Implementation, RegistrationMethod
-from scr.structures import DualRateMasks, Frame, PipelineResult
+from scr.config import DenoiseMethod, FeatureKind, RegistrationMethod
+from scr.structures import Frame, PipelineResult
 
 OBJECT_BBOX = (60, 40, 30, 25)
 """Bounding box of the object deposited into the synthetic sequence."""
@@ -106,17 +106,13 @@ class TestSelectMask:
         shape = (8, 8)
         return PipelineResult(
             frame=Frame(bgr=np.zeros((*shape, 3), dtype=np.uint8)),
-            masks=DualRateMasks(
-                fast=np.full(shape, 1, dtype=np.uint8),
-                slow=np.full(shape, 2, dtype=np.uint8),
-                static=np.full(shape, 3, dtype=np.uint8),
-            ),
+            foreground=np.full(shape, 1, dtype=np.uint8),
             filtered_mask=np.full(shape, 4, dtype=np.uint8),
         )
 
     @pytest.mark.parametrize(
         ("source", "expected"),
-        [("fast", 1), ("slow", 2), ("static", 3), ("filtered", 4)],
+        [("foreground", 1), ("filtered", 4)],
     )
     def test_returns_the_requested_mask(self, source: str, expected: int) -> None:
         assert main.select_mask(self._result(), source)[0, 0] == expected
@@ -136,13 +132,10 @@ class TestBuildConfig:
                 "--denoise", "bilateral",
                 "--registration", "ecc",
                 "--feature", "lbp",
-                "--fast-backend", "mog2",
-                "--slow-backend", "knn",
-                "--fast-alpha", "0.2",
-                "--slow-alpha", "0.002",
+                "--backend", "mog2",
+                "--alpha", "0.2",
                 "--min-area", "42",
                 "--dwell-frames", "7",
-                "--warmup-frames", "3",
                 "--no-shadow-veto",
             ]
         )
@@ -153,11 +146,8 @@ class TestBuildConfig:
         assert config.preprocess.registration is RegistrationMethod.ECC
         assert config.feature.kind is FeatureKind.LBP
         assert config.shadow.enabled is False
-        assert config.dual_rate.fast.backend == "mog2"
-        assert config.dual_rate.slow.backend == "knn"
-        assert config.dual_rate.fast.learning_rate == 0.2
-        assert config.dual_rate.slow.learning_rate == 0.002
-        assert config.dual_rate.warmup_frames == 3
+        assert config.bgs.backend == "mog2"
+        assert config.bgs.learning_rate == 0.2
         assert config.blob.min_area == 42
         assert config.dwell.dwell_frames == 7
 
@@ -166,54 +156,19 @@ class TestBuildConfig:
 
         config = main.build_config(args)
 
-        assert config.dual_rate.fast.learning_rate > config.dual_rate.slow.learning_rate
+        assert config.bgs.backend == "running_gaussian"
+        assert 0.0 < config.bgs.learning_rate <= 1.0
 
-    def test_invalid_combination_is_rejected(self, tmp_path: Path) -> None:
+    def test_invalid_learning_rate_is_rejected(self, tmp_path: Path) -> None:
         args = main.parse_args(
             [
                 "-i", str(tmp_path), "-o", str(tmp_path / "out"),
-                "--fast-alpha", "0.001", "--slow-alpha", "0.5",
+                "--alpha", "1.5",
             ]
         )
 
-        with pytest.raises(ValueError, match="fast.learning_rate"):
+        with pytest.raises(ValueError, match="learning_rate"):
             main.build_config(args)
-
-
-class TestDegeneratePairingWarning:
-    """Guard against a dual-rate pair that can never signal."""
-
-    def test_warns_on_identical_pybgs_backends(
-        self, caplog: pytest.LogCaptureFixture
-    ) -> None:
-        with caplog.at_level(logging.WARNING):
-            main.warn_on_degenerate_pairing("vibe", "vibe", Implementation.LIB)
-
-        assert "will be empty" in caplog.text
-
-    def test_warns_on_identical_rate_ignoring_native_backends(
-        self, caplog: pytest.LogCaptureFixture
-    ) -> None:
-        with caplog.at_level(logging.WARNING):
-            main.warn_on_degenerate_pairing("vibe", "vibe", Implementation.NATIVE)
-
-        assert "will be empty" in caplog.text
-
-    def test_silent_for_mixed_backends(self, caplog: pytest.LogCaptureFixture) -> None:
-        with caplog.at_level(logging.WARNING):
-            main.warn_on_degenerate_pairing(
-                "running_average", "vibe", Implementation.LIB
-            )
-
-        assert caplog.text == ""
-
-    def test_silent_for_rate_controlled_backends(
-        self, caplog: pytest.LogCaptureFixture
-    ) -> None:
-        with caplog.at_level(logging.WARNING):
-            main.warn_on_degenerate_pairing("mog2", "mog2", Implementation.LIB)
-
-        assert caplog.text == ""
 
 
 class TestRun:
@@ -223,9 +178,7 @@ class TestRun:
         sequence = tmp_path / "seq"
         output = tmp_path / "out"
         _write_sequence(sequence, 12, deposit_from=6)
-        args = main.parse_args(
-            ["-i", str(sequence), "-o", str(output), "--warmup-frames", "2"]
-        )
+        args = main.parse_args(["-i", str(sequence), "-o", str(output)])
 
         written = main.run(args)
 
@@ -269,9 +222,8 @@ class TestRun:
                 "-i", str(sequence), "-o", str(output),
                 "--denoise", "none",
                 "--no-shadow-veto",
-                "--fast-alpha", "0.6",
-                "--slow-alpha", "0.0005",
-                "--warmup-frames", "4",
+                "--backend", "running_average",
+                "--alpha", "0.02",
                 "--dwell-frames", "5",
                 "--min-area", "100",
             ]
@@ -296,7 +248,7 @@ class TestRun:
         output = tmp_path / "out"
         _write_sequence(sequence, 5)
         args = main.parse_args(
-            ["-i", str(sequence), "-o", str(output), "--mask", "slow", "--dump-background"]
+            ["-i", str(sequence), "-o", str(output), "--mask", "foreground", "--dump-background"]
         )
 
         main.run(args)
@@ -340,7 +292,7 @@ class TestMain:
         exit_code = main.main(
             [
                 "-i", str(sequence), "-o", str(tmp_path / "out"),
-                "--fast-alpha", "0.001", "--slow-alpha", "0.5",
+                "--alpha", "1.5",
             ]
         )
 

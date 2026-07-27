@@ -8,7 +8,6 @@ from conftest import FRAME_SIZE, make_background
 
 from scr.structures import (
     Blob,
-    DualRateMasks,
     Frame,
     ObjectState,
     PipelineResult,
@@ -57,7 +56,7 @@ class TestPipelineResult:
         empty = np.zeros(FRAME_SIZE, dtype=np.uint8)
         return PipelineResult(
             frame=Frame(bgr=make_background()),
-            masks=DualRateMasks(fast=empty, slow=empty, static=empty),
+            foreground=empty,
             filtered_mask=empty,
             events=events,
         )

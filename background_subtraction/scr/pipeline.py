@@ -11,9 +11,9 @@ from collections.abc import Iterable
 
 import numpy as np
 
+from .bgs_model import RateParameterizedBGS
 from .blobs import BlobFilter
 from .config import PipelineConfig
-from .dual_rate import DualRateBGS
 from .fsm import StaticObjectFSM
 from .preprocessing import Preprocessor
 from .structures import BoundingBox, PipelineResult
@@ -52,12 +52,12 @@ def _scale_boxes(
 
 
 class SignOfLifePipeline:
-    """Chains Layer 0, the dual-rate Layer 1/2 pair and the Layer 3 engine."""
+    """Chains Layer 0, the single Layer 1/2 background model and Layer 3."""
 
     def __init__(
         self,
         preprocessor: Preprocessor,
-        dual_rate: DualRateBGS,
+        model: RateParameterizedBGS,
         blob_filter: BlobFilter,
         fsm: StaticObjectFSM,
     ) -> None:
@@ -65,12 +65,12 @@ class SignOfLifePipeline:
 
         Args:
             preprocessor: Layer 0 denoising and registration stage.
-            dual_rate: Layer 3 dual-rate background subtraction stage.
-            blob_filter: Structural filter over the static-candidate mask.
+            model: Layer 1/2 rate-parameterized background subtraction model.
+            blob_filter: Structural filter over the foreground mask.
             fsm: Dwell-time state machine raising the left-object signal.
         """
         self._preprocessor = preprocessor
-        self._dual_rate = dual_rate
+        self._model = model
         self._blob_filter = blob_filter
         self._fsm = fsm
 
@@ -88,17 +88,17 @@ class SignOfLifePipeline:
         config = config or PipelineConfig()
         return cls(
             preprocessor=Preprocessor(config.preprocess),
-            dual_rate=DualRateBGS.from_config(
-                config.dual_rate, config.feature, config.shadow
+            model=RateParameterizedBGS.from_config(
+                config.bgs, config.feature, config.shadow
             ),
             blob_filter=BlobFilter(config.blob),
             fsm=StaticObjectFSM(config.dwell),
         )
 
     @property
-    def dual_rate(self) -> DualRateBGS:
-        """The dual-rate background subtraction stage."""
-        return self._dual_rate
+    def model(self) -> RateParameterizedBGS:
+        """The background subtraction model."""
+        return self._model
 
     @property
     def fsm(self) -> StaticObjectFSM:
@@ -128,13 +128,13 @@ class SignOfLifePipeline:
         frame = self._preprocessor.process(image)
         scaled_boxes = _scale_boxes(person_boxes, original_shape, frame.shape)
 
-        masks = self._dual_rate.apply(frame)
-        filtered_mask, blobs = self._blob_filter.filter(masks.static)
+        foreground = self._model.apply(frame)
+        filtered_mask, blobs = self._blob_filter.filter(foreground)
         events = self._fsm.update(blobs, frame.index, scaled_boxes)
 
         return PipelineResult(
             frame=frame,
-            masks=masks,
+            foreground=foreground,
             filtered_mask=filtered_mask,
             blobs=blobs,
             tracked=self._fsm.snapshot(),
@@ -144,5 +144,5 @@ class SignOfLifePipeline:
     def reset(self) -> None:
         """Return every stage to its initial state."""
         self._preprocessor.reset()
-        self._dual_rate.reset()
+        self._model.reset()
         self._fsm.reset()

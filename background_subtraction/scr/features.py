@@ -16,7 +16,8 @@ from abc import ABC, abstractmethod
 import cv2
 import numpy as np
 
-from .config import FeatureConfig, FeatureKind, ShadowConfig
+from .config import FeatureConfig, FeatureKind, Implementation, ShadowConfig
+from .native_ops import bgr_to_hsv
 from .structures import Frame
 
 _EPSILON = 1e-6
@@ -201,13 +202,46 @@ class ShadowSuppressor:
             np.uint8
         )
 
+    def shadow_mask(
+        self, frame: Frame, background_bgr: np.ndarray | None
+    ) -> np.ndarray:
+        """Return the shadow classification as a ``uint8`` ``0``/``255`` mask.
+
+        Pixels set to ``255`` are the ones :meth:`suppress` would remove from a
+        foreground mask. Useful for visualising and tuning the veto without
+        rerunning the model. An all-zero mask is returned when the veto is
+        disabled or no background estimate is available yet.
+
+        Args:
+            frame: The frame to classify.
+            background_bgr: Current background estimate as a ``uint8`` BGR image.
+
+        Returns:
+            A ``uint8`` mask of the pixels classified as shadow.
+
+        Raises:
+            ValueError: If the background estimate does not match the frame size.
+        """
+        if not self._config.enabled or background_bgr is None:
+            return np.zeros(frame.shape, dtype=np.uint8)
+        if background_bgr.shape[:2] != frame.shape:
+            raise ValueError("background estimate and frame sizes differ")
+
+        return np.where(self._shadow_mask(frame, background_bgr), 255, 0).astype(
+            np.uint8
+        )
+
+    def _to_hsv(self, image: np.ndarray) -> np.ndarray:
+        """Convert a BGR image to HSV via the configured implementation."""
+        if self._config.implementation is Implementation.NATIVE:
+            return bgr_to_hsv(image).astype(np.float32)
+        return cv2.cvtColor(image, cv2.COLOR_BGR2HSV).astype(np.float32)
+
     def _shadow_mask(self, frame: Frame, background_bgr: np.ndarray) -> np.ndarray:
         """Return the boolean mask of pixels classified as shadow."""
         cfg = self._config
-        frame_hsv = frame.hsv.astype(np.float32)
-        background_hsv = cv2.cvtColor(background_bgr, cv2.COLOR_BGR2HSV).astype(
-            np.float32
-        )
+        frame_hsv = self._to_hsv(frame.bgr)
+        background_hsv = self._to_hsv(background_bgr)
 
         value_ratio = frame_hsv[:, :, 2] / (background_hsv[:, :, 2] + _EPSILON)
         saturation_delta = np.abs(frame_hsv[:, :, 1] - background_hsv[:, :, 1])
