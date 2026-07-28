@@ -28,12 +28,19 @@ import numpy as np
 __all__ = [
     "MorphOp",
     "StructuringShape",
+    "CC_STAT_LEFT",
+    "CC_STAT_TOP",
+    "CC_STAT_WIDTH",
+    "CC_STAT_HEIGHT",
+    "CC_STAT_AREA",
     "bgr_to_hsv",
     "hsv_to_bgr",
     "get_structuring_element",
     "erode",
     "dilate",
     "morphology_ex",
+    "connected_components",
+    "find_contour",
 ]
 
 # --- BGR -> HSV (8-bit, H in [0, 180)) -------------------------------------
@@ -326,3 +333,183 @@ def morphology_ex(
     return _rank_filter(
         _rank_filter(image, kernel, dilate_op=True), kernel, dilate_op=False
     )
+
+
+# --- Connected components --------------------------------------------------
+
+CC_STAT_LEFT = 0
+CC_STAT_TOP = 1
+CC_STAT_WIDTH = 2
+CC_STAT_HEIGHT = 3
+CC_STAT_AREA = 4
+"""Column indices into the per-label ``stats`` array (mirrors ``cv2.CC_STAT_*``)."""
+
+_NEIGHBOURS = {
+    4: ((-1, 0), (1, 0), (0, -1), (0, 1)),
+    8: ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)),
+}
+
+
+def connected_components(
+    mask: np.ndarray, connectivity: int = 8
+) -> tuple[int, np.ndarray, np.ndarray, np.ndarray]:
+    """Label the connected foreground regions of a binary mask.
+
+    A pure-NumPy/Python equivalent of ``cv2.connectedComponentsWithStats`` using
+    iterative flood-fill (region-growing) labelling. Label ``0`` is the
+    background. The returned ``stats`` and ``centroids`` match OpenCV's layout
+    and values for every foreground label (label numbering may differ, but the
+    set of components and their statistics are identical).
+
+    Args:
+        mask: Single-channel ``uint8`` mask; any non-zero pixel is foreground.
+        connectivity: ``4`` or ``8`` pixel connectivity.
+
+    Returns:
+        ``(count, labels, stats, centroids)`` where ``count`` includes the
+        background, ``labels`` is an ``int32`` label image, ``stats`` is
+        ``(count, 5)`` of ``[left, top, width, height, area]`` and ``centroids``
+        is ``(count, 2)`` of ``(x, y)``.
+
+    Raises:
+        ValueError: If ``mask`` is not single-channel or ``connectivity`` is not
+            ``4`` or ``8``.
+    """
+    if mask.ndim != 2:
+        raise ValueError("connected_components expects a single-channel image")
+    if connectivity not in (4, 8):
+        raise ValueError("connectivity must be 4 or 8")
+
+    foreground = mask > 0
+    rows, cols = foreground.shape
+    labels = np.zeros((rows, cols), dtype=np.int32)
+    offsets = _NEIGHBOURS[connectivity]
+
+    count = 0
+    seed_rows, seed_cols = np.nonzero(foreground)
+    for y0, x0 in zip(seed_rows.tolist(), seed_cols.tolist()):
+        if labels[y0, x0]:
+            continue
+        count += 1
+        stack = [(y0, x0)]
+        labels[y0, x0] = count
+        while stack:
+            y, x = stack.pop()
+            for dy, dx in offsets:
+                ny, nx = y + dy, x + dx
+                if (
+                    0 <= ny < rows
+                    and 0 <= nx < cols
+                    and foreground[ny, nx]
+                    and not labels[ny, nx]
+                ):
+                    labels[ny, nx] = count
+                    stack.append((ny, nx))
+
+    num_labels = count + 1
+    stats, centroids = _component_stats(labels, num_labels)
+    return num_labels, labels, stats, centroids
+
+
+def _component_stats(
+    labels: np.ndarray, num_labels: int
+) -> tuple[np.ndarray, np.ndarray]:
+    """Compute per-label bounding box, area and centroid in a single pass."""
+    rows, cols = labels.shape
+    flat = labels.ravel()
+    pixel_rows = np.repeat(np.arange(rows), cols)
+    pixel_cols = np.tile(np.arange(cols), rows)
+
+    area = np.bincount(flat, minlength=num_labels)
+    sum_rows = np.bincount(flat, weights=pixel_rows, minlength=num_labels)
+    sum_cols = np.bincount(flat, weights=pixel_cols, minlength=num_labels)
+
+    min_row = np.full(num_labels, rows, dtype=np.int64)
+    max_row = np.full(num_labels, -1, dtype=np.int64)
+    min_col = np.full(num_labels, cols, dtype=np.int64)
+    max_col = np.full(num_labels, -1, dtype=np.int64)
+    np.minimum.at(min_row, flat, pixel_rows)
+    np.maximum.at(max_row, flat, pixel_rows)
+    np.minimum.at(min_col, flat, pixel_cols)
+    np.maximum.at(max_col, flat, pixel_cols)
+
+    stats = np.zeros((num_labels, 5), dtype=np.int32)
+    stats[:, CC_STAT_LEFT] = min_col
+    stats[:, CC_STAT_TOP] = min_row
+    stats[:, CC_STAT_WIDTH] = max_col - min_col + 1
+    stats[:, CC_STAT_HEIGHT] = max_row - min_row + 1
+    stats[:, CC_STAT_AREA] = area
+
+    with np.errstate(invalid="ignore", divide="ignore"):
+        centroids = np.stack([sum_cols / area, sum_rows / area], axis=1)
+    return stats, centroids
+
+
+# --- Contour tracing -------------------------------------------------------
+
+# Clockwise 8-neighbourhood offsets (row, col) starting from West.
+_MOORE_CW = ((0, -1), (-1, -1), (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1))
+_MOORE_INDEX = {offset: i for i, offset in enumerate(_MOORE_CW)}
+
+
+def find_contour(mask: np.ndarray) -> np.ndarray:
+    """Trace the outer contour of a binary region (Moore-neighbour tracing).
+
+    A pure-NumPy/Python equivalent of the external contour from
+    ``cv2.findContours(..., RETR_EXTERNAL, CHAIN_APPROX_NONE)``: the boundary is
+    followed clockwise from the region's topmost-leftmost pixel, and the traced
+    point set matches OpenCV's. Intended for a mask holding a single region
+    (e.g. one connected component); if several are present, the one containing
+    the topmost-leftmost foreground pixel is traced.
+
+    Args:
+        mask: Single-channel ``uint8`` mask; any non-zero pixel is foreground.
+
+    Returns:
+        An ``(N, 2)`` ``int32`` array of ordered ``(x, y)`` boundary points
+        (empty when the mask has no foreground).
+
+    Raises:
+        ValueError: If ``mask`` is not single-channel.
+    """
+    if mask.ndim != 2:
+        raise ValueError("find_contour expects a single-channel image")
+
+    foreground = mask > 0
+    rows, cols = foreground.shape
+    seed_rows, seed_cols = np.nonzero(foreground)
+    if seed_rows.size == 0:
+        return np.empty((0, 2), dtype=np.int32)
+
+    start = (int(seed_rows[0]), int(seed_cols[0]))  # topmost, then leftmost
+
+    def is_foreground(r: int, c: int) -> bool:
+        return 0 <= r < rows and 0 <= c < cols and foreground[r, c]
+
+    contour = [start]
+    current = start
+    backtrack = 0  # West of the start pixel
+    first_step: tuple[int, int] | None = None
+    max_iterations = 8 * int(seed_rows.size) + 16
+
+    for _ in range(max_iterations):
+        following = None
+        for step in range(1, 9):  # clockwise, past the backtrack direction
+            index = (backtrack + step) % 8
+            dy, dx = _MOORE_CW[index]
+            neighbour = (current[0] + dy, current[1] + dx)
+            if is_foreground(*neighbour):
+                following = neighbour
+                backtrack = _MOORE_INDEX[(current[0] - neighbour[0], current[1] - neighbour[1])]
+                break
+        if following is None:  # isolated single pixel
+            break
+        # Jacob's stopping criterion: back at the start, about to repeat step 1.
+        if current == start and following == first_step:
+            break
+        if first_step is None:
+            first_step = following
+        contour.append(following)
+        current = following
+
+    return np.array([(c, r) for r, c in contour], dtype=np.int32)

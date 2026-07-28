@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from scr.blobs import BlobFilter
-from scr.config import BlobConfig
+from scr.config import BlobConfig, Implementation
 from scr.utils import FOREGROUND
 
 MASK_SIZE = (120, 160)
@@ -134,3 +134,47 @@ class TestOutputContract:
         _, blobs = blob_filter.filter(mask)
 
         assert len(blobs) == 1
+
+
+class TestContour:
+    """Per-blob outer contour extraction."""
+
+    def test_blob_carries_a_contour_around_its_bbox(self) -> None:
+        mask = _mask_with((40, 30, 30, 20))
+        blob_filter = BlobFilter(BlobConfig(min_area=100, open_kernel=0, close_kernel=0))
+
+        _, blobs = blob_filter.filter(mask)
+        contour = blobs[0].contour
+
+        assert contour is not None and contour.shape[1] == 2
+        x, y, width, height = blobs[0].bbox
+        assert contour[:, 0].min() == x
+        assert contour[:, 0].max() == x + width - 1
+        assert contour[:, 1].min() == y
+        assert contour[:, 1].max() == y + height - 1
+
+
+class TestNativeBackend:
+    """The native connected-components path matches the OpenCV path."""
+
+    @staticmethod
+    def _config(implementation: Implementation) -> BlobConfig:
+        return BlobConfig(
+            min_area=100,
+            open_kernel=0,
+            close_kernel=0,
+            implementation=implementation,
+        )
+
+    def test_native_and_library_blobs_agree(self) -> None:
+        mask = _mask_with((10, 10, 20, 20), (80, 60, 40, 30), (120, 20, 25, 25))
+
+        _, lib_blobs = BlobFilter(self._config(Implementation.LIB)).filter(mask)
+        native_filtered, native_blobs = BlobFilter(
+            self._config(Implementation.NATIVE)
+        ).filter(mask)
+
+        assert [(b.bbox, b.area, b.centroid) for b in native_blobs] == [
+            (b.bbox, b.area, b.centroid) for b in lib_blobs
+        ]
+        assert native_filtered.any()

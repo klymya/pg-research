@@ -241,6 +241,26 @@ class DwellConfig:
                 raise ValueError(f"{name} must lie in [0, 1]")
 
 
+@dataclass(frozen=True)
+class SignOfLifeConfig:
+    """Per-frame, area-based "Sign of Life" trigger.
+
+    A simpler signal than the dwell-time FSM: the frame is flagged when any
+    region surviving the structural filter is large enough. Independent of the
+    FSM's dwell-confirmed left-object events.
+
+    Attributes:
+        area_threshold: A frame raises the Sign-of-Life flag when at least one
+            blob has an area (in pixels) greater than or equal to this value.
+    """
+
+    area_threshold: int = 500
+
+    def __post_init__(self) -> None:
+        if self.area_threshold < 1:
+            raise ValueError("area_threshold must be >= 1")
+
+
 def _default_bgs() -> BGSConfig:
     """Phase-2 default background model: the recommended single fast model.
 
@@ -267,3 +287,4 @@ class PipelineConfig:
     bgs: BGSConfig = field(default_factory=_default_bgs)
     blob: BlobConfig = field(default_factory=BlobConfig)
     dwell: DwellConfig = field(default_factory=DwellConfig)
+    sign_of_life: SignOfLifeConfig = field(default_factory=SignOfLifeConfig)

@@ -14,6 +14,7 @@ from scr.config import (
     PipelineConfig,
     PreprocessConfig,
     ShadowConfig,
+    SignOfLifeConfig,
 )
 from scr.pipeline import SignOfLifePipeline
 from scr.structures import ObjectState, PipelineResult
@@ -94,6 +95,50 @@ class TestLeftObjectDetection:
         results = _run(pipeline, [background] * 40)
 
         assert not any(result.has_sign_of_life for result in results)
+
+
+class TestSignOfLife:
+    """The per-frame area-based Sign-of-Life flag (independent of the FSM)."""
+
+    @staticmethod
+    def _with_threshold(area_threshold: int) -> PipelineConfig:
+        base = _config()
+        return PipelineConfig(
+            preprocess=base.preprocess,
+            shadow=base.shadow,
+            bgs=base.bgs,
+            blob=base.blob,
+            dwell=base.dwell,
+            sign_of_life=SignOfLifeConfig(area_threshold=area_threshold),
+        )
+
+    def test_flag_raised_when_a_large_region_appears(self) -> None:
+        background = make_background()
+        occupied = draw_rectangle(background, OBJECT_BBOX)  # 30x25 = 750 px
+        pipeline = SignOfLifePipeline.from_config(self._with_threshold(400))
+
+        results = _run(pipeline, [background] * 3 + [occupied] * 3)
+
+        assert any(result.sign_of_life for result in results)
+
+    def test_flag_stays_false_on_an_empty_scene(self) -> None:
+        background = make_background()
+        pipeline = SignOfLifePipeline.from_config(self._with_threshold(400))
+
+        results = _run(pipeline, [background] * 8)
+
+        assert not any(result.sign_of_life for result in results)
+
+    def test_threshold_above_the_region_area_suppresses_the_flag(self) -> None:
+        background = make_background()
+        occupied = draw_rectangle(background, OBJECT_BBOX)
+        pipeline = SignOfLifePipeline.from_config(self._with_threshold(100_000))
+
+        results = _run(pipeline, [background] * 3 + [occupied] * 3)
+
+        assert not any(result.sign_of_life for result in results)
+        # ... yet the regions are still detected as blobs.
+        assert any(result.blobs for result in results)
 
 
 class TestPersonSuppression:

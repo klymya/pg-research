@@ -11,11 +11,14 @@ import numpy as np
 import pytest
 
 from scr.native_ops import (
+    CC_STAT_AREA,
     MorphOp,
     StructuringShape,
     bgr_to_hsv,
+    connected_components,
     dilate,
     erode,
+    find_contour,
     get_structuring_element,
     hsv_to_bgr,
     morphology_ex,
@@ -213,3 +216,140 @@ class TestMorphology:
         native = get_structuring_element(StructuringShape.ELLIPSE, (3, 3))
         with pytest.raises(ValueError, match="single-channel"):
             erode(np.zeros((4, 4, 3), dtype=np.uint8), native)
+
+
+def _blob_mask() -> np.ndarray:
+    """A mask with three well-separated rectangular blobs."""
+    mask = np.zeros((60, 80), dtype=np.uint8)
+    mask[5:25, 8:33] = 255
+    mask[30:40, 50:60] = 255
+    mask[45:47, 10:14] = 255
+    return mask
+
+
+class TestConnectedComponents:
+    """``connected_components`` versus ``cv2.connectedComponentsWithStats``."""
+
+    @staticmethod
+    def _foreground_records(count, stats, centroids):
+        """Per-label (stats, rounded centroid) tuples, order-independent."""
+        return sorted(
+            tuple(int(v) for v in stats[i])
+            + (round(float(centroids[i, 0]), 3), round(float(centroids[i, 1]), 3))
+            for i in range(1, count)
+        )
+
+    @pytest.mark.parametrize("connectivity", [4, 8])
+    def test_matches_opencv(self, connectivity: int) -> None:
+        mask = _blob_mask()
+
+        count, _, stats, centroids = connected_components(mask, connectivity)
+        cv_count, _, cv_stats, cv_centroids = cv2.connectedComponentsWithStats(
+            mask, connectivity=connectivity
+        )
+
+        assert count == cv_count
+        assert self._foreground_records(
+            count, stats, centroids
+        ) == self._foreground_records(cv_count, cv_stats, cv_centroids)
+
+    def test_matches_opencv_on_random_masks(self) -> None:
+        for _ in range(5):
+            mask = (RNG.integers(0, 2, (48, 64)) * 255).astype(np.uint8)
+            count, _, stats, centroids = connected_components(mask, 8)
+            cv_count, _, cv_stats, cv_centroids = cv2.connectedComponentsWithStats(
+                mask, connectivity=8
+            )
+            assert count == cv_count
+            assert self._foreground_records(
+                count, stats, centroids
+            ) == self._foreground_records(cv_count, cv_stats, cv_centroids)
+
+    def test_four_and_eight_connectivity_differ_on_diagonals(self) -> None:
+        mask = np.zeros((5, 5), dtype=np.uint8)
+        mask[1, 1] = mask[2, 2] = 255  # diagonally touching
+
+        assert connected_components(mask, 8)[0] == 2  # 1 component + background
+        assert connected_components(mask, 4)[0] == 3  # 2 components + background
+
+    def test_empty_mask_has_only_background(self) -> None:
+        count, labels, _, _ = connected_components(np.zeros((8, 8), np.uint8), 8)
+        assert count == 1
+        assert not labels.any()
+
+    def test_rejects_colour_image(self) -> None:
+        with pytest.raises(ValueError, match="single-channel"):
+            connected_components(np.zeros((4, 4, 3), np.uint8))
+
+    def test_rejects_bad_connectivity(self) -> None:
+        with pytest.raises(ValueError, match="connectivity"):
+            connected_components(np.zeros((4, 4), np.uint8), connectivity=6)
+
+
+class TestFindContour:
+    """``find_contour`` versus ``cv2.findContours`` (external, no approximation)."""
+
+    @staticmethod
+    def _rectangle() -> np.ndarray:
+        mask = np.zeros((40, 45), np.uint8)
+        mask[5:25, 8:33] = 255
+        return mask
+
+    @staticmethod
+    def _l_shape() -> np.ndarray:
+        mask = np.zeros((40, 40), np.uint8)
+        mask[5:30, 5:15] = 255  # vertical bar
+        mask[20:30, 5:30] = 255  # horizontal foot
+        return mask
+
+    @pytest.mark.parametrize("shape", ["rectangle", "l_shape"])
+    def test_point_set_matches_opencv(self, shape: str) -> None:
+        mask = self._rectangle() if shape == "rectangle" else self._l_shape()
+        contour = find_contour(mask)
+        cv_contours, _ = cv2.findContours(
+            mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE
+        )
+        cv_points = {(int(p[0][0]), int(p[0][1])) for p in cv_contours[0]}
+
+        assert {(int(x), int(y)) for x, y in contour} == cv_points
+
+    def test_contour_is_a_closed_eight_connected_loop(self) -> None:
+        mask = np.zeros((50, 50), np.uint8)
+        yy, xx = np.ogrid[:50, :50]
+        mask[(yy - 25) ** 2 + (xx - 25) ** 2 <= 15**2] = 255
+
+        contour = find_contour(mask)
+
+        assert len(contour) > 1
+        for i in range(len(contour)):
+            a, b = contour[i], contour[(i + 1) % len(contour)]
+            assert max(abs(int(a[0]) - int(b[0])), abs(int(a[1]) - int(b[1]))) <= 1
+
+    def test_bounding_box_matches_the_region(self) -> None:
+        mask = _blob_mask()
+        # Trace the first (largest) component in isolation.
+        _, labels, _, _ = connected_components(mask, 8)
+        component = (labels == 1).astype(np.uint8)
+
+        contour = find_contour(component)
+        ys, xs = np.nonzero(component)
+
+        assert contour[:, 0].min() == xs.min()
+        assert contour[:, 0].max() == xs.max()
+        assert contour[:, 1].min() == ys.min()
+        assert contour[:, 1].max() == ys.max()
+
+    def test_single_pixel_returns_one_point(self) -> None:
+        mask = np.zeros((10, 10), np.uint8)
+        mask[4, 6] = 255
+
+        contour = find_contour(mask)
+
+        np.testing.assert_array_equal(contour, np.array([[6, 4]], dtype=np.int32))
+
+    def test_empty_mask_returns_no_points(self) -> None:
+        assert find_contour(np.zeros((6, 6), np.uint8)).shape == (0, 2)
+
+    def test_rejects_colour_image(self) -> None:
+        with pytest.raises(ValueError, match="single-channel"):
+            find_contour(np.zeros((4, 4, 3), np.uint8))

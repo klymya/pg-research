@@ -60,6 +60,7 @@ class SignOfLifePipeline:
         model: RateParameterizedBGS,
         blob_filter: BlobFilter,
         fsm: StaticObjectFSM,
+        sol_area_threshold: int = 500,
     ) -> None:
         """Initialise the pipeline from already-built stages.
 
@@ -68,11 +69,14 @@ class SignOfLifePipeline:
             model: Layer 1/2 rate-parameterized background subtraction model.
             blob_filter: Structural filter over the foreground mask.
             fsm: Dwell-time state machine raising the left-object signal.
+            sol_area_threshold: Minimum blob area (px) that raises the per-frame
+                area-based Sign-of-Life flag.
         """
         self._preprocessor = preprocessor
         self._model = model
         self._blob_filter = blob_filter
         self._fsm = fsm
+        self._sol_area_threshold = sol_area_threshold
 
     @classmethod
     def from_config(cls, config: PipelineConfig | None = None) -> SignOfLifePipeline:
@@ -93,6 +97,7 @@ class SignOfLifePipeline:
             ),
             blob_filter=BlobFilter(config.blob),
             fsm=StaticObjectFSM(config.dwell),
+            sol_area_threshold=config.sign_of_life.area_threshold,
         )
 
     @property
@@ -121,7 +126,8 @@ class SignOfLifePipeline:
 
         Returns:
             The per-frame :class:`~scr.structures.PipelineResult`; its
-            ``events`` field carries the "Sign of Life" signal. Masks, blobs and
+            ``sign_of_life`` field is the per-frame area-based flag and its
+            ``events`` field carries the dwell-based signal. Masks, blobs and
             track boxes are in the (possibly resized) frame coordinates.
         """
         original_shape = image.shape[:2]
@@ -131,6 +137,9 @@ class SignOfLifePipeline:
         foreground = self._model.apply(frame)
         filtered_mask, blobs = self._blob_filter.filter(foreground)
         events = self._fsm.update(blobs, frame.index, scaled_boxes)
+        sign_of_life = any(
+            blob.area >= self._sol_area_threshold for blob in blobs
+        )
 
         return PipelineResult(
             frame=frame,
@@ -139,6 +148,7 @@ class SignOfLifePipeline:
             blobs=blobs,
             tracked=self._fsm.snapshot(),
             events=events,
+            sign_of_life=sign_of_life,
         )
 
     def reset(self) -> None:

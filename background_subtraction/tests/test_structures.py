@@ -64,6 +64,9 @@ class TestPipelineResult:
     def test_no_events_means_no_signal(self) -> None:
         assert self._result(()).has_sign_of_life is False
 
+    def test_sign_of_life_defaults_to_false(self) -> None:
+        assert self._result(()).sign_of_life is False
+
     def test_events_mean_a_signal(self) -> None:
         track = TrackedObject(
             track_id=0, bbox=(0, 0, 4, 4), area=16, state=ObjectState.CONFIRMED
@@ -83,3 +86,21 @@ class TestBlob:
 
         with pytest.raises(AttributeError):
             blob.area = 32  # type: ignore[misc]
+
+    def test_contour_defaults_to_none(self) -> None:
+        assert Blob(bbox=(0, 0, 4, 4), area=16, centroid=(2.0, 2.0)).contour is None
+
+    def test_equality_ignores_the_contour(self) -> None:
+        # The contour is metadata; two blobs with the same geometry are equal
+        # even with different (or array-valued) contours, which also keeps the
+        # frozen dataclass hashable.
+        base = Blob(bbox=(0, 0, 4, 4), area=16, centroid=(2.0, 2.0))
+        with_contour = Blob(
+            bbox=(0, 0, 4, 4),
+            area=16,
+            centroid=(2.0, 2.0),
+            contour=np.array([[0, 0], [3, 0], [3, 3], [0, 3]], dtype=np.int32),
+        )
+
+        assert base == with_contour
+        assert hash(base) == hash(with_contour)

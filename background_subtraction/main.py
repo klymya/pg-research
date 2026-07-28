@@ -33,6 +33,7 @@ from scr.config import (
     PreprocessConfig,
     RegistrationMethod,
     ShadowConfig,
+    SignOfLifeConfig,
 )
 from scr.structures import PipelineResult
 
@@ -185,6 +186,7 @@ def build_config(args: argparse.Namespace) -> PipelineConfig:
             dwell_frames=args.dwell_frames,
             max_missing_frames=args.max_missing_frames,
         ),
+        sign_of_life=SignOfLifeConfig(area_threshold=args.sol_area),
     )
 
 
@@ -217,6 +219,7 @@ def run(args: argparse.Namespace) -> int:
 
     written = 0
     events = 0
+    sol_frames = 0
     for index, frame_path in enumerate(frames):
         image = cv2.imread(str(frame_path), cv2.IMREAD_COLOR)
         if image is None:
@@ -238,6 +241,9 @@ def run(args: argparse.Namespace) -> int:
                 if not cv2.imwrite(str(background_path), background):
                     raise OSError(f"failed to write {background_path}")
 
+        if result.sign_of_life:
+            sol_frames += 1
+
         for event in result.events:
             events += 1
             logger.info(
@@ -251,7 +257,13 @@ def run(args: argparse.Namespace) -> int:
         if args.progress and index and index % args.progress == 0:
             logger.info("  %d/%d frames", index, len(frames))
 
-    logger.info("Wrote %d masks, %d sign-of-life events", written, events)
+    logger.info(
+        "Wrote %d masks, %d dwell events, %d Sign-of-Life frames (area >= %d px)",
+        written,
+        events,
+        sol_frames,
+        args.sol_area,
+    )
     return written
 
 
@@ -378,6 +390,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     layer3.add_argument("--max-area", type=int, default=None)
     layer3.add_argument("--dwell-frames", type=int, default=60)
     layer3.add_argument("--max-missing-frames", type=int, default=15)
+    layer3.add_argument(
+        "--sol-area",
+        type=int,
+        default=500,
+        help="min region area (px) that raises the per-frame Sign-of-Life flag",
+    )
 
     parser.add_argument(
         "-v", "--verbose", action="store_true", help="enable debug logging"

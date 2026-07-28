@@ -78,7 +78,7 @@ remaining OpenCV dependencies from the core stages:
 | `preprocessing.py` | 0 | Gaussian/bilateral denoising, phase-correlation or ECC registration |
 | `features.py` | 2 | Grayscale / LBP / chromaticity metrics + HSV shadow veto |
 | `backends.py` | 1 | Swappable subtraction algorithms behind one adapter interface |
-| `native_ops.py` | 1/2/3 | Pure-NumPy BGR↔HSV conversion and morphology (open/close), ported from OpenCV |
+| `native_ops.py` | 1/2/3 | Pure-NumPy BGR↔HSV, morphology (open/close), connected components and contour tracing, ported from OpenCV |
 | `bgs_model.py` | 1 | `RateParameterizedBGS` — feature + backend(α) + shadow veto |
 | `blobs.py` | 3 | Morphology and area-gated connected components |
 | `fsm.py` | 3 | IoU association, dwell-time promotion, person veto |
@@ -107,18 +107,24 @@ background estimate, but not every backend exposes its internal model.
 same α, so the veto works with any backend.
 
 **One `--implementation` switch, `lib` or `native`.** Beyond the model backend,
-the OpenCV operations the pipeline relies on — the BGR→HSV conversion of the
-shadow veto and the opening/closing morphology — have pure-NumPy equivalents in
-`native_ops.py`, ported from the OpenCV source (`color_hsv.simd.hpp`
-`RGB2HSV_b` / `HSV2RGB_native`; `getStructuringElement` and the erode/dilate
-min/max filter) and validated against `cv2` in `test_native_ops.py`. The
-integer forward paths — `bgr_to_hsv` and the morphology — are **bit-exact**; the
-inverse `hsv_to_bgr` is a float conversion and matches `cv2` **to within one
-LSB** (the standard 8-bit HSV↔RGB round-trip tolerance; used for visualisation,
-not by the pipeline itself). `--implementation native` (or
-`Implementation.NATIVE` on `BGSConfig`, `ShadowConfig` and `BlobConfig`) selects
-them, giving a path with no OpenCV dependency for these stages — the target for
-the C / Alif port. The pipeline masks and scores are unchanged either way.
+the OpenCV operations the pipeline relies on have pure-NumPy equivalents in
+`native_ops.py`, ported from the OpenCV source and validated against `cv2` in
+`test_native_ops.py`:
+
+- `bgr_to_hsv` (shadow veto) — fixed-point, **bit-exact** (`RGB2HSV_b`).
+- morphology `get_structuring_element` / `erode` / `dilate` / `morphology_ex`
+  (open/close) — **bit-exact** (`getStructuringElement`, min/max filter).
+- `connected_components` — flood-fill labelling; **matches** the stats/centroids
+  of `cv2.connectedComponentsWithStats`.
+- `find_contour` — Moore-neighbour tracing; point set **matches**
+  `cv2.findContours(RETR_EXTERNAL)`. Each `Blob` carries its `.contour`.
+- `hsv_to_bgr` (inverse; visualisation only, not on the pipeline path) — float
+  path, matches `cv2` **to within one LSB**.
+
+`--implementation native` (or `Implementation.NATIVE` on `BGSConfig`,
+`ShadowConfig` and `BlobConfig`) selects them, giving a path with no OpenCV
+dependency for these stages — the target for the C / Alif port. The pipeline
+masks and scores are unchanged either way.
 
 ### ⚠️ The static-object rule is inverted in the task description
 
@@ -230,11 +236,16 @@ Layer 2 is applied **inside** Layer 1, not as a separate stage:
   (`min_area=150`, `max_area=None`). Survivors become `Blob`s.
 - **L3b dwell-time FSM** (`fsm.py`) — blobs are associated to existing tracks
   by bounding-box IoU (`iou_match_threshold=0.3`). A track accumulates *dwell*
-  while it keeps being seen and is promoted to **confirmed** — the Sign-of-Life
-  event — once `dwell ≥ dwell_frames`. A track unseen for more than
-  `max_missing_frames=15` is evicted. Any candidate overlapping an active
-  person box beyond `person_overlap_threshold=0.1` IoU is vetoed and its dwell
-  reset, so a stationary person raises no alarm.
+  while it keeps being seen and is promoted to **confirmed** — the dwell-based
+  Sign-of-Life event (`result.events`) — once `dwell ≥ dwell_frames`. A track
+  unseen for more than `max_missing_frames=15` is evicted. Any candidate
+  overlapping an active person box beyond `person_overlap_threshold=0.1` IoU is
+  vetoed and its dwell reset, so a stationary person raises no alarm.
+- **L3c per-frame Sign-of-Life flag** (`pipeline.py`, `SignOfLifeConfig`) — a
+  simpler, dwell-independent signal: `result.sign_of_life` is `True` when any
+  region surviving the area gate has area `≥ area_threshold` (default `500` px).
+  Use it for per-frame presence; use the FSM `events` for the abandoned-object
+  (dwell-confirmed) case.
 
 ### Background-model initialization & convergence time
 
@@ -277,7 +288,8 @@ values under the flags in brackets.
 | `bgs.learning_rate` `[--alpha]` | `0.1` | 1 | Absorption rate α |
 | `threshold` `[--threshold]` | `25.0` | 1 | Native-backend foreground threshold |
 | `blob.min_area` `[--min-area]` | `150` | 3 | Smallest accepted blob (px) |
-| `dwell_frames` `[--dwell-frames]` | `60` | 3 | Presence budget before a Sign-of-Life event |
+| `dwell_frames` `[--dwell-frames]` | `60` | 3 | Presence budget before a dwell-based Sign-of-Life event |
+| `sign_of_life.area_threshold` `[--sol-area]` | `500` | 3 | Min region area (px) raising the per-frame Sign-of-Life flag |
 | `max_missing_frames` `[--max-missing-frames]` | `15` | 3 | Frames a track survives unmatched |
 | `iou_match_threshold` | `0.3` | 3 | Track↔blob association |
 | `person_overlap_threshold` | `0.1` | 3 | IoU with a person box that vetoes a candidate |
@@ -568,6 +580,7 @@ Extra constructor arguments are passed through `BGSConfig.backend_params`, e.g.
 | `BGSConfig` | `backend`, `learning_rate`, `threshold`, `backend_params`, `implementation` |
 | `BlobConfig` | `min_area`, `max_area`, `open_kernel`, `close_kernel`, `connectivity`, `implementation` |
 | `DwellConfig` | `dwell_frames`, `max_missing_frames`, `iou_match_threshold`, `person_overlap_threshold` |
+| `SignOfLifeConfig` | `area_threshold` (per-frame area-based flag) |
 
 `PipelineConfig.bgs` is a single `BGSConfig` — the one background model of the
 Phase-2 pipeline (default native `running_gaussian`, `learning_rate=0.1`). All

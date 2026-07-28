@@ -13,6 +13,7 @@ from scr.config import (
     PipelineConfig,
     PreprocessConfig,
     ShadowConfig,
+    SignOfLifeConfig,
 )
 
 
@@ -138,6 +139,17 @@ class TestDwellConfig:
             DwellConfig(iou_match_threshold=threshold)
 
 
+class TestSignOfLifeConfig:
+    """Validation of the per-frame area-based Sign-of-Life trigger."""
+
+    def test_rejects_non_positive_area(self) -> None:
+        with pytest.raises(ValueError, match="area_threshold"):
+            SignOfLifeConfig(area_threshold=0)
+
+    def test_default_is_positive(self) -> None:
+        assert SignOfLifeConfig().area_threshold >= 1
+
+
 class TestPipelineConfig:
     """Composition of the per-layer configurations."""
 
@@ -145,6 +157,7 @@ class TestPipelineConfig:
         config = PipelineConfig()
         assert config.preprocess.kernel_size == 5
         assert config.bgs.learning_rate > 0
+        assert config.sign_of_life.area_threshold >= 1
 
     def test_default_model_is_the_recommended_single_fast_model(self) -> None:
         # Phase 2: one native running_gaussian model at the fast rate.

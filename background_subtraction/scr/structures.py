@@ -55,11 +55,14 @@ class Blob:
         bbox: Bounding box in ``(x, y, width, height)``.
         area: Number of foreground pixels in the component.
         centroid: Sub-pixel centroid as ``(x, y)``.
+        contour: Ordered ``(N, 2)`` array of ``(x, y)`` outer-boundary points,
+            or ``None`` when not computed. Excluded from equality/hashing.
     """
 
     bbox: BoundingBox
     area: int
     centroid: tuple[float, float]
+    contour: np.ndarray | None = field(default=None, compare=False)
 
 
 class ObjectState(str, Enum):
@@ -109,7 +112,10 @@ class PipelineResult:
         blobs: Structurally valid static-object candidates.
         tracked: All live tracks known to the FSM after this frame.
         events: Tracks that reached the confirmed state on this frame; a
-            non-empty list is the "Sign of Life" signal.
+            non-empty list is the dwell-based "Sign of Life" signal.
+        sign_of_life: Per-frame area-based Sign-of-Life flag -- ``True`` when a
+            region large enough (see :class:`~scr.config.SignOfLifeConfig`) is
+            present this frame. Independent of the FSM ``events``.
     """
 
     frame: Frame
@@ -118,8 +124,9 @@ class PipelineResult:
     blobs: tuple[Blob, ...] = ()
     tracked: tuple[TrackedObject, ...] = ()
     events: tuple[TrackedObject, ...] = field(default=())
+    sign_of_life: bool = False
 
     @property
     def has_sign_of_life(self) -> bool:
-        """Whether a left object was confirmed on this frame."""
+        """Whether a left object was confirmed on this frame (dwell FSM)."""
         return bool(self.events)

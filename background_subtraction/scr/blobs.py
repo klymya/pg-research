@@ -1,8 +1,9 @@
-"""Layer 3b: structural filtering of the static-candidate mask.
+"""Layer 3b: structural filtering of the foreground mask.
 
-Morphological opening removes isolated speckle, closing bridges the gaps a
-static object develops as the slow model erodes it, and area gating discards
-components too small or too large to be a plausible left object.
+Morphological opening removes isolated speckle, closing bridges small gaps, and
+area gating discards components too small or too large to be a plausible object.
+Each surviving component is labelled (connected components), measured (bounding
+box, centroid) and traced (outer contour).
 """
 
 from __future__ import annotations
@@ -11,7 +12,19 @@ import cv2
 import numpy as np
 
 from .config import BlobConfig, Implementation
-from .native_ops import MorphOp, StructuringShape, get_structuring_element, morphology_ex
+from .native_ops import (
+    CC_STAT_AREA,
+    CC_STAT_HEIGHT,
+    CC_STAT_LEFT,
+    CC_STAT_TOP,
+    CC_STAT_WIDTH,
+    MorphOp,
+    StructuringShape,
+    connected_components,
+    find_contour,
+    get_structuring_element,
+    morphology_ex,
+)
 from .structures import Blob
 from .utils import FOREGROUND, ensure_binary_mask
 
@@ -46,33 +59,49 @@ class BlobFilter:
         """
         cleaned = self._apply_morphology(ensure_binary_mask(mask))
 
-        count, labels, stats, centroids = cv2.connectedComponentsWithStats(
-            cleaned, connectivity=self._config.connectivity
-        )
+        count, labels, stats, centroids = self._connected_components(cleaned)
 
         output = np.zeros_like(cleaned)
         blobs: list[Blob] = []
         for label in range(1, count):  # Label 0 is the background.
-            area = int(stats[label, cv2.CC_STAT_AREA])
+            area = int(stats[label, CC_STAT_AREA])
             if not self._area_accepted(area):
                 continue
 
-            output[labels == label] = FOREGROUND
+            component = labels == label
+            output[component] = FOREGROUND
+            contour = find_contour(component.astype(np.uint8))
             blobs.append(
                 Blob(
                     bbox=(
-                        int(stats[label, cv2.CC_STAT_LEFT]),
-                        int(stats[label, cv2.CC_STAT_TOP]),
-                        int(stats[label, cv2.CC_STAT_WIDTH]),
-                        int(stats[label, cv2.CC_STAT_HEIGHT]),
+                        int(stats[label, CC_STAT_LEFT]),
+                        int(stats[label, CC_STAT_TOP]),
+                        int(stats[label, CC_STAT_WIDTH]),
+                        int(stats[label, CC_STAT_HEIGHT]),
                     ),
                     area=area,
                     centroid=(float(centroids[label][0]), float(centroids[label][1])),
+                    contour=contour,
                 )
             )
 
         blobs.sort(key=lambda blob: blob.area, reverse=True)
         return output, tuple(blobs)
+
+    def _connected_components(
+        self, mask: np.ndarray
+    ) -> tuple[int, np.ndarray, np.ndarray, np.ndarray]:
+        """Label components via the configured backend (native or OpenCV).
+
+        Both backends return the same ``(count, labels, stats, centroids)``
+        layout, with ``stats`` columns ordered ``[left, top, width, height,
+        area]`` (the ``CC_STAT_*`` indices).
+        """
+        if self._config.implementation is Implementation.NATIVE:
+            return connected_components(mask, self._config.connectivity)
+        return cv2.connectedComponentsWithStats(
+            mask, connectivity=self._config.connectivity
+        )
 
     def _area_accepted(self, area: int) -> bool:
         """Whether ``area`` falls inside the configured gate."""
