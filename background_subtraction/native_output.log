@@ -1,0 +1,76 @@
+INFO - ARM ML Embedded Evaluation Kit
+INFO - Version 23.08.0 Build date: Jul 30 2026 @ 14:55:37
+INFO - Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+
+INFO - Added  support to op resolver
+INFO - Creating allocator using tensor arena at 0x59b3c8d080b0
+INFO - Allocating tensors
+
+--- Frame 1/6: in000001.bmp ---
+INFO - Running inference on image 0 => in000001.bmp
+Sign-of-Life: flag=0 objects=0
+Final results:
+Total number of inferences: 0
+INFO - Profile for Detection:
+INFO - Duration: 26135151 microseconds
+INFO - Profile for ModelInit:
+INFO - Duration: 8813 microseconds
+INFO - Profile for SignOfLife:
+INFO - Duration: 150637 microseconds
+
+--- Frame 2/6: in000241.bmp ---
+INFO - Running inference on image 1 => in000241.bmp
+Sign-of-Life: flag=0 objects=0
+Final results:
+Total number of inferences: 0
+INFO - Profile for Detection:
+INFO - Duration: 25813417 microseconds
+INFO - Profile for SignOfLife:
+INFO - Duration: 146418 microseconds
+
+--- Frame 3/6: in000481.bmp ---
+INFO - Running inference on image 2 => in000481.bmp
+Sign-of-Life: flag=1 objects=1
+SoL box: [46 70 49 94]. Area: 2632. Centroid: [68.17 113.32]
+Final results:
+Total number of inferences: 0
+INFO - Profile for Detection:
+INFO - Duration: 26362622 microseconds
+INFO - Profile for SignOfLife:
+INFO - Duration: 146625 microseconds
+
+--- Frame 4/6: in000721.bmp ---
+INFO - Running inference on image 3 => in000721.bmp
+Sign-of-Life: flag=1 objects=1
+SoL box: [48 67 49 100]. Area: 2399. Centroid: [71.62 118.37]
+Final results:
+Total number of inferences: 0
+INFO - Profile for Detection:
+INFO - Duration: 26180318 microseconds
+INFO - Profile for SignOfLife:
+INFO - Duration: 150836 microseconds
+
+--- Frame 5/6: in000961.bmp ---
+INFO - Running inference on image 4 => in000961.bmp
+Sign-of-Life: flag=1 objects=2
+SoL box: [44 54 61 108]. Area: 2592. Centroid: [76.79 112.27]
+SoL box: [114 67 32 111]. Area: 1915. Centroid: [128.97 120.64]
+Final results:
+Total number of inferences: 1
+Box: [30.57 69.27 64.36 79.26]. Position: [81.21 120.19]. Confidence: 0.42
+INFO - Profile for Detection:
+INFO - Duration: 26733372 microseconds
+INFO - Profile for SignOfLife:
+INFO - Duration: 147871 microseconds
+
+--- Frame 6/6: in001201.bmp ---
+INFO - Running inference on image 5 => in001201.bmp
+Sign-of-Life: flag=0 objects=0
+Final results:
+Total number of inferences: 0
+INFO - Profile for Detection:
+INFO - Duration: 26136429 microseconds
+INFO - Profile for SignOfLife:
+INFO - Duration: 146079 microseconds
+ERROR - Main loop terminated.
+INFO - program terminating...
