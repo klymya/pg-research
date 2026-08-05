@@ -28,6 +28,12 @@ class RateParameterizedBGS:
     is maintained at the same learning rate.  It gives the shadow veto a
     background estimate for every backend, including those that do not expose
     their internal model.
+
+    The reference exists solely to feed the veto, so it is only maintained while
+    the veto is enabled (:attr:`ShadowConfig.enabled`).  With the veto off no
+    reference is allocated and :attr:`background_bgr` stays ``None`` — the same
+    contract as before the first frame.  This matters most for the embedded port,
+    where the reference is 3 of the 5 persistent full-frame planes.
     """
 
     def __init__(
@@ -117,8 +123,12 @@ class RateParameterizedBGS:
         """
         features = self._feature_extractor.transform(frame)
         mask = self._backend.apply(features, self._learning_rate)
-        mask = self._shadow_suppressor.suppress(mask, frame, self.background_bgr)
-        self._update_reference(frame)
+        if self._shadow_suppressor.config.enabled:
+            # Guarded rather than left to suppress()'s own early return: both
+            # the uint8 view built by background_bgr and the float32 reference
+            # behind it are full-frame allocations that nothing else reads.
+            mask = self._shadow_suppressor.suppress(mask, frame, self.background_bgr)
+            self._update_reference(frame)
         return mask
 
     def reset(self) -> None:

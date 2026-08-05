@@ -79,6 +79,15 @@ namespace sol {
 
     void ShadowSuppressor::UpdateReference(const Image& frameRgb)
     {
+        /* Nothing reads the reference when the veto is off, so it must never be
+         * allocated -- it is a full-frame float RGB buffer (921,600 B at QVGA).
+         * The guard lives here rather than only at the call site so the class is
+         * correct for any caller. */
+        if (!m_config.shadowEnabled)
+        {
+            return;
+        }
+
         const int w = frameRgb.width;
         const int h = frameRgb.height;
         const size_t count = frameRgb.PixelCount() * 3;

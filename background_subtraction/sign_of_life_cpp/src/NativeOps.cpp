@@ -266,6 +266,48 @@ namespace ops {
         return RankFilter(RankFilter(mask, offsets, true), offsets, false);
     }
 
+    namespace {
+
+        /** @brief Union-find root of a provisional label, with path compression. */
+        int FindRoot(std::vector<int>& parent, int label)
+        {
+            int root = label;
+            while (parent[root] != root)
+            {
+                root = parent[root];
+            }
+            while (parent[label] != root) /* compress, iteratively */
+            {
+                const int next = parent[label];
+                parent[label]  = root;
+                label          = next;
+            }
+            return root;
+        }
+
+        /**
+         * @brief Merge two provisional labels' components.
+         *
+         * The smaller root wins -- the classic Rosenfeld choice, which biases a
+         * component towards the label it was first given in the raster scan.
+         */
+        void UnionLabels(std::vector<int>& parent, int a, int b)
+        {
+            int rootA = FindRoot(parent, a);
+            int rootB = FindRoot(parent, b);
+            if (rootA == rootB)
+            {
+                return;
+            }
+            if (rootB < rootA)
+            {
+                std::swap(rootA, rootB);
+            }
+            parent[rootB] = rootA;
+        }
+
+    } /* namespace */
+
     std::vector<Blob> ConnectedComponents(const Image& mask, int connectivity,
                                           std::vector<int>* outLabels)
     {
@@ -273,78 +315,146 @@ namespace ops {
         const int h = mask.height;
         std::vector<int> labels(static_cast<size_t>(w) * h, 0);
 
-        static const int n8dy[8] = {-1, -1, -1, 0, 0, 1, 1, 1};
-        static const int n8dx[8] = {-1, 0, 1, -1, 1, -1, 0, 1};
-        static const int n4dy[4] = {-1, 1, 0, 0};
-        static const int n4dx[4] = {0, 0, -1, 1};
-        const int* dy = (connectivity == 4) ? n4dy : n8dy;
-        const int* dx = (connectivity == 4) ? n4dx : n8dx;
-        const int nn  = (connectivity == 4) ? 4 : 8;
+        /* Two-pass union-find (Rosenfeld & Pfaltz; He et al.). Pass 1 scans
+         * once, giving each foreground pixel the smallest label among the
+         * neighbours the scan has already visited -- or a fresh provisional
+         * label -- and recording the equivalences it finds. Pass 2 resolves
+         * each provisional label to its root, renumbers the roots in raster
+         * order of first appearance and accumulates the per-blob statistics.
+         *
+         * Only backwards neighbours are consulted, so no pixel stack is needed:
+         * north-west, north, north-east and west for 8-connectivity, north and
+         * west for 4-connectivity. Mirrors scr/native_ops.py exactly. */
+        static const int nbDy8[4] = {-1, -1, -1, 0};
+        static const int nbDx8[4] = {-1, 0, 1, -1};
+        static const int nbDy4[2] = {-1, 0};
+        static const int nbDx4[2] = {0, -1};
+        const int* nbDy = (connectivity == 4) ? nbDy4 : nbDy8;
+        const int* nbDx = (connectivity == 4) ? nbDx4 : nbDx8;
+        const int nn    = (connectivity == 4) ? 2 : 4;
 
-        std::vector<Blob> blobs;
-        std::vector<int> stack;
-        int label = 0;
-
-        for (int y0 = 0; y0 < h; ++y0)
+        /* --- Pass 1: provisional labels + equivalences --------------------- */
+        std::vector<int> parent(1, 0); /* index 0 is the background */
+        for (int y = 0; y < h; ++y)
         {
-            for (int x0 = 0; x0 < w; ++x0)
+            for (int x = 0; x < w; ++x)
             {
-                const size_t seed = static_cast<size_t>(y0) * w + x0;
-                if (mask.data[seed] == 0 || labels[seed] != 0)
+                const size_t here = static_cast<size_t>(y) * w + x;
+                if (mask.data[here] == 0)
                 {
                     continue;
                 }
-                ++label;
-                Blob blob;
-                blob.x = x0;
-                blob.y = y0;
-                int maxX = x0;
-                int maxY = y0;
-                long sumX = 0;
-                long sumY = 0;
-                int area  = 0;
 
-                labels[seed] = label;
-                stack.clear();
-                stack.push_back(static_cast<int>(seed));
-                while (!stack.empty())
+                int smallest = 0;
+                for (int k = 0; k < nn; ++k)
                 {
-                    const int p = stack.back();
-                    stack.pop_back();
-                    const int py = p / w;
-                    const int px = p % w;
-                    ++area;
-                    sumX += px;
-                    sumY += py;
-                    blob.x = std::min(blob.x, px);
-                    blob.y = std::min(blob.y, py);
-                    maxX   = std::max(maxX, px);
-                    maxY   = std::max(maxY, py);
-                    for (int k = 0; k < nn; ++k)
+                    const int ny = y + nbDy[k];
+                    const int nx = x + nbDx[k];
+                    if (ny < 0 || ny >= h || nx < 0 || nx >= w)
                     {
-                        const int ny = py + dy[k];
-                        const int nx = px + dx[k];
-                        if (ny < 0 || ny >= h || nx < 0 || nx >= w)
-                        {
-                            continue;
-                        }
-                        const size_t np = static_cast<size_t>(ny) * w + nx;
-                        if (mask.data[np] != 0 && labels[np] == 0)
-                        {
-                            labels[np] = label;
-                            stack.push_back(static_cast<int>(np));
-                        }
+                        continue;
+                    }
+                    const int neighbour = labels[static_cast<size_t>(ny) * w + nx];
+                    if (neighbour != 0 && (smallest == 0 || neighbour < smallest))
+                    {
+                        smallest = neighbour;
                     }
                 }
 
-                blob.width     = maxX - blob.x + 1;
-                blob.height    = maxY - blob.y + 1;
-                blob.area      = area;
-                blob.centroidX = static_cast<float>(static_cast<double>(sumX) / area);
-                blob.centroidY = static_cast<float>(static_cast<double>(sumY) / area);
-                blobs.push_back(blob);
+                if (smallest == 0)
+                {
+                    parent.push_back(static_cast<int>(parent.size()));
+                    labels[here] = static_cast<int>(parent.size()) - 1;
+                    continue;
+                }
+
+                labels[here] = smallest;
+                for (int k = 0; k < nn; ++k) /* every neighbour joins this one */
+                {
+                    const int ny = y + nbDy[k];
+                    const int nx = x + nbDx[k];
+                    if (ny < 0 || ny >= h || nx < 0 || nx >= w)
+                    {
+                        continue;
+                    }
+                    const int neighbour = labels[static_cast<size_t>(ny) * w + nx];
+                    if (neighbour != 0)
+                    {
+                        UnionLabels(parent, smallest, neighbour);
+                    }
+                }
             }
         }
+
+        /* --- Pass 2: flatten the table, renumber, resolve, measure -------- */
+        /* UnionLabels always points the larger root at the smaller one, so
+         * parent[l] <= l always holds and one *ascending* sweep both flattens
+         * the table and renumbers the roots in place: by the time l is reached,
+         * whatever it points at is already a final label.
+         *
+         * Ascending root order is exactly raster order of first appearance -- a
+         * component's root is the smallest provisional label in it, which is the
+         * one created at its topmost-leftmost pixel -- so this reproduces the
+         * flood fill's numbering with no first-seen bookkeeping. */
+        int count = 0;
+        for (size_t label = 1; label < parent.size(); ++label)
+        {
+            if (parent[label] == static_cast<int>(label))
+            {
+                parent[label] = ++count; /* a root: take the next final label */
+            }
+            else
+            {
+                parent[label] = parent[parent[label]];
+            }
+        }
+
+        std::vector<Blob> blobs(static_cast<size_t>(count));
+        std::vector<long> sumX(static_cast<size_t>(count), 0);
+        std::vector<long> sumY(static_cast<size_t>(count), 0);
+        std::vector<bool> seen(static_cast<size_t>(count), false);
+
+        const size_t n = static_cast<size_t>(w) * h;
+        for (size_t i = 0; i < n; ++i)
+        {
+            const int provisional = labels[i];
+            if (provisional == 0)
+            {
+                continue;
+            }
+            const int final = parent[provisional];
+            const size_t at = static_cast<size_t>(final) - 1u;
+            const int x     = static_cast<int>(i % w);
+            const int y     = static_cast<int>(i / w);
+
+            labels[i]  = final;
+            Blob& blob = blobs[at];
+            if (!seen[at]) /* first pixel of this component in raster order */
+            {
+                seen[at]   = true;
+                blob.x     = x;
+                blob.y     = y;
+                blob.width = x;  /* max-x so far; turned into a width below */
+                blob.height = y; /* max-y so far                            */
+            }
+            ++blob.area;
+            sumX[at] += x;
+            sumY[at] += y;
+            blob.x      = std::min(blob.x, x);
+            blob.y      = std::min(blob.y, y);
+            blob.width  = std::max(blob.width, x);
+            blob.height = std::max(blob.height, y);
+        }
+
+        for (size_t k = 0; k < blobs.size(); ++k)
+        {
+            Blob& blob     = blobs[k];
+            blob.width     = blob.width - blob.x + 1;
+            blob.height    = blob.height - blob.y + 1;
+            blob.centroidX = static_cast<float>(static_cast<double>(sumX[k]) / blob.area);
+            blob.centroidY = static_cast<float>(static_cast<double>(sumY[k]) / blob.area);
+        }
+
         if (outLabels != nullptr)
         {
             *outLabels = std::move(labels);

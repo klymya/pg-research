@@ -28,8 +28,14 @@ What it does, per sequence:
   (``in000025.jpg`` stays ``in000025.jpg``, not renumbered to ``in000002``).
   This is deliberate: it keeps the copied ``temporalROI.txt``, whose range is
   expressed in original frame numbers, valid without recomputation.
+* **Optional spatial downsampling** (``--size WIDTH HEIGHT``) resizes every
+  image on the way out, so a single pass yields e.g. a 0.1 fps QQVGA tree.
+  Photographic frames use ``INTER_AREA``, the project's convention for
+  downscaling; label images (``groundtruth/``, ``ROI.*``) use ``INTER_NEAREST``
+  so CDNET's discrete codes (0/50/85/170/255) survive untouched.
 * **ROI and temporal-ROI files are copied verbatim** (``ROI.bmp``, ``ROI.jpg``,
-  ``temporalROI.txt``, and any other top-level file of the sequence).
+  ``temporalROI.txt``, and any other top-level file of the sequence) — or
+  resized, for the ROI images, when ``--size`` is given.
 
 The CDNET directory layout is assumed:
 
@@ -41,6 +47,7 @@ Usage:
     python downsample_dataset.py                       # 0.1 fps -> data_0_1fps/
     python downsample_dataset.py --target-fps 1        # 1 fps   -> data_1fps/
     python downsample_dataset.py -i data -o data_custom --target-fps 0.5
+    python downsample_dataset.py -o data_0_1fps_qqvga --size 160 120
     python downsample_dataset.py --default-fps 30 -v
 """
 
@@ -54,6 +61,8 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+import cv2
+
 logger = logging.getLogger("downsample_dataset")
 
 IMAGE_SUFFIXES = (".jpg", ".jpeg", ".png", ".bmp")
@@ -64,6 +73,9 @@ FPS_IN_NAME = re.compile(r"_(\d+)(?:_(\d+))?fps$")
 
 FRAME_NUMBER = re.compile(r"(\d+)")
 """Extracts the frame number from a stem such as ``in000240``."""
+
+ROI_IMAGE_NAMES = ("roi.bmp", "roi.jpg")
+"""Top-level sequence files that hold a label image rather than a photograph."""
 
 
 @dataclass
@@ -172,11 +184,49 @@ def frame_number(path: Path) -> int | None:
     return int(match.group(1)) if match else None
 
 
+def emit_image(
+    source: Path,
+    destination: Path,
+    size: tuple[int, int] | None,
+    is_label: bool,
+) -> None:
+    """Write one image to ``destination``, resizing it when ``size`` is given.
+
+    Without ``size`` the file is copied byte for byte (metadata included), which
+    keeps the output identical to the source encoding. With ``size`` the image
+    is re-encoded at the requested resolution: photographic frames are area-
+    averaged, label images are sampled nearest-neighbour so CDNET's discrete
+    codes are not blended into invalid intermediate values.
+
+    Args:
+        source: Image to read.
+        destination: Path to write.
+        size: Target ``(width, height)``, or ``None`` to copy unchanged.
+        is_label: Whether the image holds label codes rather than a photograph.
+
+    Raises:
+        OSError: If the image cannot be read or written.
+    """
+    if size is None:
+        shutil.copy2(source, destination)
+        return
+
+    image = cv2.imread(str(source), cv2.IMREAD_UNCHANGED)
+    if image is None:
+        raise OSError(f"failed to read {source}")
+
+    interpolation = cv2.INTER_NEAREST if is_label else cv2.INTER_AREA
+    resized = cv2.resize(image, size, interpolation=interpolation)
+    if not cv2.imwrite(str(destination), resized):
+        raise OSError(f"failed to write {destination}")
+
+
 def downsample_sequence(
     sequence_dir: Path,
     output_dir: Path,
     target_fps: float,
     default_fps: float,
+    size: tuple[int, int] | None = None,
 ) -> SequenceStats | None:
     """Downsample one sequence into ``output_dir``.
 
@@ -185,6 +235,7 @@ def downsample_sequence(
         output_dir: Destination sequence directory, created if missing.
         target_fps: Desired output frame rate.
         default_fps: Rate assumed when the name encodes none.
+        size: Optional target ``(width, height)`` for spatial downsampling.
 
     Returns:
         The per-sequence statistics, or ``None`` when the sequence has no
@@ -217,18 +268,20 @@ def downsample_sequence(
 
     kept_masks = 0
     for frame_path in selected:
-        shutil.copy2(frame_path, out_input / frame_path.name)
+        emit_image(frame_path, out_input / frame_path.name, size, is_label=False)
 
         number = frame_number(frame_path)
         if groundtruth_dir.is_dir() and number is not None:
             mask_path = groundtruth_dir / f"gt{number:06d}.png"
             if mask_path.exists():
-                shutil.copy2(mask_path, out_groundtruth / mask_path.name)
+                emit_image(
+                    mask_path, out_groundtruth / mask_path.name, size, is_label=True
+                )
                 kept_masks += 1
             else:
                 logger.debug("No groundtruth for frame %d in %s", number, sequence_dir.name)
 
-    copy_auxiliary_files(sequence_dir, output_dir)
+    copy_auxiliary_files(sequence_dir, output_dir, size)
 
     stats = SequenceStats(
         name=sequence_dir.name,
@@ -250,16 +303,28 @@ def downsample_sequence(
     return stats
 
 
-def copy_auxiliary_files(sequence_dir: Path, output_dir: Path) -> None:
-    """Copy the sequence's top-level files (ROI images, temporal ROI) verbatim.
+def copy_auxiliary_files(
+    sequence_dir: Path, output_dir: Path, size: tuple[int, int] | None = None
+) -> None:
+    """Copy the sequence's top-level files (ROI images, temporal ROI).
+
+    Everything is copied verbatim, except that the ROI images are resized along
+    with the frames when ``size`` is given so the ROI still masks the right
+    pixels. ``temporalROI.txt`` is unaffected by resizing: it indexes frames,
+    not pixels.
 
     Args:
         sequence_dir: Source sequence directory.
         output_dir: Destination sequence directory.
+        size: Optional target ``(width, height)`` applied to the ROI images.
     """
     output_dir.mkdir(parents=True, exist_ok=True)
     for path in sequence_dir.iterdir():
-        if path.is_file():
+        if not path.is_file():
+            continue
+        if size is not None and path.name.lower() in ROI_IMAGE_NAMES:
+            emit_image(path, output_dir / path.name, size, is_label=True)
+        else:
             shutil.copy2(path, output_dir / path.name)
 
 
@@ -268,6 +333,7 @@ def convert_dataset(
     output_root: Path,
     target_fps: float,
     default_fps: float,
+    size: tuple[int, int] | None = None,
 ) -> list[SequenceStats]:
     """Downsample every sequence found under ``input_root``.
 
@@ -276,6 +342,7 @@ def convert_dataset(
         output_root: Directory receiving the downsampled tree.
         target_fps: Desired output frame rate.
         default_fps: Rate assumed for sequences whose name encodes none.
+        size: Optional target ``(width, height)`` for spatial downsampling.
 
     Returns:
         The per-sequence statistics for every sequence that was converted.
@@ -291,10 +358,11 @@ def convert_dataset(
 
     sequences = sorted(path for path in input_root.iterdir() if path.is_dir())
     logger.info(
-        "Downsampling %d sequences from %s to %.3f fps -> %s",
+        "Downsampling %d sequences from %s to %.3f fps%s -> %s",
         len(sequences),
         input_root,
         target_fps,
+        f" and {size[0]}x{size[1]}" if size else "",
         output_root,
     )
 
@@ -305,6 +373,7 @@ def convert_dataset(
             output_root / sequence_dir.name,
             target_fps,
             default_fps,
+            size,
         )
         if stats is not None:
             results.append(stats)
@@ -345,6 +414,18 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--target-fps", type=float, default=0.1, help="output frame rate"
     )
     parser.add_argument(
+        "--size",
+        type=int,
+        nargs=2,
+        metavar=("WIDTH", "HEIGHT"),
+        default=None,
+        help=(
+            "resize every image to this resolution (e.g. 320 240 for QVGA, "
+            "160 120 for QQVGA); frames are kept at their original size when "
+            "omitted"
+        ),
+    )
+    parser.add_argument(
         "--default-fps",
         type=float,
         default=24.0,
@@ -372,8 +453,13 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     output = args.output or Path(default_output_name(args.target_fps))
+    size = tuple(args.size) if args.size else None
+    if size is not None and (size[0] <= 0 or size[1] <= 0):
+        logger.error("--size must be positive, got %dx%d", *size)
+        return 1
+
     try:
-        convert_dataset(args.input, output, args.target_fps, args.default_fps)
+        convert_dataset(args.input, output, args.target_fps, args.default_fps, size)
     except (FileNotFoundError, NotADirectoryError, ValueError, OSError) as error:
         logger.error("%s", error)
         return 1

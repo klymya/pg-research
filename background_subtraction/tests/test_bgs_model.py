@@ -128,14 +128,18 @@ class TestApply:
 
 
 class TestBackgroundReference:
-    """The BGR reference maintained for the shadow veto."""
+    """The BGR reference maintained for the shadow veto.
+
+    The reference exists only to feed the veto, so every case here enables it;
+    :class:`TestBackgroundReferenceWithoutVeto` covers the disabled contract.
+    """
 
     def test_is_none_before_the_first_frame(self) -> None:
-        assert _build(0.1).background_bgr is None
+        assert _build(0.1, shadow_enabled=True).background_bgr is None
 
     def test_tracks_the_scene(self) -> None:
         background = make_background()
-        model = _build(1.0)
+        model = _build(1.0, shadow_enabled=True)
 
         model.apply(Frame(bgr=background))
         model.apply(Frame(bgr=background))
@@ -144,9 +148,40 @@ class TestBackgroundReference:
         np.testing.assert_allclose(model.background_bgr, background, atol=1)
 
     def test_reset_clears_backend_and_reference(self) -> None:
-        model = _build(0.1)
+        model = _build(0.1, shadow_enabled=True)
         model.apply(Frame(bgr=make_background()))
 
         model.reset()
 
+        assert model.background_bgr is None
+
+
+class TestBackgroundReferenceWithoutVeto:
+    """With the veto disabled the reference is never allocated.
+
+    It is a full-frame float32 HWC buffer that nothing but the veto reads, and
+    on the embedded port it is 3 of the 5 persistent planes -- so "veto off"
+    has to mean "not allocated", not merely "not used".
+    """
+
+    def test_no_reference_is_built(self) -> None:
+        model = _build(1.0, shadow_enabled=False)
+
+        model.apply(Frame(bgr=make_background()))
+        model.apply(Frame(bgr=make_background()))
+
+        assert model.background_bgr is None
+
+    def test_the_frame_path_still_works_without_one(self) -> None:
+        """The absent reference must not break detection -- only the veto."""
+        background = make_background()
+        model = _build(0.1, shadow_enabled=False)
+        model.apply(Frame(bgr=background))
+
+        mask = model.apply(Frame(bgr=draw_rectangle(background, OBJECT_BBOX)))
+
+        assert mask.dtype == np.uint8
+        assert set(np.unique(mask)) <= {0, 255}
+        x, y, width, height = OBJECT_BBOX
+        assert mask[y : y + height, x : x + width].mean() > 200
         assert model.background_bgr is None

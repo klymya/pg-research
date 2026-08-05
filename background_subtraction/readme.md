@@ -697,7 +697,7 @@ All under `background_subtraction/`:
 - `alif_syntaxis_standart.md` — C/C++ standards, toolchain, and Eigen assessment
   for the Alif integration.
 - `lib_vs_native_comparison*.ipynb`, `qvga_vs_original_comparison.ipynb`,
-  `native_mask_comparison*.ipynb` — supporting comparisons (library vs native,
-  resolution, mask visualisation).
+  `qqvga_vs_qvga_comparison.ipynb`, `native_mask_comparison*.ipynb` — supporting
+  comparisons (library vs native, resolution, mask visualisation).
 - Produced by `run_model_experiments.py` (sweeps), `evaluate.py` /
   `summarize_results.py` (F1 scoring), and `main.py` (pipeline runner).

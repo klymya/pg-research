@@ -34,9 +34,15 @@ namespace sol {
         Image foreground = m_model.Apply(gray);
 
         /* Layer 2 -- HSV shadow veto (uses the previous frame's reference), then
-         * absorb this frame into the reference. */
-        m_shadow.Suppress(foreground, denoised);
-        m_shadow.UpdateReference(denoised);
+         * absorb this frame into the reference. Both are skipped when the veto
+         * is off, so the EW reference -- a full-frame float RGB buffer nothing
+         * else reads -- is never allocated. Matches scr/bgs_model.py and the
+         * Alif port's SolPipeline.cc. */
+        if (m_config.shadowEnabled)
+        {
+            m_shadow.Suppress(foreground, denoised);
+            m_shadow.UpdateReference(denoised);
+        }
         result.rawMask = foreground;
 
         /* Layer 3 -- morphology (open then close). */

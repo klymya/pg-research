@@ -7,7 +7,7 @@
  *   - RgbToHsv   : 8-bit fixed-point HSV (matches cv2 RGB2HSV)
  *   - GaussianBlur : separable Gaussian, reflect-101 border (~ cv2.GaussianBlur)
  *   - Morphology : elliptical structuring element, erode/dilate/open/close
- *   - ConnectedComponents : flood-fill labelling + per-blob stats
+ *   - ConnectedComponents : two-pass union-find labelling + per-blob stats
  */
 #ifndef SOL_NATIVE_OPS_HPP
 #define SOL_NATIVE_OPS_HPP

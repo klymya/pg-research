@@ -344,10 +344,52 @@ CC_STAT_HEIGHT = 3
 CC_STAT_AREA = 4
 """Column indices into the per-label ``stats`` array (mirrors ``cv2.CC_STAT_*``)."""
 
-_NEIGHBOURS = {
-    4: ((-1, 0), (1, 0), (0, -1), (0, 1)),
-    8: ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)),
+_SCANNED_NEIGHBOURS = {
+    4: ((-1, 0), (0, -1)),
+    8: ((-1, -1), (-1, 0), (-1, 1), (0, -1)),
 }
+"""Neighbours a raster scan has *already* visited, as ``(dy, dx)``.
+
+The two-pass algorithm only ever looks backwards: north-west, north, north-east
+and west for 8-connectivity, north and west for 4-connectivity.
+"""
+
+
+def _find(parent: list[int], label: int) -> int:
+    """Return the representative of ``label``, compressing the path behind it.
+
+    Args:
+        parent: Union-find parent table; ``parent[i] == i`` marks a root.
+        label: Provisional label to resolve.
+
+    Returns:
+        The root provisional label of ``label``'s component.
+    """
+    root = label
+    while parent[root] != root:
+        root = parent[root]
+    while parent[label] != root:  # path compression, iterative (no recursion)
+        parent[label], label = root, parent[label]
+    return root
+
+
+def _union(parent: list[int], a: int, b: int) -> None:
+    """Merge the components of two provisional labels.
+
+    The smaller root is kept, which is the classic Rosenfeld choice: it biases
+    every component towards the label it was first given in the raster scan.
+
+    Args:
+        parent: Union-find parent table, modified in place.
+        a: A provisional label.
+        b: Another provisional label.
+    """
+    root_a, root_b = _find(parent, a), _find(parent, b)
+    if root_a == root_b:
+        return
+    if root_b < root_a:
+        root_a, root_b = root_b, root_a
+    parent[root_b] = root_a
 
 
 def connected_components(
@@ -356,10 +398,23 @@ def connected_components(
     """Label the connected foreground regions of a binary mask.
 
     A pure-NumPy/Python equivalent of ``cv2.connectedComponentsWithStats`` using
-    iterative flood-fill (region-growing) labelling. Label ``0`` is the
-    background. The returned ``stats`` and ``centroids`` match OpenCV's layout
-    and values for every foreground label (label numbering may differ, but the
-    set of components and their statistics are identical).
+    the classic **two-pass union-find** algorithm (Rosenfeld & Pfaltz; He et
+    al.). Label ``0`` is the background. The returned ``stats`` and ``centroids``
+    match OpenCV's layout and values for every foreground label (label numbering
+    may differ, but the set of components and their statistics are identical).
+
+    Pass 1 raster-scans once, giving each foreground pixel the smallest label
+    among its already-scanned neighbours -- or a fresh provisional label -- and
+    recording the equivalences it discovers in a union-find table. Pass 2
+    resolves every provisional label to its root and renumbers the roots in
+    raster order of first appearance, so label 1 is the component containing the
+    topmost-leftmost foreground pixel.
+
+    This replaces an iterative flood fill. The visible behaviour is unchanged --
+    same components, same statistics, same numbering -- but it needs no
+    explicit pixel stack, which on the embedded port was the single largest
+    scratch allocation. The C++ ports in ``sign_of_life_cpp/`` and the Alif
+    tree implement the same two passes.
 
     Args:
         mask: Single-channel ``uint8`` mask; any non-zero pixel is foreground.
@@ -382,29 +437,47 @@ def connected_components(
 
     foreground = mask > 0
     rows, cols = foreground.shape
-    labels = np.zeros((rows, cols), dtype=np.int32)
-    offsets = _NEIGHBOURS[connectivity]
+    provisional = np.zeros((rows, cols), dtype=np.int32)
+    offsets = _SCANNED_NEIGHBOURS[connectivity]
 
+    # --- Pass 1: provisional labels + equivalences -------------------------
+    parent = [0]  # index 0 is the background and is never a real label
+    for y in range(rows):
+        for x in np.flatnonzero(foreground[y]).tolist():
+            neighbours = [
+                provisional[y + dy, x + dx]
+                for dy, dx in offsets
+                if 0 <= y + dy < rows and 0 <= x + dx < cols
+                and provisional[y + dy, x + dx]
+            ]
+            if not neighbours:
+                parent.append(len(parent))  # a fresh component, its own root
+                provisional[y, x] = len(parent) - 1
+                continue
+            smallest = min(neighbours)
+            provisional[y, x] = smallest
+            for other in neighbours:  # every neighbour joins the same component
+                _union(parent, smallest, other)
+
+    # --- Pass 2: flatten the table, renumber, resolve, measure -------------
+    # `_union` always points the larger root at the smaller one, so
+    # ``parent[label] <= label`` always holds and a single *ascending* sweep
+    # both flattens the table and renumbers the roots in place: by the time
+    # `label` is reached, everything it points at is already a final label.
+    #
+    # Ascending root order is exactly raster order of first appearance -- a
+    # component's root is the smallest provisional label in it, which is the one
+    # created at its topmost-leftmost pixel -- so this reproduces the flood
+    # fill's numbering without tracking first-seen positions.
     count = 0
-    seed_rows, seed_cols = np.nonzero(foreground)
-    for y0, x0 in zip(seed_rows.tolist(), seed_cols.tolist()):
-        if labels[y0, x0]:
-            continue
-        count += 1
-        stack = [(y0, x0)]
-        labels[y0, x0] = count
-        while stack:
-            y, x = stack.pop()
-            for dy, dx in offsets:
-                ny, nx = y + dy, x + dx
-                if (
-                    0 <= ny < rows
-                    and 0 <= nx < cols
-                    and foreground[ny, nx]
-                    and not labels[ny, nx]
-                ):
-                    labels[ny, nx] = count
-                    stack.append((ny, nx))
+    for label in range(1, len(parent)):
+        if parent[label] == label:  # a root: take the next final label
+            count += 1
+            parent[label] = count
+        else:  # points at a smaller label, already rewritten to its final one
+            parent[label] = parent[parent[label]]
+
+    labels = np.array(parent, dtype=np.int32)[provisional]
 
     num_labels = count + 1
     stats, centroids = _component_stats(labels, num_labels)

@@ -52,7 +52,7 @@ algorithms and methods that the current single-model pipeline uses **and** that
 
 | Operator / method | What it does | Algorithm / source | Location |
 | --- | --- | --- | --- |
-| `connected_components` | Label the foreground regions and return per-label bbox / area / centroid; **matches** `cv2.connectedComponentsWithStats` (stats + centroids, 4-/8-connectivity) | Iterative flood-fill (region-growing) labelling | `scr/native_ops.py` |
+| `connected_components` | Label the foreground regions and return per-label bbox / area / centroid; **matches** `cv2.connectedComponentsWithStats` (stats + centroids, 4-/8-connectivity) | Two-pass union-find labelling (Rosenfeld & Pfaltz; He et al.) | `scr/native_ops.py` |
 | `find_contour` | Trace an object's outer boundary → ordered `(x, y)` points; point set **matches** `cv2.findContours(RETR_EXTERNAL, CHAIN_APPROX_NONE)` | Moore-neighbour boundary tracing (Jacob's stopping criterion) | `scr/native_ops.py` |
 
 > `BlobFilter` (Layer 3) uses `connected_components` on the native path and
@@ -169,7 +169,7 @@ Ordered by porting difficulty. "Parity" = whether the C port can be made
 | --- | --- | --- | --- | --- |
 | `bgr_to_hsv` → **`rgb_to_hsv`** | Same integer path as the Python `bgr_to_hsv`, but with **R = channel 0, B = channel 2** (`blueIdx = 2`): two `const int32_t[256]` LUTs (`sdiv`, `hdiv`), `hsv_shift=12`, per-pixel min/max/select | `uint8`(RGB)→`uint8`(HSV), `int32` temps | **Bit-exact** vs `cv2.COLOR_RGB2HSV` | No float. ~2 KB const LUTs. Feed the camera RGB frame directly — no swap |
 | `erode` / `dilate` / `morphology_ex` | Min/max over a precomputed structuring-element offset list; border = 255 (erode) / 0 (dilate) | `uint8` | **Bit-exact** | Precompute `get_structuring_element` (ellipse) offsets once. MVE `vminq/vmaxq` later |
-| `connected_components` | Flood-fill labelling with an **explicit stack** (no recursion); single-pass stats via accumulate | `uint8` in, `int32`/`int16` labels | Matches cv2 stats/centroids | Pre-size the stack to the pixel count (no exceptions). `int16` labels if `<32k` components |
+| `connected_components` | Two-pass union-find: pass 1 assigns provisional labels from already-scanned neighbours and records equivalences; pass 2 flattens/renumbers the table in one ascending sweep and accumulates stats | `uint8` in, `int32`/`uint16` labels | Matches cv2 stats/centroids | **No pixel stack.** Pre-size the union-find table to `(w·h+1)/2` provisional labels; ascending root order = raster order of first appearance, so numbering matches the flood fill it replaced |
 | `find_contour` | Moore-neighbour tracing: fixed 8-neighbour CW offset table, Jacob's stopping criterion | `uint8` in, `int32` points | Matches cv2 point set | Pre-size the output point buffer to the component perimeter bound |
 | `RunningGaussianAverage` | Per-pixel `f32`: `delta`, squared distance (sum over C), compare `threshold·var`, update mean/var by `alpha`, clip variance to `[4, 5·init]` | `uint8` frame → `f32` state → `uint8` mask | Parity within f32 rounding | FPU/MVE `f32`; **no sqrt**. State = `mean` + `variance` (see budget) |
 | Shadow veto (`ShadowSuppressor`) | Per-pixel from two HSV pixels: `V_f/V_b` ratio, `|ΔS|`, circular `|ΔH|` (`min(d,180-d)`); AND the three bounds | `uint8` HSV → `f32` (or fixed-point) | Parity within f32/fixed rounding | Only the ratio needs division; consider fixed-point to avoid per-pixel FP divide |
@@ -274,8 +274,9 @@ reference and the `int32` label buffer are the two levers.
 - **Contour tracing**: Moore-neighbour (a.k.a. radial-sweep) boundary following
   with Jacob's stopping criterion; the reference is
   `cv2.findContours` (Suzuki–Abe, 1985), matched on the traced point set.
-- **Connected components**: flood-fill / region-growing labelling; the reference
-  is `cv2.connectedComponentsWithStats`.
+- **Connected components**: two-pass union-find labelling (Rosenfeld & Pfaltz,
+  1966; He et al., 2008); the reference is `cv2.connectedComponentsWithStats`,
+  which uses the same family of algorithm.
 
 Equivalence to `cv2` for every native operation is asserted in
 `tests/test_native_ops.py`.

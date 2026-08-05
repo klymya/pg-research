@@ -67,7 +67,7 @@ The executable is `build/sign_of_life`.
 ## Run
 
 ```
-sign_of_life <input_dir> <output_dir> [--min-area N] [--sol-area N]
+sign_of_life <input_dir> <output_dir> [--min-area N] [--sol-area N] [--no-shadow-veto]
 ```
 
 | Argument | Meaning |
@@ -76,6 +76,13 @@ sign_of_life <input_dir> <output_dir> [--min-area N] [--sol-area N]
 | `<output_dir>` | Folder for the output masks and report (created if missing) |
 | `--min-area N` | Smallest kept foreground object, px (default `150`) |
 | `--sol-area N` | Sign-of-Life area threshold, px (default `500`) |
+| `--no-shadow-veto` | Disable the HSV shadow filter (default: enabled) |
+
+`--no-shadow-veto` is the same gate as `main.py --no-shadow-veto` and the Alif
+port's `PipelineConfig::shadowEnabled`. When it is off the veto's background
+reference — a full-frame float RGB buffer, 921,600 B at QVGA — is never
+allocated, and the HSV conversions are never run. The setting is recorded in the
+`sign_of_life.txt` header as `shadow_veto=0/1`.
 
 Example:
 

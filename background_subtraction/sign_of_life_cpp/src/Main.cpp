@@ -7,6 +7,7 @@
  *
  * Usage:
  *   sign_of_life <input_dir> <output_dir> [--min-area N] [--sol-area N]
+ *                [--no-shadow-veto]
  */
 #include "ImageIo.hpp"
 #include "Pipeline.hpp"
@@ -29,17 +30,21 @@ namespace {
         std::string outputDir;
         int minArea       = -1; /* -1 = keep the config default */
         int areaThreshold = -1;
+        bool shadowVeto   = true;
     };
 
     void PrintUsage(const char* program)
     {
         std::fprintf(stderr,
                      "Usage: %s <input_dir> <output_dir> [--min-area N] [--sol-area N]\n"
-                     "  <input_dir>   folder of JPEG/PNG frames (processed in name order)\n"
-                     "  <output_dir>  folder for the *_raw.png / *_morph.png masks and\n"
-                     "                the sign_of_life.txt report\n"
-                     "  --min-area N  smallest kept foreground object in px (default 150)\n"
-                     "  --sol-area N  Sign-of-Life area threshold in px (default 500)\n",
+                     "                [--no-shadow-veto]\n"
+                     "  <input_dir>       folder of JPEG/PNG frames (processed in name order)\n"
+                     "  <output_dir>      folder for the *_raw.png / *_morph.png masks and\n"
+                     "                    the sign_of_life.txt report\n"
+                     "  --min-area N      smallest kept foreground object in px (default 150)\n"
+                     "  --sol-area N      Sign-of-Life area threshold in px (default 500)\n"
+                     "  --no-shadow-veto  disable the HSV shadow filter; its background\n"
+                     "                    reference is then never allocated\n",
                      program);
     }
 
@@ -56,6 +61,10 @@ namespace {
             else if (arg == "--sol-area" && i + 1 < argc)
             {
                 options.areaThreshold = std::atoi(argv[++i]);
+            }
+            else if (arg == "--no-shadow-veto")
+            {
+                options.shadowVeto = false;
             }
             else if (arg == "-h" || arg == "--help")
             {
@@ -118,6 +127,7 @@ int main(int argc, char** argv)
     {
         config.areaThreshold = options.areaThreshold;
     }
+    config.shadowEnabled = options.shadowVeto;
 
     const std::vector<std::string> frames = sol::io::ListImageFiles(options.inputDir);
     if (frames.empty())
@@ -140,7 +150,8 @@ int main(int argc, char** argv)
     }
     report << "# Sign-of-Life report\n";
     report << "# min_area=" << config.minArea
-           << " area_threshold=" << config.areaThreshold << "\n";
+           << " area_threshold=" << config.areaThreshold
+           << " shadow_veto=" << (config.shadowEnabled ? 1 : 0) << "\n";
     report << "# columns: frame  sign_of_life  num_objects  objects[area@x,y,w,h;...]\n";
 
     sol::Pipeline pipeline(config);
