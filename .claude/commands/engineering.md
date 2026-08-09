@@ -36,6 +36,7 @@ allowed-tools:
   - WebFetch(domain:pybind11.readthedocs.io)
   - WebFetch(domain:github.com)
   - WebFetch(domain:raw.githubusercontent.com)
+  - WebFetch(domain:mermaid.js.org)
   - Bash(git:*)
   - Bash(python3:*)
   - Bash(python:*)
