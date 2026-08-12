@@ -116,11 +116,14 @@ Written to `<output_dir>`:
 
 - **Integer ops are bit-exact** with the Python/`cv2` reference: `RgbToGray`
   (BT.601), `RgbToHsv` (fixed-point), the elliptical structuring element,
-  erode/dilate/open/close, and connected-components stats.
-- **Float ops match within rounding**: the running-Gaussian model (single-
-  precision) and the HSV ratio test. `GaussianBlur` is a float separable
-  Gaussian with the cv2 sigma formula and reflect-101 border — very close to,
-  but not bit-identical with, `cv2.GaussianBlur`.
+  erode/dilate/open/close, connected-components stats, and — since the model
+  state became `uint8` — the running-Gaussian model itself. Its update is
+  integer Q8 fixed point end to end, so `BackgroundModel` and
+  `scr/models/running_gaussian.py` produce identical masks and identical state
+  given identical grayscale input.
+- **Float ops match within rounding**: the HSV ratio test. `GaussianBlur` is a
+  float separable Gaussian with the cv2 sigma formula and reflect-101 border —
+  very close to, but not bit-identical with, `cv2.GaussianBlur`.
 - **Resolution:** this tool processes each JPEG at its **native size** (no
   resize). The Python notebook resizes to QVGA 320×240, so object *areas* scale
   with resolution — for already-QVGA inputs (e.g. `canoe`) the results are
@@ -135,3 +138,24 @@ and are ready to compile under the eval-kit toolchain. Only `ImageIo` and
 `Main` are host-specific (stb + `dirent` + CLI); on device, frames come from the
 camera HAL (already **RGB, QVGA** — see `../native_operators.md`), so those two
 files are replaced by the kit's PreProcess/PostProcess wiring.
+
+### Persistent state
+
+| Buffer | Type | Bytes/px | QVGA 320×240 |
+| --- | --- | --- | --- |
+| `BackgroundModel::m_mean` | `uint8_t` | 1 | 76,800 |
+| `BackgroundModel::m_variance` | `uint8_t` | 1 | 76,800 |
+| `ShadowSuppressor::m_reference` | `float` ×3 | 12 | 921,600 |
+
+The model was `float` mean + `float` variance (614,400 B) until the `uint8`
+conversion; the update is now integer Q8 fixed point with `int32_t`
+intermediates. The shadow reference is untouched and is only allocated when the
+veto is on (`--no-shadow-veto` frees all 921,600 B), so it remains the largest
+single consumer and the obvious next target.
+
+The quantised mean carries an **update dead zone** of `1/(2·alpha)` grey levels
+(5 at `modelAlpha = 0.1`): an update smaller than that rounds to zero and the
+mean stops tracking. It is safe only because the dead zone stays under the
+smallest detectable distance, `sqrt(modelThreshold · 4)` = 7. **Lowering
+`modelAlpha` below ≈0.071 freezes the model**; the Python port logs a warning
+for the same condition.

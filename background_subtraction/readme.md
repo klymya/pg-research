@@ -671,6 +671,16 @@ By contrast MoG is the slowest measured (≈32×), ViBe the heaviest in memory
 (6 000 KB), and EigenBackground scored 0 (needs ≥ 20 frames) — all costlier for
 no accuracy gain.
 
+> ✅ **Since implemented at `uint8`.** The model state is quantised to one byte
+> per plane — **150 KB at QVGA, not 600 KB** — with integer Q8 fixed-point
+> updates that make the Python and C++ ports bit-identical. It costs −0.032 F1
+> on busStation (recall only) and nothing on canoe, with the Sign-of-Life flag
+> still agreeing 98–100 % of frames. The full measurement, the mean-vs-variance
+> split that explains the loss, and the `alpha > 0.071` validity condition are
+> in [`models_complexity_ranking.md`](models_complexity_ranking.md#uint8-model-state-running_gaussian);
+> [`state_dtype_comparison.ipynb`](state_dtype_comparison.ipynb) runs both arms
+> side by side and reproduces the numbers.
+
 ### 3. Next phases
 
 - **HSV shadow tuning** — the shadow veto already operates in HSV

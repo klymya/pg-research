@@ -46,7 +46,7 @@ model state at QVGA 320×240 grayscale (`C = 1`), stored as **float32** — the 
 | 2 | `frame_difference` | `O(P·C)` | 1.7 | 300 |
 | 3 | `running_average` | `O(P·C)` | 1.0 | 300 |
 | 4 | `adaptive_median` | `O(P·C)` | **1.0 ← X** | 300 |
-| 5 | `running_gaussian` | `O(P·C)` | 1.6 | 600 |
+| 5 | `running_gaussian` | `O(P·C)` | 1.6 | 600 ⁵ |
 | 6 | `mixture_of_gaussians` | `O(P·K·(C+log K))` | 32 | 2 700 ¹ |
 | 7 | `eigenbackground` | `O(P·D)` + `O(M²·P)` once | 1.9 ² | 3 300 ³ |
 | 8 | `vibe` | `O(P·N)` | 11.7 | 6 000 ⁴ |
@@ -63,10 +63,55 @@ float32.)
 ² inference only; excludes the one-time SVD and the empty first `M` frames.
 ³ steady state; peaks ~6 000 KB + SVD temporaries while training.
 ⁴ float32 samples; 1 500 KB if stored as uint8.
+⁵ the column is the float32 basis used for the comparison; the shipped
+`running_gaussian` stores its state as **uint8** and costs **150 KB** — see
+[uint8 model state](#uint8-model-state-running_gaussian).
 
 Note the inversion at rows 6–7: MoG has *lower* time complexity than ViBe yet
 is measured slowest (`N = 32`) — see
 [Why MoG measures slower than ViBe](#why-mog-measures-slower-than-vibe-smaller-big-o-larger-constant).
+
+### uint8 model state (`running_gaussian`)
+
+The table above compares every model on the same float32 basis. The selected
+model does not use it: `scr/models/running_gaussian.py` and
+`sign_of_life_cpp/src/BackgroundModel.cpp` store the mean and the variance as
+`uint8` — `P·(C+1)·1` = **150 KB at QVGA instead of 600 KB (4×)**, 38 KB at
+QQVGA. The arithmetic is integer Q8 fixed point with `int32` intermediates, so
+the two ports are bit-identical rather than merely close. `state_dtype`
+selects the float32 state in the Python model for reference runs; the C++ port
+implements the quantised state only.
+
+**Accuracy cost.** Measured over the full `data/` sequences at QVGA with the
+standard pipeline parameters (`open_kernel=3`, `close_kernel=7`, `min_area=150`,
+shadow veto on), scoring the filtered mask the pipeline emits. Reproduce with
+[`state_dtype_comparison.ipynb`](state_dtype_comparison.ipynb), which runs both
+arms side by side:
+
+| Sequence | float32 F1 | uint8 F1 | Δ F1 | Δ precision | Δ recall | Sign-of-Life agreement |
+| --- | --- | --- | --- | --- | --- | --- |
+| busStation | 0.695 | 0.663 | −0.0323 | −0.0022 | −0.0417 | 98.3 % (21/1250 frames) |
+| canoe | 0.810 | 0.811 | +0.0011 | +0.0007 | +0.0012 | 100 % |
+
+The busStation loss is almost entirely **recall** (0.572 → 0.531) at essentially
+unchanged precision (0.887 → 0.884). Quantising the two planes separately
+locates the cause: the `uint8` variance alone is nearly free (mask IoU 0.967 vs
+float32), the `uint8` mean alone accounts for all of it (0.840). A mean that
+cannot make sub-unit updates lags the scene, which inflates the variance and
+raises the detection threshold. Rescaling the variance to fill the `uint8` range
+(×1.4) recovers nothing (0.832 → 0.835), so the extra precision would have to go
+to the mean: a Q8.8 `uint16` mean (3 B/px, 225 KB) scores 0.6950 / 0.8109 on the
+same two sequences — it buys the loss back for 75 KB. **The 4× reduction was
+chosen over that**, on the grounds that the deliverable is the Sign-of-Life flag,
+which still agrees 98–100 % of frames; where it disagrees, the deciding blob sits
+within a few dozen pixels of the 500 px threshold.
+
+**Dead zone.** Integer storage makes the update `alpha · delta` round to zero
+for `|delta| < 1/(2·alpha)` — 5 grey levels at `alpha = 0.1`. This is safe only
+while it stays under the smallest detectable distance,
+`sqrt(threshold · variance_floor)` = 7, i.e. **`alpha` must exceed ≈0.071**. At
+bgslibrary's default `alpha = 0.005` the dead zone is 100 grey levels and the
+mean never moves; both ports flag the condition rather than degrade silently.
 
 ## Per-model analysis
 

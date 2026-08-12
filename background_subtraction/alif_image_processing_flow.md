@@ -115,7 +115,7 @@ defaults (`SolTypes.hpp:80`).
 | --- | --- | --- | --- |
 | 0 | denoise | separable **Gaussian blur**, reflect-101 border, σ derived from ksize as OpenCV does; rolling 5-row float ring instead of a full float image | 5×5 |
 | 1 | feature | **RGB→Gray**, BT.601 fixed point `4899/9617/1868 >> 14` — bit-identical to `cv2.RGB2GRAY` | — |
-| 1 | model | **Running Gaussian Average** (Wren / bgslibrary): per-pixel mean + variance, foreground if `(x−μ)² > 12.25·σ²`; selective update (background pixels only) after a 30-frame learn-in; variance clamped to \[4, 180] | α 0.1, thr 3.5², init var 36 |
+| 1 | model | **Running Gaussian Average** (Wren / bgslibrary): per-pixel mean + variance, foreground if `(x−μ)² > 12.25·σ²`; selective update (background pixels only) after a 30-frame learn-in; variance clamped to \[4, 180]. State is **uint8** (2 B/px, 150 KB at QVGA) updated in integer Q8 fixed point with `int32` intermediates — see `models_complexity_ranking.md`. Needs α > 0.071, else the quantised mean stops tracking | α 0.1, thr 3.5², init var 36 |
 | 2 | shadow veto | HSV shadow suppression + EW RGB reference — **compiled out** (`SOL_SHADOW_VETO=OFF`) | — |
 | 3 | open | erode ∘ dilate, elliptical SE | 3×3 |
 | 3 | close | dilate ∘ erode, elliptical SE | 7×7 |

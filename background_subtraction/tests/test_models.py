@@ -59,6 +59,9 @@ MODEL_FACTORIES: dict[str, Callable[[], BackgroundSubtractor]] = {
     "running_average": lambda: RunningAverageSubtractor(alpha=0.1),
     "adaptive_median": lambda: AdaptiveMedianSubtractor(sampling_rate=1, learning_frames=5),
     "running_gaussian": lambda: RunningGaussianAverage(alpha=0.05, learning_frames=5),
+    "running_gaussian_fp32": lambda: RunningGaussianAverage(
+        alpha=0.05, learning_frames=5, state_dtype="float32"
+    ),
     "mog": lambda: MixtureOfGaussians(alpha=0.05),
     "vibe": lambda: ViBe(seed=0),
     "eigen": lambda: EigenBackground(n_components=3, history_size=5),
@@ -272,6 +275,146 @@ class TestRunningGaussian:
     def test_rejects_non_positive_variance(self) -> None:
         with pytest.raises(ValueError, match="init_variance"):
             RunningGaussianAverage(init_variance=0.0)
+
+    def test_rejects_unknown_state_dtype(self) -> None:
+        with pytest.raises(ValueError, match="state_dtype"):
+            RunningGaussianAverage(state_dtype="float16")
+
+    def test_background_image_is_uint8_for_both_states(self) -> None:
+        for dtype in ("uint8", "float32"):
+            model = RunningGaussianAverage(alpha=0.1, state_dtype=dtype)
+            model.apply(scene())
+
+            background = model.get_background_image()
+
+            assert background is not None
+            assert background.dtype == np.uint8
+            assert background.shape == (*SIZE, 3)
+
+
+class TestRunningGaussianQuantisedState:
+    """The ``uint8`` model state: sizing, saturation and integer overflow.
+
+    The point of the quantised state is 2 bytes per pixel instead of 8, so the
+    arithmetic runs on ``int32`` views of ``uint8`` storage. Every test here
+    drives a value that would wrap if an intermediate were kept narrow.
+    """
+
+    @staticmethod
+    def uniform(value: int) -> np.ndarray:
+        """Return a flat single-channel frame filled with ``value``."""
+        return np.full(SIZE, value, dtype=np.uint8)
+
+    def test_state_is_uint8_and_two_bytes_per_pixel(self) -> None:
+        model = RunningGaussianAverage(alpha=0.1)
+
+        model.apply(self.uniform(100))
+
+        assert model._mean.dtype == np.uint8
+        assert model._variance.dtype == np.uint8
+        pixels = SIZE[0] * SIZE[1]
+        assert model._mean.nbytes + model._variance.nbytes == 2 * pixels
+
+    def test_float32_state_is_preserved(self) -> None:
+        model = RunningGaussianAverage(alpha=0.1, state_dtype="float32")
+
+        model.apply(self.uniform(100))
+
+        assert model._mean.dtype == np.float32
+        assert model._variance.dtype == np.float32
+
+    def test_black_to_white_step_does_not_wrap_the_mean(self) -> None:
+        # learning_frames keeps every pixel updatable, so the extreme delta
+        # actually reaches the mean update instead of being vetoed as foreground.
+        model = RunningGaussianAverage(alpha=0.1, learning_frames=1000)
+        for _ in range(5):
+            model.apply(self.uniform(0))
+
+        means = []
+        for _ in range(60):
+            model.apply(self.uniform(255))
+            means.append(int(model._mean.flat[0]))
+
+        assert means[0] == 26  # 0 + round(26 * 255 / 256), no wrap to a low value
+        assert means == sorted(means)  # monotone climb, never rolls over
+        # Converges to within the dead zone: at alpha=0.1 an update of
+        # |delta| < 1/(2*alpha) = 5 rounds to zero, so the mean stops there.
+        assert 250 <= means[-1] <= 255
+
+    def test_white_to_black_step_does_not_wrap_the_mean(self) -> None:
+        model = RunningGaussianAverage(alpha=0.1, learning_frames=1000)
+        for _ in range(5):
+            model.apply(self.uniform(255))
+
+        means = []
+        for _ in range(60):
+            model.apply(self.uniform(0))
+            means.append(int(model._mean.flat[0]))
+
+        assert means[0] == 229  # 255 - round(26 * 255 / 256), no wrap to a high value
+        assert means == sorted(means, reverse=True)
+        assert 0 <= means[-1] <= 5  # symmetric with the dead zone above
+
+    def test_variance_saturates_at_the_ceiling(self) -> None:
+        # A 0/255 flip gives a squared distance of 65,025 -- 361x the ceiling and
+        # far outside uint8, so the update must clamp before the store.
+        model = RunningGaussianAverage(alpha=0.1, learning_frames=1000)
+        model.apply(self.uniform(0))
+        for index in range(20):
+            model.apply(self.uniform(255 if index % 2 == 0 else 0))
+
+        assert int(model._variance.flat[0]) == 180  # 5 * init_variance
+
+    def test_variance_settles_on_the_floor(self) -> None:
+        model = RunningGaussianAverage(alpha=0.1, learning_frames=1000)
+        for _ in range(400):
+            model.apply(self.uniform(100))
+
+        assert int(model._variance.flat[0]) == 4
+
+    def test_large_init_variance_clamps_the_ceiling(self) -> None:
+        # 5 * 100 = 500 does not fit a uint8; the ceiling must cap at 255 rather
+        # than wrap to 244.
+        model = RunningGaussianAverage(alpha=0.1, init_variance=100.0, learning_frames=1000)
+        model.apply(self.uniform(0))
+        for index in range(20):
+            model.apply(self.uniform(255 if index % 2 == 0 else 0))
+
+        assert int(model._variance.flat[0]) == 255
+
+    def test_warns_when_alpha_freezes_the_mean(self, caplog) -> None:
+        with caplog.at_level("WARNING", logger="scr.models.running_gaussian"):
+            RunningGaussianAverage(alpha=0.005)
+
+        assert "dead zone" in caplog.text
+
+    def test_no_warning_at_the_pipeline_alpha(self, caplog) -> None:
+        with caplog.at_level("WARNING", logger="scr.models.running_gaussian"):
+            RunningGaussianAverage(alpha=0.1)
+
+        assert caplog.text == ""
+
+    def test_tracks_the_float32_model(self) -> None:
+        quantised = RunningGaussianAverage(alpha=0.1)
+        reference = RunningGaussianAverage(alpha=0.1, state_dtype="float32")
+        rng = np.random.default_rng(7)
+        background = scene()
+
+        for _ in range(40):
+            noisy = np.clip(
+                background.astype(np.int16) + rng.integers(-3, 4, background.shape),
+                0,
+                255,
+            ).astype(np.uint8)
+            quantised_mask = quantised.apply(noisy)
+            reference_mask = reference.apply(noisy)
+
+        drift = np.abs(
+            quantised.get_background_image().astype(np.int16)
+            - reference.get_background_image().astype(np.int16)
+        )
+        assert drift.mean() < 3.0
+        assert (quantised_mask != reference_mask).mean() < 0.02
 
 
 class TestMixtureOfGaussians:

@@ -269,6 +269,16 @@ class NativeModelBackend(BGSBackend):
         """
         self._model = model
 
+    @property
+    def model(self) -> Any:
+        """The wrapped native model.
+
+        Exposed so callers can reach model-specific state -- the background
+        estimate, or the size of the learned parameters -- without touching
+        private attributes.
+        """
+        return self._model
+
     def apply(self, image: np.ndarray, learning_rate: float) -> np.ndarray:
         """Run the wrapped model and return its foreground mask."""
         del learning_rate  # The model's rate is fixed at construction.
