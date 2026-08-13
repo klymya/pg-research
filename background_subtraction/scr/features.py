@@ -19,8 +19,12 @@ import numpy as np
 from .config import FeatureConfig, FeatureKind, Implementation, ShadowConfig
 from .native_ops import bgr_to_hsv
 from .structures import Frame
+from .utils import Q_BITS as _Q_BITS, quantise
 
 _EPSILON = 1e-6
+
+_RATIO_BITS = 16
+"""Fractional bits of the value-ratio bounds in the integer veto path."""
 
 _LBP_NEIGHBOURS: tuple[tuple[int, int], ...] = (
     (-1, -1),
@@ -232,16 +236,31 @@ class ShadowSuppressor:
         )
 
     def _to_hsv(self, image: np.ndarray) -> np.ndarray:
-        """Convert a BGR image to HSV via the configured implementation."""
+        """Convert a BGR image to HSV as ``uint8``.
+
+        The conversion is integer fixed point in both implementations -- the
+        native path uses reciprocal tables and OpenCV's is equivalent -- so
+        neither mode of the veto pays for a floating-point conversion.
+        """
         if self._config.implementation is Implementation.NATIVE:
-            return bgr_to_hsv(image).astype(np.float32)
-        return cv2.cvtColor(image, cv2.COLOR_BGR2HSV).astype(np.float32)
+            return bgr_to_hsv(image)
+        return cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
     def _shadow_mask(self, frame: Frame, background_bgr: np.ndarray) -> np.ndarray:
         """Return the boolean mask of pixels classified as shadow."""
-        cfg = self._config
         frame_hsv = self._to_hsv(frame.bgr)
         background_hsv = self._to_hsv(background_bgr)
+        if self._config.quantised:
+            return self._shadow_mask_integer(frame_hsv, background_hsv)
+        return self._shadow_mask_float(frame_hsv, background_hsv)
+
+    def _shadow_mask_float(
+        self, frame_hsv: np.ndarray, background_hsv: np.ndarray
+    ) -> np.ndarray:
+        """Classify shadow pixels in floating point (the original path)."""
+        cfg = self._config
+        frame_hsv = frame_hsv.astype(np.float32)
+        background_hsv = background_hsv.astype(np.float32)
 
         value_ratio = frame_hsv[:, :, 2] / (background_hsv[:, :, 2] + _EPSILON)
         saturation_delta = np.abs(frame_hsv[:, :, 1] - background_hsv[:, :, 1])
@@ -253,4 +272,48 @@ class ShadowSuppressor:
             & (value_ratio <= cfg.value_ratio_max)
             & (saturation_delta <= cfg.saturation_delta_max)
             & (hue_delta <= cfg.hue_delta_max)
+        )
+
+    def _shadow_mask_integer(
+        self, frame_hsv: np.ndarray, background_hsv: np.ndarray
+    ) -> np.ndarray:
+        """Classify shadow pixels in integer arithmetic, matching the C++ port.
+
+        The division is turned into two cross-multiplications against the Q8
+        bounds, which is where the one behavioural subtlety lives. The float
+        form divides by ``V_background + 1e-6``, so at ``V_background = 0`` the
+        ratio is either enormous or exactly zero and **both** fall outside
+        ``[value_ratio_min, value_ratio_max]`` -- a black background pixel is
+        never shadow. Cross-multiplied, ``V_frame * 256 >= min_q * 0`` and
+        ``V_frame * 256 <= max_q * 0`` are both satisfied at
+        ``V_frame = V_background = 0``, which would silently invert that. The
+        explicit guard below keeps the two paths in agreement.
+
+        The ratio bounds are scaled by ``2 ** _RATIO_BITS`` rather than the Q8
+        used elsewhere: Q8 would round ``0.40`` to ``102/256 = 0.3984``, a 0.4 %
+        shift of the threshold that disagrees with the float path on a
+        measurable number of pixels. Q16 puts that error at 6e-6 for free --
+        the products still fit ``int32`` with a 128x margin (``255 << 16`` =
+        16.7 M against ``INT32_MAX``).
+        """
+        cfg = self._config
+        frame_hsv = frame_hsv.astype(np.int32)
+        background_hsv = background_hsv.astype(np.int32)
+
+        value_frame = frame_hsv[:, :, 2]
+        value_background = background_hsv[:, :, 2]
+        scaled = value_frame << _RATIO_BITS
+        ratio_min_q = int(round(cfg.value_ratio_min * (1 << _RATIO_BITS)))
+        ratio_max_q = int(round(cfg.value_ratio_max * (1 << _RATIO_BITS)))
+
+        saturation_delta = np.abs(frame_hsv[:, :, 1] - background_hsv[:, :, 1])
+        hue_delta = np.abs(frame_hsv[:, :, 0] - background_hsv[:, :, 0])
+        hue_delta = np.minimum(hue_delta, 180 - hue_delta)
+
+        return (
+            (value_background > 0)
+            & (scaled >= ratio_min_q * value_background)
+            & (scaled <= ratio_max_q * value_background)
+            & (saturation_delta <= int(round(cfg.saturation_delta_max)))
+            & (hue_delta <= int(round(cfg.hue_delta_max)))
         )

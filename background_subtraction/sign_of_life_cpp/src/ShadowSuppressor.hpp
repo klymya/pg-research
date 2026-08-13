@@ -16,6 +16,20 @@ namespace sol {
      * @brief Removes foreground pixels whose HSV signature matches a cast shadow
      *        (brightness dropped by a bounded factor, hue and saturation kept),
      *        and maintains the RGB reference the veto compares against.
+     *
+     * The reference is @c uint8 -- 3 bytes per pixel, 230,400 B at QVGA against
+     * the 921,600 B a float reference costs -- absorbed with the same Q8
+     * integer update as the background model, and the veto's comparisons are
+     * integer too. The float reference is not implemented here: it is 12 B/px
+     * of persistent state on a target that has none to spare, and the Python
+     * reference keeps it selectable (``ShadowConfig.reference_dtype``) for
+     * exactly this comparison.
+     *
+     * @note The quantised reference carries the same @c 1/(2*shadowAlpha) dead
+     *       zone as the model mean. Unlike the model there is no closed-form
+     *       bound on the error the veto tolerates -- it depends on the value
+     *       ratio band and hue stability, both of which vary with scene
+     *       brightness -- so this mode rests on measurement, not derivation.
      */
     class ShadowSuppressor
     {
@@ -37,9 +51,14 @@ namespace sol {
 
     private:
         PipelineConfig m_config;
+        int32_t m_alphaQ8;      /* shadowAlpha * 256, in [0, 256]            */
+        int32_t m_ratioMinQ16;  /* valueRatioMin * 65536 (see ShadowSuppressor.cpp) */
+        int32_t m_ratioMaxQ16;  /* valueRatioMax * 65536                     */
+        int32_t m_satDeltaMax;  /* rounded to whole saturation levels        */
+        int32_t m_hueDeltaMax;  /* rounded to whole hue levels               */
         int m_width  = 0;
         int m_height = 0;
-        std::vector<float> m_reference; /* EW RGB reference, HWC float */
+        std::vector<uint8_t> m_reference; /* EW RGB reference, HWC uint8 */
     };
 
 } /* namespace sol */

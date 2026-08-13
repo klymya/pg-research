@@ -114,6 +114,10 @@ class FeatureConfig:
             raise ValueError("lbp_blur_ksize must be 0 or an odd integer >= 3")
 
 
+REFERENCE_DTYPES = ("float32", "uint8")
+"""Accepted values of :attr:`ShadowConfig.reference_dtype`."""
+
+
 @dataclass(frozen=True)
 class ShadowConfig:
     """HSV brightness-ratio veto suppressing moving-shadow foreground.
@@ -121,17 +125,38 @@ class ShadowConfig:
     A pixel is classified as shadow when it is darker than the background by a
     bounded factor while keeping a similar hue and saturation.
 
+    Three modes are expressible, matching the embedded build options:
+
+    ===================================  =================================
+    ``enabled`` / ``reference_dtype``    Cost of the EW background reference
+    ===================================  =================================
+    ``False`` / any                      not allocated
+    ``True`` / ``"float32"``             12 bytes per pixel
+    ``True`` / ``"uint8"``               3 bytes per pixel
+    ===================================  =================================
+
+    ``"uint8"`` also switches the veto's comparisons to integer arithmetic, so
+    that mode is bit-identical to the C++ port (which implements only the
+    disabled and ``uint8`` modes -- an embedded target has no use for a float
+    reference costing 921,600 B at QVGA).
+
     Attributes:
         enabled: Whether the veto is applied at all.
+        reference_dtype: Storage of the exponentially weighted background
+            reference: ``"float32"`` for the original path, or ``"uint8"`` for
+            the quantised one with integer comparisons.
         value_ratio_min: Lower bound of ``V_frame / V_background``.
         value_ratio_max: Upper bound of ``V_frame / V_background``.
         saturation_delta_max: Maximum absolute saturation difference (0-255).
         hue_delta_max: Maximum circular hue difference (OpenCV scale, 0-179).
         implementation: Whether the BGR->HSV conversion uses OpenCV or the
-            pure-NumPy :mod:`scr.native_ops` equivalent.
+            pure-NumPy :mod:`scr.native_ops` equivalent. The conversion is
+            integer fixed point either way; only the comparisons above depend
+            on ``reference_dtype``.
     """
 
     enabled: bool = True
+    reference_dtype: str = "float32"
     value_ratio_min: float = 0.4
     value_ratio_max: float = 0.95
     saturation_delta_max: float = 40.0
@@ -141,7 +166,24 @@ class ShadowConfig:
     def __post_init__(self) -> None:
         if not 0.0 <= self.value_ratio_min < self.value_ratio_max:
             raise ValueError("require 0 <= value_ratio_min < value_ratio_max")
+        if self.reference_dtype not in REFERENCE_DTYPES:
+            raise ValueError(
+                f"unknown reference_dtype {self.reference_dtype!r}; "
+                f"expected one of {REFERENCE_DTYPES}"
+            )
         object.__setattr__(self, "implementation", Implementation(self.implementation))
+
+    @property
+    def quantised(self) -> bool:
+        """Whether the reference is stored ``uint8`` and compared in integers."""
+        return self.reference_dtype == "uint8"
+
+    @property
+    def reference_bytes_per_pixel(self) -> int:
+        """Bytes of persistent reference per pixel; ``0`` when the veto is off."""
+        if not self.enabled:
+            return 0
+        return 3 if self.quantised else 12
 
 
 @dataclass(frozen=True)

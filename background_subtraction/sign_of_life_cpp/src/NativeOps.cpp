@@ -89,36 +89,39 @@ namespace ops {
         return gray;
     }
 
-    Image RgbToHsv(const Image& rgb)
+    void RgbToHsvPixel(int r, int g, int b, uint8_t& h8, uint8_t& s8, uint8_t& v8)
     {
         const HsvTables& t = Tables();
+        const int rounding = 1 << (kHsvShift - 1);
+
+        const int v    = std::max(std::max(r, g), b);
+        const int vmin = std::min(std::min(r, g), b);
+        const int diff = v - vmin;
+
+        const int vr = (v == r) ? -1 : 0;
+        const int vg = (v == g) ? -1 : 0;
+
+        const int s = (diff * t.sdiv[v] + rounding) >> kHsvShift;
+
+        int h = (vr & (g - b)) +
+                (~vr & ((vg & (b - r + 2 * diff)) + (~vg & (r - g + 4 * diff))));
+        h = (h * t.hdiv[diff] + rounding) >> kHsvShift;
+        h += (h < 0) ? kHueRange : 0;
+
+        h8 = static_cast<uint8_t>(h);
+        s8 = static_cast<uint8_t>(s);
+        v8 = static_cast<uint8_t>(v);
+    }
+
+    Image RgbToHsv(const Image& rgb)
+    {
         Image hsv(rgb.width, rgb.height, 3);
         const size_t n = rgb.PixelCount();
-        const int rounding = 1 << (kHsvShift - 1);
 
         for (size_t i = 0; i < n; ++i)
         {
-            const int r = rgb.data[i * 3 + 0];
-            const int g = rgb.data[i * 3 + 1];
-            const int b = rgb.data[i * 3 + 2];
-
-            const int v    = std::max(std::max(r, g), b);
-            const int vmin = std::min(std::min(r, g), b);
-            const int diff = v - vmin;
-
-            const int vr = (v == r) ? -1 : 0;
-            const int vg = (v == g) ? -1 : 0;
-
-            const int s = (diff * t.sdiv[v] + rounding) >> kHsvShift;
-
-            int h = (vr & (g - b)) +
-                    (~vr & ((vg & (b - r + 2 * diff)) + (~vg & (r - g + 4 * diff))));
-            h = (h * t.hdiv[diff] + rounding) >> kHsvShift;
-            h += (h < 0) ? kHueRange : 0;
-
-            hsv.data[i * 3 + 0] = static_cast<uint8_t>(h);
-            hsv.data[i * 3 + 1] = static_cast<uint8_t>(s);
-            hsv.data[i * 3 + 2] = static_cast<uint8_t>(v);
+            RgbToHsvPixel(rgb.data[i * 3 + 0], rgb.data[i * 3 + 1], rgb.data[i * 3 + 2],
+                          hsv.data[i * 3 + 0], hsv.data[i * 3 + 1], hsv.data[i * 3 + 2]);
         }
         return hsv;
     }

@@ -10,6 +10,42 @@ from .structures import BoundingBox
 FOREGROUND = 255
 """Value marking a foreground pixel in every mask produced by the pipeline."""
 
+Q_BITS = 8
+"""Fractional bits of the Q8 fixed-point form shared by the quantised stages."""
+
+Q_ONE = 1 << Q_BITS
+"""Fixed-point representation of ``1.0``."""
+
+
+def quantise(value: float) -> int:
+    """Return ``value`` in Q8 fixed point, rounded to nearest.
+
+    Args:
+        value: The real-valued parameter to quantise.
+
+    Returns:
+        ``round(value * 256)`` as a Python ``int``.
+    """
+    return int(round(value * Q_ONE))
+
+
+def round_shift(values: np.ndarray) -> np.ndarray:
+    """Divide ``values`` by ``2 ** Q_BITS``, rounding half away from zero.
+
+    Shared by every quantised stage so they round identically. A plain right
+    shift would round towards negative infinity and bias the result downwards;
+    truncating towards zero would instead widen the update dead zone. Both cost
+    accuracy, so the magnitude is rounded and the sign reapplied -- which is
+    also exactly what the C++ ports do.
+
+    Args:
+        values: ``int32`` array of Q8 fixed-point products.
+
+    Returns:
+        The rounded quotients as ``int32``.
+    """
+    return np.sign(values) * ((np.abs(values) + (Q_ONE >> 1)) >> Q_BITS)
+
 
 def ensure_binary_mask(mask: np.ndarray) -> np.ndarray:
     """Normalise an arbitrary mask to ``uint8`` values of ``0`` or ``255``.

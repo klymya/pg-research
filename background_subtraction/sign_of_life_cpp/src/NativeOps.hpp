@@ -23,6 +23,15 @@ namespace ops {
     /** @brief RGB (HWC, 3ch) -> HSV (HWC, 3ch), H in [0,180). */
     Image RgbToHsv(const Image& rgb);
 
+    /**
+     * @brief Convert one RGB triple to 8-bit HSV.
+     *
+     * Same implementation RgbToHsv() is built on. Lets the shadow veto convert
+     * only the pixels it actually tests, instead of materialising two
+     * full-frame HSV images per frame.
+     */
+    void RgbToHsvPixel(int r, int g, int b, uint8_t& h, uint8_t& s, uint8_t& v);
+
     /** @brief Separable Gaussian blur of an odd @c kernelSize; sigma from cv2. */
     Image GaussianBlur(const Image& src, int kernelSize);
 

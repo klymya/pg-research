@@ -17,6 +17,7 @@ from .backends import BGSBackend, create_backend
 from .config import BGSConfig, FeatureConfig, ShadowConfig
 from .features import FeatureExtractor, ShadowSuppressor, create_feature_extractor
 from .structures import Frame
+from .utils import Q_ONE, quantise, round_shift as _round_shift
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +63,9 @@ class RateParameterizedBGS:
         self._feature_extractor = feature_extractor
         self._shadow_suppressor = shadow_suppressor or ShadowSuppressor()
         self._reference: np.ndarray | None = None
+        # Absorption rate of the quantised reference, in Q8. Same rate as the
+        # float path, so the two modes differ only in storage and rounding.
+        self._alpha_q = min(quantise(self._learning_rate), Q_ONE)
 
         if not backend.supports_learning_rate:
             logger.info(
@@ -110,6 +114,8 @@ class RateParameterizedBGS:
         """Exponentially weighted BGR background estimate, if initialised."""
         if self._reference is None:
             return None
+        if self._shadow_suppressor.config.quantised:
+            return self._reference  # already uint8; nothing to clip
         return np.clip(self._reference, 0, 255).astype(np.uint8)
 
     def apply(self, frame: Frame) -> np.ndarray:
@@ -137,9 +143,36 @@ class RateParameterizedBGS:
         self._reference = None
 
     def _update_reference(self, frame: Frame) -> None:
-        """Absorb ``frame`` into the BGR reference used by the shadow veto."""
+        """Absorb ``frame`` into the BGR reference used by the shadow veto.
+
+        With ``reference_dtype="uint8"`` the reference is 3 bytes per pixel
+        instead of 12 and is absorbed with the same Q8 integer update the
+        background model uses, so the result matches the C++ port exactly.
+        """
+        if self._shadow_suppressor.config.quantised:
+            self._update_reference_uint8(frame)
+            return
         current = frame.bgr.astype(np.float32)
         if self._reference is None or self._reference.shape != current.shape:
             self._reference = current.copy()
             return
         cv2.accumulateWeighted(current, self._reference, self._learning_rate)
+
+    def _update_reference_uint8(self, frame: Frame) -> None:
+        """Absorb ``frame`` into the quantised reference, in integer arithmetic.
+
+        Quantising the reference introduces the same update dead zone as the
+        quantised model mean: an absorption smaller than ``1 / (2 * alpha)``
+        grey levels rounds to zero. Unlike the model there is no closed-form
+        bound on how much error the veto tolerates -- it depends on the value
+        ratio band and on hue stability, both of which vary with scene
+        brightness -- so this mode is justified by measurement rather than by
+        derivation. See ``shadow_veto_quantisation_roadmap.md``.
+        """
+        current = frame.bgr.astype(np.int32)
+        if self._reference is None or self._reference.shape != current.shape:
+            self._reference = frame.bgr.astype(np.uint8).copy()
+            return
+        reference = self._reference.astype(np.int32)
+        step = _round_shift(self._alpha_q * (current - reference))
+        self._reference = np.clip(reference + step, 0, 255).astype(np.uint8)

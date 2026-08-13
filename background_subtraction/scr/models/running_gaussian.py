@@ -28,18 +28,13 @@ import math
 
 import numpy as np
 
+from ..utils import Q_BITS as _Q_BITS, Q_ONE as _Q_ONE, quantise, round_shift
 from .base import BackgroundSubtractor, prepare_frame, to_mask
 
 logger = logging.getLogger(__name__)
 
 _VARIANCE_FLOOR = 4.0
 """Lower clamp on the per-pixel variance, matching bgslibrary."""
-
-_Q_BITS = 8
-"""Fractional bits of the fixed-point representation of alpha and threshold."""
-
-_Q_ONE = 1 << _Q_BITS
-"""Fixed-point representation of 1.0."""
 
 _UINT8_MAX = 255
 """Largest value the quantised mean and variance can hold."""
@@ -56,21 +51,8 @@ STATE_DTYPES = ("uint8", "float32")
 """Accepted values of the ``state_dtype`` argument."""
 
 
-def _round_shift(values: np.ndarray) -> np.ndarray:
-    """Divide ``values`` by ``2 ** _Q_BITS``, rounding half away from zero.
-
-    A plain right shift would round towards negative infinity and bias the mean
-    downwards; truncation towards zero would widen the dead zone instead. Both
-    cost accuracy, so the rounding is done on the magnitude and the sign
-    reapplied.
-
-    Args:
-        values: ``int32`` array of Q8 fixed-point products.
-
-    Returns:
-        The rounded quotients as ``int32``.
-    """
-    return np.sign(values) * ((np.abs(values) + (_Q_ONE >> 1)) >> _Q_BITS)
+_round_shift = round_shift
+"""Q8 rounding shared with the shadow reference; see :func:`scr.utils.round_shift`."""
 
 
 class RunningGaussianAverage(BackgroundSubtractor):
@@ -135,9 +117,9 @@ class RunningGaussianAverage(BackgroundSubtractor):
         ``init_variance > 51``. Capping it keeps the state representable and the
         warning names the discrepancy rather than hiding it.
         """
-        self._alpha_q = min(int(round(self._alpha * _Q_ONE)), _Q_ONE)
-        self._threshold_q = min(int(round(self._threshold * _Q_ONE)), _MAX_THRESHOLD_Q)
-        if int(round(self._threshold * _Q_ONE)) > _MAX_THRESHOLD_Q:
+        self._alpha_q = min(quantise(self._alpha), _Q_ONE)
+        self._threshold_q = min(quantise(self._threshold), _MAX_THRESHOLD_Q)
+        if quantise(self._threshold) > _MAX_THRESHOLD_Q:
             logger.warning(
                 "threshold=%.2f exceeds what the int32 comparison can hold; "
                 "clamped to %.2f",

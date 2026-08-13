@@ -203,3 +203,89 @@ class TestShadowSuppressor:
 
         assert shadow.shape == FRAME_SIZE
         assert not shadow.any()
+
+
+QUANTISED = ShadowConfig(reference_dtype="uint8")
+"""Veto with the quantised reference and integer comparisons."""
+
+
+class TestQuantisedShadowVeto:
+    """The integer comparison path used with a ``uint8`` reference.
+
+    The arithmetic is the same veto with the division cross-multiplied, so the
+    two paths must agree everywhere the ratio is well defined -- and must be
+    checked explicitly where it is not.
+    """
+
+    @staticmethod
+    def _full_mask() -> np.ndarray:
+        return np.full(FRAME_SIZE, FOREGROUND, dtype=np.uint8)
+
+    def test_rejects_unknown_reference_dtype(self) -> None:
+        with pytest.raises(ValueError, match="reference_dtype"):
+            ShadowConfig(reference_dtype="int8")
+
+    def test_reference_cost_per_mode(self) -> None:
+        assert ShadowConfig(enabled=False).reference_bytes_per_pixel == 0
+        assert ShadowConfig(reference_dtype="float32").reference_bytes_per_pixel == 12
+        assert QUANTISED.reference_bytes_per_pixel == 3
+        assert QUANTISED.quantised
+        assert not ShadowConfig(reference_dtype="float32").quantised
+
+    def test_removes_uniformly_darkened_regions(self) -> None:
+        background = make_background()
+        shadowed = (background.astype(np.float32) * 0.7).astype(np.uint8)
+
+        result = ShadowSuppressor(QUANTISED).suppress(
+            self._full_mask(), Frame(bgr=shadowed), background
+        )
+
+        assert result.mean() < 0.1 * FOREGROUND
+
+    def test_keeps_genuine_objects(self) -> None:
+        background = make_background()
+        occluded = background.copy()
+        occluded[:, :] = (10, 200, 250)
+
+        result = ShadowSuppressor(QUANTISED).suppress(
+            self._full_mask(), Frame(bgr=occluded), background
+        )
+
+        assert np.all(result == FOREGROUND)
+
+    def test_agrees_with_the_float_path_on_a_grey_ramp(self) -> None:
+        # Grey keeps hue and saturation at zero for both frame and background,
+        # isolating the value-ratio comparison that the integer path rewrites.
+        # Exact agreement is not achievable and not the goal: the float path
+        # divides by V_background + 1e-6, so at an exactly-on-the-bound ratio
+        # (V_frame/V_background == 0.40) it answers "not shadow" while the
+        # cross-multiplied form answers "shadow". Every disagreement must
+        # therefore sit on a threshold, which is what this pins.
+        values = np.arange(256, dtype=np.uint8)
+        frame_grid, background_grid = np.meshgrid(values, values)
+        frame = Frame(bgr=np.repeat(frame_grid[:, :, None], 3, axis=2).copy())
+        background = np.repeat(background_grid[:, :, None], 3, axis=2).copy()
+        config = ShadowConfig()
+
+        integer = ShadowSuppressor(QUANTISED).shadow_mask(frame, background)
+        floating = ShadowSuppressor(config).shadow_mask(frame, background)
+
+        differ = integer != floating
+        ratio = frame_grid.astype(np.float64) / np.maximum(background_grid, 1)
+        on_bound = np.minimum(
+            np.abs(ratio - config.value_ratio_min),
+            np.abs(ratio - config.value_ratio_max),
+        )
+        assert differ.mean() < 0.001
+        assert np.all(on_bound[differ] < 1e-9)
+
+    def test_black_background_is_never_shadow(self) -> None:
+        # The float form divides by V_background + 1e-6, so V_background = 0
+        # always falls outside the ratio band. Cross-multiplied, 0 >= 0 and
+        # 0 <= 0 would both hold at V_frame = 0 and invert the decision.
+        black = np.zeros((*FRAME_SIZE, 3), dtype=np.uint8)
+        frame = Frame(bgr=black.copy())
+
+        shadow = ShadowSuppressor(QUANTISED).shadow_mask(frame, black)
+
+        assert not shadow.any()
