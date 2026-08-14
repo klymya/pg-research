@@ -14,6 +14,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from .evaluate import EvaluationResult, run_evaluation
+from .preprocess import preprocess_rgb
 from .report import write_pdf
 
 
@@ -46,8 +47,22 @@ def evaluate(
     dut_dir: str | Path,
     scene: str,
     config_path: str | Path | None = None,
+    preprocess_ref: bool = False,
+    preprocess_dut: bool = False,
+    save_preprocessed: str | Path | None = None,
 ) -> _ResultWrapper:
-    return _ResultWrapper(run_evaluation(ref_dir, dut_dir, scene, config_path))
+    return _ResultWrapper(run_evaluation(
+        ref_dir,
+        dut_dir,
+        scene,
+        config_path,
+        preprocess_ref=preprocess_ref,
+        preprocess_dut=preprocess_dut,
+        save_preprocessed=save_preprocessed,
+    ))
 
 
-__all__ = ["evaluate", "write_pdf", "run_evaluation", "EvaluationResult"]
+__all__ = [
+    "evaluate", "write_pdf", "run_evaluation", "EvaluationResult",
+    "preprocess_rgb",
+]

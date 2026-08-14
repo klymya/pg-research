@@ -14,6 +14,7 @@ from tqdm import tqdm
 
 from .loader import LoadedInputs, load_inputs
 from .metrics import headline_metrics
+from .preprocess import MODE as PREPROCESS_MODE
 from .verdict import (
     PerImageVerdict, VerdictResult, decide, decide_single_image, load_config,
 )
@@ -39,6 +40,9 @@ def run_evaluation(
     dut_dir: Path | str,
     scene: str,
     config_path: Path | str | None = None,
+    preprocess_ref: bool = False,
+    preprocess_dut: bool = False,
+    save_preprocessed: Path | str | None = None,
 ) -> EvaluationResult:
     config = load_config(config_path or PACKAGE_CONFIG)
 
@@ -48,7 +52,21 @@ def run_evaluation(
             f"Available: {list(config['scenes'].keys())}"
         )
 
-    inputs = load_inputs(ref_dir, dut_dir)
+    inputs = load_inputs(
+        ref_dir,
+        dut_dir,
+        preprocess_ref=preprocess_ref,
+        preprocess_dut=preprocess_dut,
+        save_preprocessed=save_preprocessed,
+    )
+
+    if inputs.preprocess_asymmetric:
+        log.warning(
+            "Only the %s side was preprocessed (%s) — metric deltas reflect "
+            "the processing difference, not only the sensor difference.",
+            "reference" if inputs.preprocess_ref else "DUT",
+            PREPROCESS_MODE,
+        )
 
     min_n = int(config["scenes"][scene].get("min_dut_images", 1))
     if len(inputs.dut_images) < min_n:

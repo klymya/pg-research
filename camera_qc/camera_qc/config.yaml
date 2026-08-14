@@ -9,10 +9,17 @@
 # uncontrolled content (occupancy, daylight) and need looser bands.
 # Tune both presets in M6 against ≥10 known-good DUT batches.
 #
-# Tolerance semantics:
-#   higher_better metrics  → fail if dut < ref - tol_pct%
-#   lower_better metrics   → fail if dut > ref + tol_pct%
-#   closer_to_ref metrics  → fail if |dut - ref| > tol_pct%   (% of |ref|)
+# Tolerance semantics (whether a metric is "outside tolerance"):
+#   higher_better metrics  → outside if dut < ref - tol_pct%
+#   lower_better metrics   → outside if dut > ref + tol_pct%
+#   closer_to_ref metrics  → outside if |dut - ref| > tol_pct%   (% of |ref|)
+#
+# Severity decides what "outside tolerance" *costs*:
+#   blocking  → drives the pass/marginal/fail verdict (optics: sharpness, noise)
+#   advisory  → never fails the unit; reported and highlighted as a warning
+#               (colour/exposure: L, a*, b*, R, G, B). Colour differences are
+#               correctable downstream (CCM / white balance), so they are not
+#               grounds for rejecting a module.
 
 metric_direction:
   L: closer_to_ref
@@ -24,6 +31,17 @@ metric_direction:
   sharpness: higher_better
   noise: lower_better
   sharpness_fft: higher_better
+
+metric_severity:
+  L: advisory
+  "a*": advisory
+  "b*": advisory
+  R: advisory
+  G: advisory
+  B: advisory
+  sharpness: blocking
+  noise: blocking
+  sharpness_fft: blocking
 
 scenes:
   chessboard:
@@ -52,6 +70,13 @@ scenes:
       noise: 0
 
 verdict:
-  fail_if_n_metrics_outside_tol: 2
-  marginal_if_n_metrics_outside_tol: 1
+  # Counted over BLOCKING metrics only. Advisory metrics never change the
+  # verdict, however far outside tolerance they land.
+  #
+  # At the defaults below any single blocking metric outside tolerance is a
+  # FAIL, so MARGINAL is unreachable. To reinstate the softer ladder, set
+  # fail_if_n_blocking_outside_tol: 2 — one blocking metric off then reads
+  # MARGINAL and two or more read FAIL.
+  fail_if_n_blocking_outside_tol: 1
+  marginal_if_n_blocking_outside_tol: 1
   aggregation: median   # median | mean | worst_case (across N DUT images)

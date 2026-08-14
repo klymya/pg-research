@@ -65,13 +65,39 @@ Open `report.pdf`. The first banner shows the verdict.
 
 ---
 
+## What can fail a unit
+
+**Only optics — sharpness and noise — can fail a DUT.** Colour and exposure
+differences are reported and highlighted, but never change the verdict: they are
+correctable downstream (CCM / white balance), so they are not grounds for
+rejecting a module.
+
+| Role | Metrics | Effect when outside tolerance |
+|---|---|---|
+| **blocking** | `sharpness`, `sharpness_fft`, `noise` | **FAIL** |
+| **advisory** | `L`, `a*`, `b*`, `R`, `G`, `B` | Warning only — amber highlight in the PDF, `!` in the console, verdict unchanged |
+
 ## Verdict meaning
 
 | Verdict | What it means | Exit code |
 |---|---|---|
-| **PASS** | DUT is same or better than the reference | 0 |
-| **MARGINAL** | One metric is outside tolerance — review the PDF | 1 |
-| **FAIL** | Two or more metrics are outside tolerance | 2 |
+| **PASS** | No blocking metric outside tolerance. May still carry colour warnings. | 0 |
+| **MARGINAL** | Not reachable at the default thresholds (see below). | 1 |
+| **FAIL** | One or more **blocking** metrics outside tolerance. | 2 |
+
+A colour-shifted but optically fine module reads:
+
+```
+Batch verdict: PASS  (0/3 blocking metrics outside tolerance ...)
+Advisory: 4/6 colour metrics outside tolerance (a*, b*, R, B) — reported only,
+does not affect the verdict.
+```
+
+To soften the ladder, set `fail_if_n_blocking_outside_tol: 2` in `config.yaml` —
+one blocking metric off then reads MARGINAL and two or more read FAIL.
+
+To move a metric between the two groups, edit `metric_severity` in
+`config.yaml`; anything not listed defaults to `blocking`.
 
 ---
 
@@ -80,9 +106,9 @@ Open `report.pdf`. The first banner shows the verdict.
 Ported from the validated `sensor_metrics.py` in
 `people_detection_pg2/investigations/rotated_cam_color_dfiff/`. Each metric is one of:
 
-- **Closer to reference is better** — `L` (luminance), `a*`, `b*` (chromaticity), `R`, `G`, `B` (per-channel mean)
-- **Higher is better** — `sharpness` (Laplacian variance), `sharpness_fft` (high-freq energy)
-- **Lower is better** — `noise` (high-frequency residual std)
+- **Closer to reference is better** — `L` (luminance), `a*`, `b*` (chromaticity), `R`, `G`, `B` (per-channel mean) — *advisory*
+- **Higher is better** — `sharpness` (Laplacian variance), `sharpness_fft` (high-freq energy) — *blocking*
+- **Lower is better** — `noise` (high-frequency residual std) — *blocking*
 
 ---
 
@@ -97,6 +123,46 @@ Ported from the validated `sensor_metrics.py` in
 
 ---
 
+## Optional: capture-pipeline preprocessing
+
+The images used to build the training datasets go through **ALIF white balance
+→ CLAHE** before they are stored. If your reference image comes from a raw
+source while the DUT captures are already preprocessed (or vice versa), apply
+the same pipeline here so the two sides are measured in the same space:
+
+```bash
+camera-qc --ref ./captures/ref --dut ./captures/dut --scene ceiling \
+  --preprocess-ref \
+  --save-preprocessed ./preprocessed \
+  --out ./report.pdf
+```
+
+| Flag | Effect |
+|---|---|
+| `--preprocess-ref` | Apply ALIF WB → CLAHE to the reference image. |
+| `--preprocess-dut` | Apply the same pipeline to every DUT image. |
+| `--save-preprocessed [DIR]` | Write the processed images to `DIR/ref` and `DIR/dut` for inspection. `DIR` is optional — the bare flag writes to `./preprocessed`. |
+
+Processing happens **in memory after loading — the `ref/` and `dut/` folders are
+never modified.**
+
+> **Process both sides or neither.** WB + CLAHE shifts `L`, `a*`, `b*`, `R/G/B`
+> and sharpness substantially. If only one side is preprocessed, the tool prints
+> a warning and the PDF carries a warning box: the deltas then mix the
+> processing difference with the sensor difference and are not a sensor-only
+> comparison.
+
+The implementation lives in `camera_qc/preprocess.py` and is a **verbatim copy**
+of `people_detection_pg2/cam4_revB/alif_awb.py` (`white_balance_vectorized`) and
+the `apply_clahe` in that folder's `preprocess_dataset.py`, so this tool stays
+usable standalone. Output is bit-identical to
+`preprocess_dataset.py --mode wb_alif_clahe`. The sharpness augmentation stage
+of that script is deliberately not copied — it is a random training-time
+augmentation, not part of the capture pipeline. **If the dataset pipeline
+changes, update `preprocess.py` to match.**
+
+---
+
 ## Advanced
 
 ### Python API
@@ -107,6 +173,16 @@ from camera_qc import evaluate
 result = evaluate(ref_dir="./ref", dut_dir="./dut", scene="chessboard")
 print(result.verdict.verdict)         # "pass" | "marginal" | "fail"
 result.write_report("./report.pdf")
+```
+
+With preprocessing, or on a single array:
+
+```python
+result = evaluate(ref_dir="./ref", dut_dir="./dut", scene="chessboard",
+                  preprocess_ref=True, save_preprocessed="./preprocessed")
+
+from camera_qc import preprocess_rgb   # RGB uint8 in, RGB uint8 out
+processed = preprocess_rgb(image_rgb)
 ```
 
 ### Override tolerances
@@ -164,10 +240,16 @@ The measured numbers (rounded into `config.yaml`):
    a tolerance by several percentage points.
 2. **Ceiling preset is a guess.** It's set to `chessboard × 2` — not measured
    on ceiling-mounted captures. Replace it with real data.
-3. **Equal weighting.** Every metric counts the same toward the pass/marginal/fail
-   tally. If QA cares more about (say) sharpness, switch to per-metric weights
-   or hard-fail metrics in `config.yaml`.
-4. **Pass/fail thresholds (`fail_if_n_metrics_outside_tol: 2`).** This too is a
+3. **Equal weighting within the blocking group.** `sharpness`, `sharpness_fft`
+   and `noise` count the same toward the tally, and any one of them failing
+   fails the unit. Note `sharpness` and `sharpness_fft` measure the same
+   physical property two ways, so a borderline-soft module trips two of the
+   three blocking metrics at once.
+4. **`noise` tolerance is 0%.** The DUT may not exceed the reference noise at
+   all. Combined with `fail_if_n_blocking_outside_tol: 1`, any measurable noise
+   increase fails the unit — verify this is the intent when tuning against real
+   known-good batches.
+5. **Pass/fail thresholds (`fail_if_n_blocking_outside_tol: 1`).** This too is a
    reasonable default, not a tuned value.
 
 ### How to retune

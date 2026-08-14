@@ -12,6 +12,9 @@ import yaml
 
 Verdict = Literal["pass", "marginal", "fail"]
 Direction = Literal["higher_better", "lower_better", "closer_to_ref"]
+Severity = Literal["blocking", "advisory"]
+
+DEFAULT_SEVERITY: Severity = "blocking"
 
 
 @dataclass
@@ -24,6 +27,21 @@ class MetricResult:
     direction: Direction
     tolerance_pct: float
     within_tol: bool
+    severity: Severity = DEFAULT_SEVERITY
+
+    @property
+    def is_blocking(self) -> bool:
+        return self.severity == "blocking"
+
+    @property
+    def fails(self) -> bool:
+        """Outside tolerance *and* allowed to affect the verdict."""
+        return self.is_blocking and not self.within_tol
+
+    @property
+    def warns(self) -> bool:
+        """Outside tolerance but advisory — highlighted, never fatal."""
+        return (not self.is_blocking) and (not self.within_tol)
 
 
 @dataclass
@@ -33,15 +51,21 @@ class VerdictResult:
     aggregation: str
     n_dut: int
     per_metric: list[MetricResult]
-    n_outside_tol: int
+    n_outside_tol: int           # blocking metrics outside tolerance — drives the verdict
+    n_blocking: int              # blocking metrics evaluated
+    n_advisory_outside_tol: int  # advisory metrics outside tolerance — warnings only
+    n_advisory: int              # advisory metrics evaluated
 
 
 @dataclass
 class PerImageVerdict:
     """Verdict + per-metric detail for a single DUT image vs the reference."""
     verdict: Verdict
-    n_outside_tol: int
+    n_outside_tol: int           # blocking metrics outside tolerance — drives the verdict
     per_metric: list[MetricResult]   # dut_agg == this single image's value
+    n_blocking: int
+    n_advisory_outside_tol: int
+    n_advisory: int
 
 
 def load_config(path: Path | str) -> dict:
@@ -94,14 +118,47 @@ def _scene_config(scene: str, config: Mapping) -> dict:
     return scene_cfg
 
 
-def _classify(n_outside: int, config: Mapping) -> Verdict:
-    fail_n = int(config["verdict"]["fail_if_n_metrics_outside_tol"])
-    marginal_n = int(config["verdict"]["marginal_if_n_metrics_outside_tol"])
-    if n_outside >= fail_n:
+def _verdict_thresholds(config: Mapping) -> tuple[int, int]:
+    """(fail_n, marginal_n) over blocking metrics.
+
+    The `*_n_metrics_outside_tol` spellings are the pre-severity key names,
+    accepted so that older copied configs keep working.
+    """
+    cfg = config["verdict"]
+    fail_n = cfg.get(
+        "fail_if_n_blocking_outside_tol", cfg.get("fail_if_n_metrics_outside_tol")
+    )
+    marginal_n = cfg.get(
+        "marginal_if_n_blocking_outside_tol",
+        cfg.get("marginal_if_n_metrics_outside_tol"),
+    )
+    if fail_n is None or marginal_n is None:
+        raise ValueError(
+            "config['verdict'] must define fail_if_n_blocking_outside_tol and "
+            "marginal_if_n_blocking_outside_tol."
+        )
+    return int(fail_n), int(marginal_n)
+
+
+def _classify(n_blocking_outside: int, config: Mapping) -> Verdict:
+    """Verdict from the blocking metrics alone. Advisory metrics outside
+    tolerance are reported and highlighted but never move the verdict.
+    """
+    fail_n, marginal_n = _verdict_thresholds(config)
+    if n_blocking_outside >= fail_n:
         return "fail"
-    if n_outside >= marginal_n:
+    if n_blocking_outside >= marginal_n:
         return "marginal"
     return "pass"
+
+
+def _tally(per_metric: list[MetricResult]) -> dict[str, int]:
+    return {
+        "n_outside_tol": sum(1 for m in per_metric if m.fails),
+        "n_blocking": sum(1 for m in per_metric if m.is_blocking),
+        "n_advisory_outside_tol": sum(1 for m in per_metric if m.warns),
+        "n_advisory": sum(1 for m in per_metric if not m.is_blocking),
+    }
 
 
 def _per_metric_results(
@@ -113,12 +170,19 @@ def _per_metric_results(
     scene_cfg = _scene_config(scene, config)
     tolerances: dict[str, float] = scene_cfg["tolerances_pct"]
     directions: dict[str, str] = config["metric_direction"]
+    severities: dict[str, str] = config.get("metric_severity", {})
 
     results: list[MetricResult] = []
     for name, ref_val in ref_metrics.items():
         if name not in tolerances:
             continue
         direction = directions.get(name, "closer_to_ref")
+        severity = severities.get(name, DEFAULT_SEVERITY)
+        if severity not in ("blocking", "advisory"):
+            raise ValueError(
+                f"metric_severity[{name!r}] must be 'blocking' or 'advisory', "
+                f"got {severity!r}."
+            )
         dut_val = float(dut_values_by_metric[name])
         tol_pct = float(tolerances[name])
         within = within_tolerance(ref_val, dut_val, direction, tol_pct)
@@ -131,6 +195,7 @@ def _per_metric_results(
             direction=direction,  # type: ignore[arg-type]
             tolerance_pct=tol_pct,
             within_tol=within,
+            severity=severity,  # type: ignore[arg-type]
         ))
     return results
 
@@ -143,11 +208,11 @@ def decide_single_image(
 ) -> PerImageVerdict:
     """Verdict for one DUT image against the reference."""
     per_metric = _per_metric_results(ref_metrics, dut_metrics, scene, config)
-    n_outside = sum(1 for m in per_metric if not m.within_tol)
+    counts = _tally(per_metric)
     return PerImageVerdict(
-        verdict=_classify(n_outside, config),
-        n_outside_tol=n_outside,
+        verdict=_classify(counts["n_outside_tol"], config),
         per_metric=per_metric,
+        **counts,
     )
 
 
@@ -172,13 +237,13 @@ def decide(
         dut_agg[name] = aggregate(values, agg_method, direction)  # type: ignore[arg-type]
 
     per_metric = _per_metric_results(ref_metrics, dut_agg, scene, config)
-    n_outside = sum(1 for m in per_metric if not m.within_tol)
+    counts = _tally(per_metric)
 
     return VerdictResult(
-        verdict=_classify(n_outside, config),
+        verdict=_classify(counts["n_outside_tol"], config),
         scene=scene,
         aggregation=agg_method,
         n_dut=len(dut_metrics_per_image),
         per_metric=per_metric,
-        n_outside_tol=n_outside,
+        **counts,
     )

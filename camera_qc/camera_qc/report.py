@@ -21,6 +21,7 @@ from tqdm import tqdm
 
 from .evaluate import EvaluationResult
 from .narrative import narrate
+from .preprocess import MODE as PREPROCESS_MODE
 from .verdict import MetricResult
 
 
@@ -35,15 +36,15 @@ _RGB_CHANNELS: tuple[tuple[str, int, str], ...] = (
 
 
 VERDICT_BANNERS: dict[str, tuple[str, str]] = {
-    "pass": ("PASS", "DUT is same or better than reference."),
-    "marginal": ("MARGINAL", "DUT is borderline — manual review recommended."),
-    "fail": ("FAIL", "DUT is worse than reference on multiple metrics."),
+    "pass": ("PASS", "DUT sharpness and noise are same or better than reference."),
+    "marginal": ("MARGINAL", "DUT is borderline on sharpness/noise — manual review recommended."),
+    "fail": ("FAIL", "DUT is worse than reference on sharpness and/or noise."),
 }
 
 PER_IMAGE_BANNERS: dict[str, str] = {
-    "pass": "within tolerance on every metric.",
-    "marginal": "one metric outside tolerance.",
-    "fail": "two or more metrics outside tolerance.",
+    "pass": "sharpness and noise within tolerance.",
+    "marginal": "one blocking metric (sharpness/noise) outside tolerance.",
+    "fail": "sharpness and/or noise outside tolerance.",
 }
 
 
@@ -68,6 +69,9 @@ img { max-width: 100%; height: auto; }
 .disclaimer { background: #fff8e1; border-left: 3px solid #c08a00; padding: 8px 12px; margin: 0.6em 0 1em 0; font-size: 9pt; color: #5a4500; }
 .ok { color: #1e6e3a; font-weight: bold; }
 .bad { color: #8a1f1f; font-weight: bold; }
+.warn { color: #8a5a00; font-weight: bold; }
+.advisory { background: #fff4e5; border-left: 3px solid #8a5a00; padding: 8px 12px; margin: 0.6em 0 1em 0; font-size: 9.5pt; color: #5a3a00; }
+.sev { font-size: 8pt; color: #555; }
 """
 
 
@@ -84,8 +88,15 @@ def np_isnan(v) -> bool:
         return False
 
 
-def _within_glyph(ok: bool) -> str:
-    return "OK" if ok else "OUT"
+def _within_glyph(m: MetricResult) -> str:
+    """Tolerance cell: green OK, red OUT for blocking, amber OUT for advisory
+    (outside tolerance but not grounds for failing the unit).
+    """
+    if m.within_tol:
+        return '<span class="ok">OK</span>'
+    if m.is_blocking:
+        return '<span class="bad">OUT</span>'
+    return '<span class="warn">OUT</span>'
 
 
 def _save_side_by_side(
@@ -181,8 +192,8 @@ def _summary_table(
     """
     n = len(per_image_verdicts)
     head = (
-        "| Metric | Direction | Tol % | Passed |\n"
-        "|---|:--|---:|:--:|\n"
+        "| Metric | Role | Direction | Tol % | Passed |\n"
+        "|---|:--|:--|---:|:--:|\n"
     )
     rows = []
     for m in aggregate_metrics:
@@ -191,11 +202,21 @@ def _summary_table(
             for pm in piv.per_metric
             if pm.name == m.name and pm.within_tol
         )
+        role = (
+            '<span class="bad">blocking</span>' if m.is_blocking
+            else '<span class="warn">advisory</span>'
+        )
+        count = f"{passed} / {n}"
+        if passed < n and not m.is_blocking:
+            count = f'<span class="warn">{count}</span>'
+        elif passed < n:
+            count = f'<span class="bad">{count}</span>'
         rows.append(
             f"| {m.name} "
+            f"| {role} "
             f"| {m.direction.replace('_', ' ')} "
             f"| {_fmt(m.tolerance_pct, 1)} "
-            f"| {passed} / {n} |"
+            f"| {count} |"
         )
     return head + "\n".join(rows)
 
@@ -212,16 +233,56 @@ def _per_dut_table_with_flags(metric_results: list[MetricResult]) -> str:
     )
     rows = []
     for m in metric_results:
+        name = m.name if m.is_blocking else f'{m.name} <span class="sev">(advisory)</span>'
         rows.append(
-            f"| {m.name} "
+            f"| {name} "
             f"| {_fmt(m.ref)} "
             f"| {_fmt(m.dut_agg)} "
             f"| {_fmt(m.delta)} "
             f"| {_fmt(m.pct_of_ref, 1)} "
             f"| {_fmt(m.tolerance_pct, 1)} "
-            f"| {_within_glyph(m.within_tol)} |"
+            f"| {_within_glyph(m)} |"
         )
     return head + "\n".join(rows)
+
+
+def _deviation_phrase(m: MetricResult) -> str:
+    """How far outside tolerance, in the units of the metric.
+
+    `% of ref` is reported for ratio-style metrics but not for closer_to_ref
+    ones: a*/b* are signed and sit near zero, so a ratio there is noise (an
+    a* of 0.17 → -1.85 reads as "-1006% of ref"). The tolerance is an absolute
+    band around the reference, so state the band.
+    """
+    if m.direction == "closer_to_ref":
+        allowed = abs(m.ref) * m.tolerance_pct / 100.0
+        return f"Δ {m.delta:+.2f} (allowed ±{_fmt(allowed)})"
+    return f"Δ {m.delta:+.2f} ({_fmt(m.pct_of_ref, 1)}% of ref, tol {_fmt(m.tolerance_pct, 1)}%)"
+
+
+def _advisory_block(metric_results: list[MetricResult]) -> str | None:
+    """Amber callout listing the advisory (colour/exposure) metrics outside
+    tolerance. Returns None when there is nothing to warn about.
+    """
+    offenders = [m for m in metric_results if m.warns]
+    if not offenders:
+        return None
+    items = "; ".join(
+        f"<strong>{m.name}</strong> {_deviation_phrase(m)}" for m in offenders
+    )
+    return (
+        '<div class="advisory">'
+        f'<strong>Colour warning — does not affect the verdict.</strong> '
+        f'{len(offenders)} colour/exposure metric(s) outside tolerance: {items}. '
+        f'Colour deviations are correctable downstream (CCM / white balance), '
+        f'so they are reported for review but are not grounds for rejecting '
+        f'the module. Only sharpness and noise can fail a unit.'
+        '</div>'
+    )
+
+
+def _preprocess_tag(preprocessed: bool) -> str:
+    return f" — preprocessed (`{PREPROCESS_MODE}`)" if preprocessed else ""
 
 
 def render_markdown(
@@ -264,9 +325,24 @@ def render_markdown(
     md_lines.append("")
     md_lines.append(f"- **Generated:** {timestamp}")
     md_lines.append(f"- **Scene preset:** `{result.scene}`")
-    md_lines.append(f"- **Reference:** `{result.inputs.ref_path.name}`")
-    md_lines.append(f"- **DUT images:** {len(result.inputs.dut_paths)}")
+    md_lines.append(f"- **Reference:** `{result.inputs.ref_path.name}`"
+                    f"{_preprocess_tag(result.inputs.preprocess_ref)}")
+    md_lines.append(f"- **DUT images:** {len(result.inputs.dut_paths)}"
+                    f"{_preprocess_tag(result.inputs.preprocess_dut)}")
     md_lines.append("")
+    if result.inputs.preprocess_asymmetric:
+        processed = "reference" if result.inputs.preprocess_ref else "DUT"
+        raw = "DUT" if result.inputs.preprocess_ref else "reference"
+        md_lines.append(
+            '<div class="disclaimer">'
+            f'<strong>Warning — asymmetric preprocessing.</strong> '
+            f'The {processed} went through the <code>{PREPROCESS_MODE}</code> '
+            f'capture pipeline while the {raw} did not. The metric deltas below '
+            f'therefore mix the processing difference with the sensor '
+            f'difference and should not be read as a sensor-only comparison.'
+            '</div>'
+        )
+        md_lines.append("")
     md_lines.append(
         '<div class="disclaimer">'
         '<strong>Disclaimer — preliminary thresholds.</strong> '
@@ -279,22 +355,34 @@ def render_markdown(
     md_lines.append("## Summary (per metric, across all DUT images)")
     md_lines.append(_summary_table(v.per_metric, result.per_image_verdicts))
     md_lines.append("")
+    advisory_block = _advisory_block(v.per_metric)
+    if advisory_block:
+        md_lines.append(advisory_block)
+        md_lines.append("")
     md_lines.append(f"![rgb histogram]({summary_hist.name})")
     md_lines.append("")
     md_lines.append('<p class="legend">'
-                    'Direction key: <em>higher better</em> — DUT failing means it dropped >tol% below ref. '
-                    '<em>lower better</em> — DUT failing means it rose >tol% above ref. '
-                    '<em>closer to ref</em> — DUT failing means |Δ| exceeds tol% of ref.'
+                    'Role key: <em>blocking</em> — sharpness / noise; outside tolerance means FAIL. '
+                    '<em>advisory</em> — colour / exposure; outside tolerance is highlighted as a '
+                    'warning and never fails the unit.<br>'
+                    'Direction key: <em>higher better</em> — outside tolerance means it dropped >tol% below ref. '
+                    '<em>lower better</em> — outside tolerance means it rose >tol% above ref. '
+                    '<em>closer to ref</em> — outside tolerance means |Δ| exceeds tol% of ref.'
                     '</p>')
     md_lines.append("")
     md_lines.append("## Per-DUT-image comparisons")
     for i, dut_path in enumerate(result.inputs.dut_paths):
         piv = result.per_image_verdicts[i]
         md_lines.append(f"### DUT {i+1}: `{dut_path.name}`")
+        advisory_note = (
+            f', {piv.n_advisory_outside_tol}/{piv.n_advisory} advisory'
+            if piv.n_advisory_outside_tol else ''
+        )
         md_lines.append(
             f'<div class="banner small {piv.verdict}">'
             f'{piv.verdict.upper()} — {PER_IMAGE_BANNERS[piv.verdict]} '
-            f'({piv.n_outside_tol}/{len(piv.per_metric)} metrics outside tolerance)'
+            f'({piv.n_outside_tol}/{piv.n_blocking} blocking metrics outside '
+            f'tolerance{advisory_note})'
             f'</div>'
         )
         md_lines.append(f"![ref vs dut]({pair_paths[i].name})")
@@ -306,6 +394,10 @@ def render_markdown(
         md_lines.append("")
         md_lines.append(_per_dut_table_with_flags(piv.per_metric))
         md_lines.append("")
+        per_image_advisory = _advisory_block(piv.per_metric)
+        if per_image_advisory:
+            md_lines.append(per_image_advisory)
+            md_lines.append("")
         md_lines.append(f"![rgb histogram]({hist_paths[i].name})")
         md_lines.append("")
 
