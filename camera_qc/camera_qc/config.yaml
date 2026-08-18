@@ -55,7 +55,7 @@ scenes:
       B: 7
       sharpness: 10       # strict: DUT sharpness must be >= 90% of ref
       sharpness_fft: 10   # strict: DUT sharpness_fft must be >= 90% of ref
-      noise: 0            # strict: DUT noise must not exceed ref
+      noise: 15           # DUT noise must not exceed ref by more than 15%
   ceiling:
     min_dut_images: 3
     tolerances_pct:
@@ -67,7 +67,7 @@ scenes:
       B: 14
       sharpness: 10       # same strict floor as chessboard
       sharpness_fft: 10
-      noise: 0
+      noise: 15           # same band as chessboard
 
 verdict:
   # Counted over BLOCKING metrics only. Advisory metrics never change the

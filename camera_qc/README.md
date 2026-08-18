@@ -245,10 +245,10 @@ The measured numbers (rounded into `config.yaml`):
    fails the unit. Note `sharpness` and `sharpness_fft` measure the same
    physical property two ways, so a borderline-soft module trips two of the
    three blocking metrics at once.
-4. **`noise` tolerance is 0%.** The DUT may not exceed the reference noise at
-   all. Combined with `fail_if_n_blocking_outside_tol: 1`, any measurable noise
-   increase fails the unit — verify this is the intent when tuning against real
-   known-good batches.
+4. **`noise` tolerance is 15%,** not the 9.5% measured after CCM. It is a
+   deliberately looser band, chosen so that a unit is not failed for a small
+   noise increase over the reference; confirm it against real known-good
+   batches.
 5. **Pass/fail thresholds (`fail_if_n_blocking_outside_tol: 1`).** This too is a
    reasonable default, not a tuned value.
 

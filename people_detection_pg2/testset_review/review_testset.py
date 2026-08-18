@@ -12,9 +12,16 @@ capture timestamp (ms since epoch) and the frame-transfer duration (ms).
 For each test case (one subfolder per case) the script reports:
 
 * per-frame FPS statistics (avg, median, std, z-score > 3 outliers)
-* number of frames, first/last frame index, list of missing indexes
-* covered wall-clock time in seconds
+* number of frames, first/last frame index, missing-index ranges
+* covered wall-clock time in seconds, and the wall-clock time lost to gaps
 * camera height in cm
+
+Missing indexes are collapsed into ranges rather than listed one by one.
+A run of consecutive misses 9, 10, 11, 12 becomes ``9-12``; a periodic
+drop such as 9, 11, 13, 15 becomes ``9-15 every 2nd frame`` (step 2). Each
+range carries the wall-clock time it cost: measured from the timestamps
+bracketing the hole for consecutive runs, estimated as
+``count * nominal frame period`` for periodic ones.
 
 Usage:
     python review_testset.py --input <folder-with-testcases> \
@@ -67,6 +74,104 @@ def parse_frame_name(path: Path) -> Frame | None:
 def parse_camera_height_cm(name: str) -> int | None:
     m = HEIGHT_RE.search(name)
     return int(m.group(1)) if m else None
+
+
+def _ordinal(n: int) -> str:
+    if 10 <= n % 100 <= 20:
+        suffix = "th"
+    else:
+        suffix = {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+    return f"{n}{suffix}"
+
+
+def group_missing_indexes(missing: list[int]) -> list[tuple[int, int, int, int]]:
+    """Collapse sorted missing indexes into ``(start, end, step, count)`` runs.
+
+    A run is a maximal arithmetic progression. Step 1 runs (a contiguous hole)
+    are always emitted; a step > 1 run needs at least 3 members before it is
+    called a pattern, since any two indexes trivially share a "constant" step
+    and would otherwise turn every scattered pair into a fake periodic drop.
+    Anything left over is emitted as a single-index run.
+    """
+    groups: list[tuple[int, int, int, int]] = []
+    i, n = 0, len(missing)
+    while i < n:
+        if i + 1 < n:
+            step = missing[i + 1] - missing[i]
+            j = i + 1
+            while j + 1 < n and missing[j + 1] - missing[j] == step:
+                j += 1
+            count = j - i + 1
+            if step == 1 or count >= 3:
+                groups.append((missing[i], missing[j], step, count))
+                i = j + 1
+                continue
+        groups.append((missing[i], missing[i], 1, 1))
+        i += 1
+    return groups
+
+
+def format_missing_range(start: int, end: int, step: int, count: int) -> str:
+    if count == 1:
+        return str(start)
+    if step == 1:
+        return f"{start}-{end}"
+    return f"{start}-{end} every {_ordinal(step)} frame"
+
+
+def nominal_period_ms(frames: list[Frame]) -> float | None:
+    """Median per-index frame period, in ms.
+
+    Dividing each timestamp delta by its index delta makes this robust to the
+    very gaps it is used to price: a hole or a periodic drop stretches the raw
+    period between the surviving frames, but leaves the per-index period alone.
+    """
+    per_index = [
+        (b.timestamp_ms - a.timestamp_ms) / (b.index - a.index)
+        for a, b in zip(frames, frames[1:])
+        if b.index > a.index and b.timestamp_ms > a.timestamp_ms
+    ]
+    return statistics.median(per_index) if per_index else None
+
+
+def missing_ranges(
+    missing: list[int], frames: list[Frame], period_ms: float | None
+) -> list[dict]:
+    """Describe each missing-index run, with the wall-clock time it cost.
+
+    Consecutive runs are priced from the timestamps of the frames bracketing
+    the hole, minus the one frame period that a normal step would have taken.
+    Periodic runs cannot be priced that way — frames survive inside the span —
+    so they fall back to ``count * period``.
+    """
+    ts_by_index = {f.index: f.timestamp_ms for f in frames}
+    present = sorted(ts_by_index)
+
+    out: list[dict] = []
+    for start, end, step, count in group_missing_indexes(missing):
+        seconds: float | None = None
+        source = "unknown"
+        if step == 1:
+            before = [i for i in present if i < start]
+            after = [i for i in present if i > end]
+            if before and after and period_ms is not None:
+                hole_ms = ts_by_index[after[0]] - ts_by_index[before[-1]] - period_ms
+                seconds = max(0.0, hole_ms) / 1000.0
+                source = "measured"
+        if seconds is None and period_ms is not None:
+            seconds = count * period_ms / 1000.0
+            source = "estimated"
+
+        out.append({
+            "range": format_missing_range(start, end, step, count),
+            "start": start,
+            "end": end,
+            "step": step,
+            "count": count,
+            "missing_time_s": seconds,
+            "missing_time_source": source,
+        })
+    return out
 
 
 def zscore_outliers(values: list[float], threshold: float) -> list[int]:
@@ -122,6 +227,10 @@ def summarise_case(case_dir: Path) -> dict:
     timestamps = [f.timestamp_ms for f in frames]
     covered_time_s = (timestamps[-1] - timestamps[0]) / 1000.0
 
+    period_ms = nominal_period_ms(frames)
+    gaps = missing_ranges(missing, frames, period_ms)
+    missing_time_s = sum(g["missing_time_s"] or 0.0 for g in gaps)
+
     # Per-frame period → per-frame FPS. Skip zero/negative diffs (would come
     # from duplicate timestamps and produce inf/undefined FPS).
     periods_ms = [b - a for a, b in zip(timestamps, timestamps[1:]) if b > a]
@@ -160,7 +269,10 @@ def summarise_case(case_dir: Path) -> dict:
         "num_frames": len(frames),
         "frame_index_range": [indexes[0], indexes[-1]],
         "expected_num_frames": len(expected),
-        "missing_frame_indexes": missing,
+        "num_missing_frames": len(missing),
+        "missing_frame_ranges": gaps,
+        "missing_time_s": missing_time_s,
+        "nominal_frame_period_ms": period_ms,
         "duplicate_frame_indexes": duplicates,
         "has_no_skips": not missing and not duplicates,
         "covered_time_s": covered_time_s,
@@ -224,6 +336,16 @@ def main() -> None:
             f"{c['covered_time_s']:.2f} s, "
             f"fps avg={fps_txt}"
         )
+        for g in c["missing_frame_ranges"]:
+            lost = (
+                f"{g['missing_time_s']:.2f} s {g['missing_time_source']}"
+                if g["missing_time_s"] is not None else "time unknown"
+            )
+            plural = "frame" if g["count"] == 1 else "frames"
+            print(f"    missing {g['range']}  ({g['count']} {plural}, {lost})")
+        if c["missing_frame_ranges"]:
+            print(f"    missing total: {c['num_missing_frames']} frames, "
+                  f"{c['missing_time_s']:.2f} s")
     print(f"Wrote {out_path}")
 
 
