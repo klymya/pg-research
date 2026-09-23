@@ -1,0 +1,3 @@
+
+# CDNET per-scene metadata is 7-9 bytes; LFS pointers are larger than the files.
+background_subtraction/**/temporalROI.txt -filter -diff -merge text
