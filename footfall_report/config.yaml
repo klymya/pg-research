@@ -1,0 +1,55 @@
+# ---------------------------------------------------------------------------
+# CSV structure and validation rules.
+# Edit this file when the export changes - no Python changes needed.
+# Everything here can also be overridden per session in the app sidebar.
+# ---------------------------------------------------------------------------
+
+# How the time is stored in the CSV:
+#   split    -> a date column AND an hour column
+#   combined -> a single timestamp column
+#   auto     -> decide from the header (default)
+time_mode: auto
+
+# Accepted column headers per logical field.
+# Matching ignores case, spaces and punctuation ("Floor Name" == "floor_name").
+# Put the header your export actually uses FIRST.
+columns:
+  datetime: ["timestamp", "datetime", "date_time", "date and time", "interval_start"]
+  date: ["date", "day", "report_date", "business_date"]
+  hour: ["hour", "time", "hour_of_day", "hour_start", "interval"]
+  floor: ["floor", "level", "zone", "area", "floor_name", "location"]
+  in: ["in", "ins", "in_count", "count_in", "entries", "entering", "enters", "footfall_in"]
+  out: ["out", "outs", "out_count", "count_out", "exits", "exiting", "leaving", "footfall_out"]
+
+# Optional explicit date formats, tried before automatic parsing.
+# Example: ["%d/%m/%Y", "%Y-%m-%d %H:%M"]
+date_formats: []
+
+# Only used by the automatic parser: is 03/04/2026 the 3rd of April (true)
+# or the 4th of March (false)?
+dayfirst: false
+
+# Expected floor labels. Leave empty to accept any label; fill it in and any
+# other value is reported as an unexpected floor and excluded from the totals.
+# Example: ["Floor 1", "Floor 2", "Floor 3"]
+allowed_floors: []
+floor_case_sensitive: false
+
+# Timestamps that are not exactly on the hour (e.g. 10:30):
+#   false -> reject the row and report it
+#   true  -> bucket it into its hour and report that it happened
+allow_sub_hourly: false
+
+# Cell values treated as "missing".
+missing_tokens: ["", "na", "n/a", "null", "none", "nan", "-", "--", "?"]
+
+counts:
+  allow_negative: false
+  require_integer: true
+  # Upper sanity bound per hour per floor; leave empty for no bound.
+  max_plausible_hourly_count:
+
+csv:
+  # null / "auto" = detect the delimiter automatically
+  delimiter:
+  encoding: utf-8-sig
