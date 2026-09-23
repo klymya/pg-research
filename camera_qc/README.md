@@ -56,6 +56,41 @@ Open `report.pdf`. The first banner shows the verdict.
 
 ---
 
+## Report modes
+
+The **simplified report is the default**. It measures sharpness alone and is
+built from three parts:
+
+1. **Summary** — total DUT images, and how many passed / failed.
+2. **Per-image table** — one row per DUT: image name, reference sharpness, the
+   image's sharpness, % of reference, and a PASS/FAIL flag.
+3. **Comparisons** — the ref (left) vs DUT (right) image pair for every unit.
+
+DUT images are ordered **sharpest first** (ties broken on filename) in both
+report modes and in the terminal output, so `#1` means the same image
+everywhere. The summary also reports how many images are **at or above the
+reference sharpness** — stricter than PASS, which tolerates a drop of up to
+the tolerance band.
+
+Sharpness is the only *blocking* metric, so the verdict is identical either
+way; the full report just adds the advisory colour / exposure / noise numbers,
+the per-image narratives and the RGB histograms.
+
+```bash
+camera-qc --ref ./ref --dut ./dut --scene chessboard   # simplified (default)
+camera-qc --ref ./ref --dut ./dut --scene chessboard --no-simplified   # full
+```
+
+| Mode | Metrics measured | Report contents | 76 images |
+|---|---|---|---:|
+| `--simplified` *(default)* | `sharpness` | summary, per-image table, ref\|DUT pairs | ~41 s |
+| `--no-simplified` | all 9 | the above + narratives, per-metric tables, RGB histograms | ~92 s |
+
+Most of the saving comes from skipping the 77 histogram figures, not from the
+metrics themselves — measuring all nine on 76 images costs only ~0.5 s.
+
+---
+
 ## Scene presets
 
 | `--scene` | When to use | Min DUT images | Tolerance band |
@@ -67,30 +102,30 @@ Open `report.pdf`. The first banner shows the verdict.
 
 ## What can fail a unit
 
-**Only optics — sharpness and noise — can fail a DUT.** Colour and exposure
-differences are reported and highlighted, but never change the verdict: they are
-correctable downstream (CCM / white balance), so they are not grounds for
-rejecting a module.
+**Only sharpness can fail a DUT.** Colour, exposure and noise differences are
+reported and highlighted, but never change the verdict: colour is correctable
+downstream (CCM / white balance) and a raised noise floor is a matter of degree
+rather than an optical defect, so neither is grounds for rejecting a module.
 
 | Role | Metrics | Effect when outside tolerance |
 |---|---|---|
-| **blocking** | `sharpness`, `sharpness_fft`, `noise` | **FAIL** |
-| **advisory** | `L`, `a*`, `b*`, `R`, `G`, `B` | Warning only — amber highlight in the PDF, `!` in the console, verdict unchanged |
+| **blocking** | `sharpness`, `sharpness_fft` | **FAIL** |
+| **advisory** | `L`, `a*`, `b*`, `R`, `G`, `B`, `noise` | Warning only — amber highlight in the PDF, `!` in the console, verdict unchanged |
 
 ## Verdict meaning
 
 | Verdict | What it means | Exit code |
 |---|---|---|
-| **PASS** | No blocking metric outside tolerance. May still carry colour warnings. | 0 |
+| **PASS** | No blocking metric outside tolerance. May still carry colour/noise warnings. | 0 |
 | **MARGINAL** | Not reachable at the default thresholds (see below). | 1 |
 | **FAIL** | One or more **blocking** metrics outside tolerance. | 2 |
 
-A colour-shifted but optically fine module reads:
+A colour-shifted, slightly noisier but optically sharp module reads:
 
 ```
-Batch verdict: PASS  (0/3 blocking metrics outside tolerance ...)
-Advisory: 4/6 colour metrics outside tolerance (a*, b*, R, B) — reported only,
-does not affect the verdict.
+Batch verdict: PASS  (0/2 blocking metrics outside tolerance ...)
+Advisory: 5/7 colour/noise metrics outside tolerance (a*, b*, R, B, noise) —
+reported only, does not affect the verdict.
 ```
 
 To soften the ladder, set `fail_if_n_blocking_outside_tol: 2` in `config.yaml` —
@@ -108,7 +143,72 @@ Ported from the validated `sensor_metrics.py` in
 
 - **Closer to reference is better** — `L` (luminance), `a*`, `b*` (chromaticity), `R`, `G`, `B` (per-channel mean) — *advisory*
 - **Higher is better** — `sharpness` (Laplacian variance), `sharpness_fft` (high-freq energy) — *blocking*
-- **Lower is better** — `noise` (high-frequency residual std) — *blocking*
+- **Lower is better** — `noise` (high-frequency residual std) — *advisory*
+
+The simplified report (the default) measures `sharpness` only. The advisory
+metrics can never fail a unit, so they are omitted rather than computed and
+ignored; `sharpness_fft` is a second blocking metric and is measured only in
+the full report.
+
+---
+
+## Merging capture batches
+
+Captures arrive as one `batch_<n>/` folder per run, each with its own `ref/`
+and `dut/`. `build_batch_all.py` merges them into a single batch to evaluate
+in one pass.
+
+```bash
+python -m camera_qc.build_batch_all --src ~/Pictures --out ./batch_all
+```
+
+A unit that failed in `batch_n` is re-worked and re-shot in a later batch, so
+when the same filename appears in several batches the **highest-numbered batch
+wins** (numeric order — `batch_10` is newer than `batch_9`). Finder/Explorer
+duplicates (`… copy.jpg`, `…_copy.jpg`, `… (1).jpg`) collapse onto the
+original; non-images are ignored. Every run writes `manifest.csv` recording,
+per output file, its unit, source batch, absolute source path, how many
+captures of that unit exist, which batches they were in, and an md5.
+
+| Flag | Effect |
+|---|---|
+| `--ref-from BATCH` | Which batch's `ref/` image becomes the global reference (default `batch_0`). The chosen reference module is excluded from the DUT set. |
+| `--include-ref-images` | Also treat each batch's `ref/` image as a DUT capture. Needed when `--ref-from` names a different module than the other batches used, so that module's captures are not lost. |
+| `--keep-duplicates` | Keep **every** capture instead of one per unit, naming each `<unit>_batch<nn>.jpg`. Byte-identical clones inside a single batch are still dropped. |
+| `--symlink` | Link instead of copy. |
+| `--dry-run` | Print the selection without writing. |
+| `--force` | Rebuild over an existing output folder. |
+
+`--keep-duplicates` is the mode for auditing the rework itself — every capture
+of a unit sits together in the report, so you can read whether a re-shoot
+actually improved it:
+
+```bash
+python -m camera_qc.build_batch_all --keep-duplicates --out ./batch_all_full
+```
+
+### Curated acceptance set
+
+`build_batch_all.py` is mechanical: a repeated serial means the same module
+was re-shot, so the latest capture wins. That is right for most units but not
+all — sometimes the *module itself* was swapped, and the two captures are two
+different physical modules sharing a serial label. Only the test log knows
+which is which, so those exceptions are declared in
+`build_acceptance_set.py`:
+
+```bash
+python -m camera_qc.build_acceptance_set --out ./batch_acceptance
+```
+
+- `MODULE_REPLACEMENTS` — units whose repeated captures are distinct modules.
+  Each declared batch contributes its own DUT, named `<unit>_batch<nn>.jpg`;
+  captures in batches *not* listed are earlier states of the first listed
+  module and are superseded as usual.
+- `UNIT_NOTES` — facts the optical metrics cannot express (e.g. a module
+  failed on electronics, not optics). Carried into `manifest.csv`.
+- `EXPECTED_CAPTURES` / `EXPECTED_TOTAL_DUT` — the declared headcount. The
+  build **fails** rather than emit a set that quietly disagrees with it, so
+  re-running over changed source folders cannot silently move the numbers.
 
 ---
 
@@ -173,6 +273,10 @@ from camera_qc import evaluate
 result = evaluate(ref_dir="./ref", dut_dir="./dut", scene="chessboard")
 print(result.verdict.verdict)         # "pass" | "marginal" | "fail"
 result.write_report("./report.pdf")
+
+# Full metric pack + long-form report:
+result = evaluate(ref_dir="./ref", dut_dir="./dut", scene="chessboard",
+                  simplified=False)
 ```
 
 With preprocessing, or on a single array:
@@ -231,7 +335,7 @@ The measured numbers (rounded into `config.yaml`):
 | G | 9.7% | 10 |
 | B | 6.1% | 7 |
 | sharpness | 15.8% | 16 |
-| noise | 9.5% | 10 |
+| noise | 9.5% | 15 (widened — see note 4) |
 | sharpness_fft | 10.8% | 11 |
 
 ### Known limitations to fix during tuning
@@ -240,15 +344,14 @@ The measured numbers (rounded into `config.yaml`):
    a tolerance by several percentage points.
 2. **Ceiling preset is a guess.** It's set to `chessboard × 2` — not measured
    on ceiling-mounted captures. Replace it with real data.
-3. **Equal weighting within the blocking group.** `sharpness`, `sharpness_fft`
-   and `noise` count the same toward the tally, and any one of them failing
-   fails the unit. Note `sharpness` and `sharpness_fft` measure the same
-   physical property two ways, so a borderline-soft module trips two of the
-   three blocking metrics at once.
-4. **`noise` tolerance is 15%,** not the 9.5% measured after CCM. It is a
-   deliberately looser band, chosen so that a unit is not failed for a small
-   noise increase over the reference; confirm it against real known-good
-   batches.
+3. **The blocking group is sharpness only.** `sharpness` and `sharpness_fft`
+   measure the same physical property two ways and count the same toward the
+   tally, so a borderline-soft module trips both blocking metrics at once —
+   the verdict effectively rests on a single property measured twice.
+4. **`noise` is advisory,** so its 15% band only decides when the warning
+   appears, not whether a unit is rejected. The band is looser than the 9.5%
+   measured after CCM; confirm it against real known-good batches so the
+   warning fires on genuinely noisy modules rather than on normal spread.
 5. **Pass/fail thresholds (`fail_if_n_blocking_outside_tol: 1`).** This too is a
    reasonable default, not a tuned value.
 

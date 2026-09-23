@@ -69,6 +69,20 @@ def headline_metrics(img: np.ndarray) -> dict:
     }
 
 
+def sharpness_metrics(img: np.ndarray) -> dict:
+    """Sharpness alone — the metric pack behind the simplified report.
+
+    Softness is the only defect that cannot be corrected downstream, so it is
+    the only blocking metric; skipping the colour/exposure/noise pack costs
+    nothing in verdict terms and avoids the LAB conversion, the FFT and the
+    Gaussian blur per image.
+    """
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    return {"sharpness": float(cv2.Laplacian(gray, cv2.CV_64F).var())}
+
+
 HEADLINE_KEYS: tuple[str, ...] = (
     "L", "a*", "b*", "R", "G", "B", "sharpness", "noise", "sharpness_fft",
 )
+
+SHARPNESS_KEYS: tuple[str, ...] = ("sharpness",)

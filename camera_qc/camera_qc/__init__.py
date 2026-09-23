@@ -6,6 +6,7 @@ Public API
 >>> from camera_qc import evaluate
 >>> result = evaluate(ref_dir="./ref", dut_dir="./dut", scene="chessboard")
 >>> result.verdict.verdict        # "pass" | "marginal" | "fail"
+>>> evaluate(..., simplified=False)  # full metric pack + long-form report
 >>> result.write_report("./report.pdf")
 """
 
@@ -50,6 +51,7 @@ def evaluate(
     preprocess_ref: bool = False,
     preprocess_dut: bool = False,
     save_preprocessed: str | Path | None = None,
+    simplified: bool = True,
 ) -> _ResultWrapper:
     return _ResultWrapper(run_evaluation(
         ref_dir,
@@ -59,6 +61,7 @@ def evaluate(
         preprocess_ref=preprocess_ref,
         preprocess_dut=preprocess_dut,
         save_preprocessed=save_preprocessed,
+        simplified=simplified,
     ))
 
 

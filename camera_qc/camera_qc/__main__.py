@@ -40,6 +40,14 @@ def _build_parser() -> argparse.ArgumentParser:
                    help="Output PDF path (default: ./report.pdf).")
     p.add_argument("--config", type=Path, default=None,
                    help="Override the bundled tolerance config.yaml.")
+    p.add_argument("--simplified", action=argparse.BooleanOptionalAction,
+                   default=True,
+                   help="Simplified report (default): measure sharpness only "
+                        "and emit a pass/fail headcount, a one-row-per-image "
+                        "table and the ref-vs-DUT image pairs. Sharpness is "
+                        "the only metric that can fail a unit, so the verdict "
+                        "is unchanged. Use --no-simplified for the full "
+                        "metric pack, narratives and RGB histograms.")
     p.add_argument("--preprocess-ref", action="store_true",
                    help="Apply the capture pipeline (ALIF white balance -> "
                         "CLAHE) to the reference image before measuring. Use "
@@ -100,10 +108,20 @@ def _print_per_image(result) -> None:
             f", {piv.n_advisory_outside_tol}/{piv.n_advisory} advisory"
             if piv.n_advisory_outside_tol else ""
         )
-        print(f"  Verdict: {piv.verdict.upper()}  "
-              f"({piv.n_outside_tol}/{piv.n_blocking} blocking metrics "
-              f"outside tolerance{advisory})")
-        print(f"  {narrate(result.ref_metrics, dut_m)}")
+        if piv.override_reason:
+            # Printing "FAIL (0/1 blocking metrics outside tolerance)" reads
+            # as a contradiction; name the reason instead.
+            print(f"  Verdict: FAIL  (non-optical: {piv.override_reason}; "
+                  f"optics measured {piv.n_outside_tol}/{piv.n_blocking} "
+                  f"blocking metrics outside tolerance{advisory})")
+        else:
+            print(f"  Verdict: {piv.verdict.upper()}  "
+                  f"({piv.n_outside_tol}/{piv.n_blocking} blocking metrics "
+                  f"outside tolerance{advisory})")
+        # narrate() reads the full metric pack; in simplified mode only
+        # sharpness was measured, so the per-metric lines below say it all.
+        if not result.simplified:
+            print(f"  {narrate(result.ref_metrics, dut_m)}")
         for m in piv.per_metric:
             print(f"  {_metric_flag(m)}{m.name:14s}  ref={m.ref:10.3f}  "
                   f"dut={m.dut_agg:10.3f}  Δ={m.delta:+10.3f}  "
@@ -123,6 +141,7 @@ def main(argv: list[str] | None = None) -> int:
             preprocess_ref=args.preprocess_ref,
             preprocess_dut=args.preprocess_dut,
             save_preprocessed=args.save_preprocessed,
+            simplified=args.simplified,
         )
     except (FileNotFoundError, NotADirectoryError, ValueError) as e:
         print(f"error: {e}", file=sys.stderr)
@@ -146,13 +165,21 @@ def main(argv: list[str] | None = None) -> int:
           f"on the {v.aggregation} aggregate across {v.n_dut} DUT image(s))")
     if v.n_advisory_outside_tol:
         offenders = ", ".join(m.name for m in v.per_metric if m.warns)
-        print(f"Advisory: {v.n_advisory_outside_tol}/{v.n_advisory} colour "
+        print(f"Advisory: {v.n_advisory_outside_tol}/{v.n_advisory} colour/noise "
               f"metrics outside tolerance ({offenders}) — reported only, does "
               f"not affect the verdict.")
     pass_n = sum(1 for p in result.per_image_verdicts if p.verdict == "pass")
     margin_n = sum(1 for p in result.per_image_verdicts if p.verdict == "marginal")
     fail_n = sum(1 for p in result.per_image_verdicts if p.verdict == "fail")
     print(f"Per-image roll-call: {pass_n} pass / {margin_n} marginal / {fail_n} fail")
+    forced = [(p.name, v.override_reason)
+              for p, v in zip(result.inputs.dut_paths, result.per_image_verdicts)
+              if v.override_reason]
+    if forced:
+        print(f"  of which {len(forced)} failed on non-optical grounds "
+              f"(optics within tolerance):")
+        for name, reason in forced:
+            print(f"    {name} — {reason}")
     print(f"Report: {out_path}")
     if args.save_preprocessed is not None and (args.preprocess_ref or args.preprocess_dut):
         print(f"Preprocessed images: {args.save_preprocessed.resolve()}")

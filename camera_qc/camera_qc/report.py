@@ -36,15 +36,15 @@ _RGB_CHANNELS: tuple[tuple[str, int, str], ...] = (
 
 
 VERDICT_BANNERS: dict[str, tuple[str, str]] = {
-    "pass": ("PASS", "DUT sharpness and noise are same or better than reference."),
-    "marginal": ("MARGINAL", "DUT is borderline on sharpness/noise — manual review recommended."),
-    "fail": ("FAIL", "DUT is worse than reference on sharpness and/or noise."),
+    "pass": ("PASS", "DUT sharpness is same or better than reference."),
+    "marginal": ("MARGINAL", "DUT is borderline on sharpness — manual review recommended."),
+    "fail": ("FAIL", "DUT is softer than reference."),
 }
 
 PER_IMAGE_BANNERS: dict[str, str] = {
-    "pass": "sharpness and noise within tolerance.",
-    "marginal": "one blocking metric (sharpness/noise) outside tolerance.",
-    "fail": "sharpness and/or noise outside tolerance.",
+    "pass": "sharpness within tolerance.",
+    "marginal": "one blocking metric (sharpness) outside tolerance.",
+    "fail": "sharpness outside tolerance.",
 }
 
 
@@ -260,9 +260,32 @@ def _deviation_phrase(m: MetricResult) -> str:
     return f"Δ {m.delta:+.2f} ({_fmt(m.pct_of_ref, 1)}% of ref, tol {_fmt(m.tolerance_pct, 1)}%)"
 
 
+_COLOUR_METRICS = frozenset({"L", "a*", "b*", "R", "G", "B"})
+
+
+def _advisory_rationale(offenders: list[MetricResult]) -> str:
+    """Why the listed advisory metrics are not grounds for rejection."""
+    reasons = []
+    if any(m.name in _COLOUR_METRICS for m in offenders):
+        reasons.append(
+            "colour and exposure deviations are correctable downstream "
+            "(CCM / white balance)"
+        )
+    if any(m.name == "noise" for m in offenders):
+        reasons.append(
+            "a raised noise floor is a matter of degree rather than an optical "
+            "defect"
+        )
+    if not reasons:
+        return "These metrics are configured as advisory."
+    clause = " and ".join(reasons)
+    tail = "it is" if len(offenders) == 1 else "they are"
+    return f"{clause[0].upper()}{clause[1:]}, so {tail} reported for review."
+
+
 def _advisory_block(metric_results: list[MetricResult]) -> str | None:
-    """Amber callout listing the advisory (colour/exposure) metrics outside
-    tolerance. Returns None when there is nothing to warn about.
+    """Amber callout listing the advisory (colour / exposure / noise) metrics
+    outside tolerance. Returns None when there is nothing to warn about.
     """
     offenders = [m for m in metric_results if m.warns]
     if not offenders:
@@ -272,11 +295,10 @@ def _advisory_block(metric_results: list[MetricResult]) -> str | None:
     )
     return (
         '<div class="advisory">'
-        f'<strong>Colour warning — does not affect the verdict.</strong> '
-        f'{len(offenders)} colour/exposure metric(s) outside tolerance: {items}. '
-        f'Colour deviations are correctable downstream (CCM / white balance), '
-        f'so they are reported for review but are not grounds for rejecting '
-        f'the module. Only sharpness and noise can fail a unit.'
+        f'<strong>Warning — does not affect the verdict.</strong> '
+        f'{len(offenders)} advisory metric(s) outside tolerance: {items}. '
+        f'{_advisory_rationale(offenders)} '
+        f'Only sharpness can fail a unit.'
         '</div>'
     )
 
@@ -355,6 +377,18 @@ def render_markdown(
     md_lines.append("## Summary (per metric, across all DUT images)")
     md_lines.append(_summary_table(v.per_metric, result.per_image_verdicts))
     md_lines.append("")
+    n_dut = len(result.per_image_verdicts)
+    ge = _at_or_above_ref(result.per_image_verdicts)
+    rc = _roll_call(result.per_image_verdicts)
+    md_lines.append(
+        f"- **Pass / fail:** {rc['pass']} pass, {rc['fail']} fail"
+        + (f", {rc['marginal']} marginal" if rc["marginal"] else "")
+        + f" of {n_dut} DUT image(s)")
+    md_lines.append(
+        f"- **At or above reference sharpness:** {ge} of {n_dut} "
+        f"({ge / n_dut * 100:.1f}%) — stricter than PASS, which allows a drop "
+        f"of up to the tolerance")
+    md_lines.append("")
     advisory_block = _advisory_block(v.per_metric)
     if advisory_block:
         md_lines.append(advisory_block)
@@ -362,9 +396,9 @@ def render_markdown(
     md_lines.append(f"![rgb histogram]({summary_hist.name})")
     md_lines.append("")
     md_lines.append('<p class="legend">'
-                    'Role key: <em>blocking</em> — sharpness / noise; outside tolerance means FAIL. '
-                    '<em>advisory</em> — colour / exposure; outside tolerance is highlighted as a '
-                    'warning and never fails the unit.<br>'
+                    'Role key: <em>blocking</em> — sharpness; outside tolerance means FAIL. '
+                    '<em>advisory</em> — colour / exposure / noise; outside tolerance is '
+                    'highlighted as a warning and never fails the unit.<br>'
                     'Direction key: <em>higher better</em> — outside tolerance means it dropped >tol% below ref. '
                     '<em>lower better</em> — outside tolerance means it rose >tol% above ref. '
                     '<em>closer to ref</em> — outside tolerance means |Δ| exceeds tol% of ref.'
@@ -379,11 +413,15 @@ def render_markdown(
             if piv.n_advisory_outside_tol else ''
         )
         md_lines.append(
-            f'<div class="banner small {piv.verdict}">'
-            f'{piv.verdict.upper()} — {PER_IMAGE_BANNERS[piv.verdict]} '
-            f'({piv.n_outside_tol}/{piv.n_blocking} blocking metrics outside '
-            f'tolerance{advisory_note})'
-            f'</div>'
+            _override_banner(
+                piv,
+                f' Measured: {piv.n_outside_tol}/{piv.n_blocking} blocking '
+                f'metrics outside tolerance{advisory_note}.')
+            or (f'<div class="banner small {piv.verdict}">'
+                f'{piv.verdict.upper()} — {PER_IMAGE_BANNERS[piv.verdict]} '
+                f'({piv.n_outside_tol}/{piv.n_blocking} blocking metrics '
+                f'outside tolerance{advisory_note})'
+                f'</div>')
         )
         md_lines.append(f"![ref vs dut]({pair_paths[i].name})")
         md_lines.append("")
@@ -404,6 +442,246 @@ def render_markdown(
     return "\n".join(md_lines)
 
 
+SIMPLE_METRIC = "sharpness"
+
+
+def _metric_by_name(metric_results: list[MetricResult], name: str) -> MetricResult:
+    for m in metric_results:
+        if m.name == name:
+            return m
+    raise KeyError(
+        f"Metric {name!r} missing from the verdict. Present: "
+        f"{[m.name for m in metric_results]}"
+    )
+
+
+def _roll_call(per_image_verdicts: list) -> dict[str, int]:
+    counts = {"pass": 0, "marginal": 0, "fail": 0}
+    for piv in per_image_verdicts:
+        counts[piv.verdict] += 1
+    return counts
+
+
+def _override_banner(piv, extra: str = "") -> str | None:
+    """Banner for a verdict that was forced regardless of the measurements.
+
+    Stating the metric alongside a FAIL it did not cause reads as a bug, so
+    the reason leads and the measurement is explicitly labelled as passing.
+    """
+    if not piv.override_reason:
+        return None
+    return (
+        f'<div class="banner small fail">'
+        f'FAIL — {piv.override_reason}. '
+        f'This is a non-optical rejection: the optical measurement is within '
+        f'tolerance and did not cause it.{extra}'
+        f'</div>'
+    )
+
+
+def _at_or_above_ref(per_image_verdicts: list) -> int:
+    """How many DUT images are at least as sharp as the reference.
+
+    Distinct from PASS, which allows a drop of up to the tolerance: this is
+    the stricter "not softer than the reference at all" count.
+    """
+    total = 0
+    for piv in per_image_verdicts:
+        m = _metric_by_name(piv.per_metric, SIMPLE_METRIC)
+        total += m.dut_agg >= m.ref
+    return total
+
+
+def _headcount_table(per_image_verdicts: list) -> str:
+    """Opening summary: how many images, how many passed / failed, and how
+    many are at or above the reference outright."""
+    n = len(per_image_verdicts)
+    counts = _roll_call(per_image_verdicts)
+    rows = [
+        f"| **Total DUT images** | **{n}** | **100.0%** |",
+        f'| <span class="ok">PASS</span> | {counts["pass"]} '
+        f'| {counts["pass"] / n * 100:.1f}% |',
+    ]
+    # MARGINAL is unreachable at the default thresholds; only show the row when
+    # a config actually produced one, so the common report stays two lines.
+    if counts["marginal"]:
+        rows.append(
+            f'| <span class="warn">MARGINAL</span> | {counts["marginal"]} '
+            f'| {counts["marginal"] / n * 100:.1f}% |'
+        )
+    rows.append(
+        f'| <span class="bad">FAIL</span> | {counts["fail"]} '
+        f'| {counts["fail"] / n * 100:.1f}% |'
+    )
+    ge = _at_or_above_ref(per_image_verdicts)
+    rows.append(
+        f'| &ge; reference sharpness | {ge} | {ge / n * 100:.1f}% |'
+    )
+    head = "| Result | Images | Share |\n|---|---:|---:|\n"
+    return head + "\n".join(rows)
+
+
+def _verdict_cell(verdict: str) -> str:
+    css = {"pass": "ok", "marginal": "warn", "fail": "bad"}[verdict]
+    return f'<span class="{css}">{verdict.upper()}</span>'
+
+
+def _sharpness_table(
+    dut_paths: list[Path],
+    per_image_verdicts: list,
+) -> str:
+    """One row per DUT image: name, ref value, DUT value, pass/fail.
+
+    A double-dagger marks a unit failed on non-optical grounds, so a FAIL
+    sitting beside a perfectly good sharpness figure reads as intentional.
+    """
+    head = (
+        "| # | DUT image | Ref sharpness | DUT sharpness | % of ref "
+        "| Tol % | Result |\n"
+        "|---:|---|---:|---:|---:|---:|:--:|\n"
+    )
+    rows = []
+    for i, (path, piv) in enumerate(zip(dut_paths, per_image_verdicts), start=1):
+        m = _metric_by_name(piv.per_metric, SIMPLE_METRIC)
+        # A forced failure keeps its real measurement in the row, so the
+        # marker is what stops a FAIL beside a healthy sharpness reading from
+        # looking like a mistake.
+        dagger = ' <span class="bad">‡</span>' if piv.override_reason else ""
+        verdict_cell = _verdict_cell(piv.verdict) + dagger
+        rows.append(
+            f"| {i} "
+            f"| `{path.name}` "
+            f"| {_fmt(m.ref)} "
+            f"| {_fmt(m.dut_agg)} "
+            f"| {_fmt(m.pct_of_ref, 1)} "
+            f"| {_fmt(m.tolerance_pct, 1)} "
+            f"| {verdict_cell} |"
+        )
+    return head + "\n".join(rows)
+
+
+def render_markdown_simplified(
+    result: EvaluationResult,
+    assets_dir: Path,
+) -> str:
+    """Sharpness-only report: headcount summary, one table row per DUT image,
+    then the ref-vs-DUT image pairs.
+
+    No histograms and no per-metric colour breakdown — sharpness is the only
+    metric that can fail a unit, so everything else is omitted rather than
+    computed and ignored.
+    """
+    v = result.verdict
+    banner_label, banner_text = VERDICT_BANNERS[v.verdict]
+    timestamp = _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+
+    assets_dir.mkdir(parents=True, exist_ok=True)
+    log.info("Rendering report assets in %s", assets_dir)
+
+    pair_paths: list[Path] = []
+    for i, (dut_path, dut_img) in enumerate(tqdm(
+        list(zip(result.inputs.dut_paths, result.inputs.dut_images)),
+        desc="Rendering report assets", unit="img",
+    )):
+        pair_png = assets_dir / f"dut_{i:03d}_pair.png"
+        _save_side_by_side(
+            result.inputs.ref_image, dut_img,
+            result.inputs.ref_path.name, dut_path.name, pair_png,
+        )
+        pair_paths.append(pair_png)
+
+    agg = _metric_by_name(v.per_metric, SIMPLE_METRIC)
+
+    md: list[str] = []
+    md.append("# Camera QC Report — sharpness")
+    md.append(f'<div class="banner {v.verdict}">{banner_label} &mdash; {banner_text}</div>')
+    md.append("")
+    md.append("## Summary")
+    md.append("")
+    md.append(_headcount_table(result.per_image_verdicts))
+    md.append("")
+    md.append(f"- **Generated:** {timestamp}")
+    md.append(f"- **Scene preset:** `{result.scene}`")
+    md.append(f"- **Reference:** `{result.inputs.ref_path.name}`"
+              f"{_preprocess_tag(result.inputs.preprocess_ref)}"
+              f" — sharpness {_fmt(agg.ref)}")
+    md.append(f"- **DUT images:** {len(result.inputs.dut_paths)}"
+              f"{_preprocess_tag(result.inputs.preprocess_dut)}")
+    md.append(f"- **Pass criterion:** DUT sharpness \u2265 "
+              f"{100 - agg.tolerance_pct:.0f}% of reference "
+              f"({_fmt(agg.ref * (1 - agg.tolerance_pct / 100))})")
+    md.append(f"- **Batch aggregate:** {_fmt(agg.dut_agg)} "
+              f"({_fmt(agg.pct_of_ref, 1)}% of ref, {v.aggregation} "
+              f"across {v.n_dut} image(s))")
+    md.append("")
+    if result.inputs.preprocess_asymmetric:
+        processed = "reference" if result.inputs.preprocess_ref else "DUT"
+        raw = "DUT" if result.inputs.preprocess_ref else "reference"
+        md.append(
+            '<div class="disclaimer">'
+            f'<strong>Warning — asymmetric preprocessing.</strong> '
+            f'The {processed} went through the <code>{PREPROCESS_MODE}</code> '
+            f'capture pipeline while the {raw} did not. The sharpness deltas '
+            f'below therefore mix the processing difference with the sensor '
+            f'difference and should not be read as a sensor-only comparison.'
+            '</div>'
+        )
+        md.append("")
+    md.append(
+        '<div class="disclaimer">'
+        '<strong>Disclaimer — preliminary thresholds.</strong> '
+        'The pass/fail threshold used in this report is preliminary and should '
+        'be tuned against a batch of known-good DUTs before this report is used '
+        'as a standalone acceptance decision. This is the simplified report: '
+        'sharpness only. Colour, exposure and noise are advisory metrics that '
+        'never fail a unit and were not measured — run with '
+        '<code>--no-simplified</code> for the full pack.'
+        '</div>'
+    )
+    md.append("")
+    # Batch-specific annotations belong to whoever built the batch, not to
+    # this generator: they stay in manifest.csv and are never rendered here.
+    md.append("## Per-image results")
+    md.append(_sharpness_table(result.inputs.dut_paths,
+                               result.per_image_verdicts))
+    md.append("")
+    forced = [(i, p.name, result.per_image_verdicts[i - 1].override_reason)
+              for i, p in enumerate(result.inputs.dut_paths, start=1)
+              if result.per_image_verdicts[i - 1].override_reason]
+    legend = ('Sharpness is the variance of the Laplacian — higher is sharper. '
+              'A unit fails the <em>optical</em> check when its sharpness '
+              'drops more than the tolerance below the reference; sharper '
+              'than reference always passes that check.')
+    if forced:
+        listed = "; ".join(f"#{i} <code>{n}</code> — {r}" for i, n, r in forced)
+        legend += (f'<br><span class="bad">‡</span> <strong>{len(forced)} '
+                   f'unit(s) carry a FAIL that the sharpness column does not '
+                   f'explain.</strong> They passed the optical check and were '
+                   f'rejected on non-optical grounds, so a high % of ref '
+                   f'beside their FAIL is expected, not an error: {listed}.')
+    md.append(f'<p class="legend">{legend}</p>')
+    md.append("")
+    md.append("## Per-DUT-image comparisons")
+    for i, dut_path in enumerate(result.inputs.dut_paths):
+        piv = result.per_image_verdicts[i]
+        m = _metric_by_name(piv.per_metric, SIMPLE_METRIC)
+        md.append(f"### DUT {i+1}: `{dut_path.name}`")
+        measured = (f' Sharpness {_fmt(m.dut_agg)} vs ref {_fmt(m.ref)} '
+                    f'({_fmt(m.pct_of_ref, 1)}% of ref).')
+        md.append(
+            _override_banner(piv, measured)
+            or (f'<div class="banner small {piv.verdict}">'
+                f'{piv.verdict.upper()} — sharpness {_fmt(m.dut_agg)} vs ref '
+                f'{_fmt(m.ref)} ({_fmt(m.pct_of_ref, 1)}% of ref, '
+                f'tolerance {_fmt(m.tolerance_pct, 1)}%)'
+                f'</div>')
+        )
+        md.append(f"![ref vs dut]({pair_paths[i].name})")
+        md.append("")
+
+    return "\n".join(md)
+
+
 def write_pdf(result: EvaluationResult, out_path: Path, keep_md: bool = False) -> Path:
     """Render MD + assets in a temp dir, convert to PDF at `out_path`."""
     import markdown as md_lib
@@ -420,7 +698,9 @@ def write_pdf(result: EvaluationResult, out_path: Path, keep_md: bool = False) -
     work_root.mkdir(parents=True, exist_ok=True)
     assets_dir = work_root  # keep PNGs alongside the MD so relative paths resolve
 
-    md_text = render_markdown(result, assets_dir)
+    render = (render_markdown_simplified if result.simplified
+              else render_markdown)
+    md_text = render(result, assets_dir)
     md_path = work_root / "report.md"
     md_path.write_text(md_text, encoding="utf-8")
 

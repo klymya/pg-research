@@ -59,13 +59,20 @@ class VerdictResult:
 
 @dataclass
 class PerImageVerdict:
-    """Verdict + per-metric detail for a single DUT image vs the reference."""
+    """Verdict + per-metric detail for a single DUT image vs the reference.
+
+    `override_reason` is set when the verdict was forced regardless of the
+    measurements — a unit rejected for something the optics cannot show, such
+    as an electronics or communication fault. The metric results are still
+    the real measurements.
+    """
     verdict: Verdict
     n_outside_tol: int           # blocking metrics outside tolerance — drives the verdict
     per_metric: list[MetricResult]   # dut_agg == this single image's value
     n_blocking: int
     n_advisory_outside_tol: int
     n_advisory: int
+    override_reason: str | None = None
 
 
 def load_config(path: Path | str) -> dict:
