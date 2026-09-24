@@ -1,4 +1,38 @@
-# Object detection V3
+# object-detection-v3
+
+Third and final iteration of furniture detection: a rebuilt dataset and a YOLOv8 model for
+tables and chairs.
+
+**Status:** ARCHIVED — frozen 2024-08 · 1.1 GB
+
+## Purpose
+
+Detect the furniture in a space so occupancy can be reasoned about — is this desk in use, is
+that chair occupied. Volumes 1 and 2 (`object-detection/`) produced a YOLOv7 model; this round
+**rebuilt the dataset from scratch** and moved to YOLOv8, because dataset quality rather than
+architecture was the limit.
+
+The dataset work is the substance here: duplicate detection via image embeddings, grouping
+correlated frames so near-identical images do not straddle the train/val split, and merging
+label variants (desk, meeting table, coffee table → table).
+
+The final model and its thresholds are recorded below. Dataset lives on
+`/mnt/pg-fs01/Current/DB/ObjectDetectionV3`.
+
+## Connections
+
+- **Supersedes `object-detection/`** (volume 2, YOLOv7).
+- Shares the CVAT annotation schema handled by `annotation_poc/`.
+- `objectdetectionmetrics/` provides the evaluation metrics used here.
+- Deployment side was benchmarked in `yolo-inference/`.
+
+## Dependencies
+
+`ultralytics`, `torch`, `torchvision`, `opencv-python`, `numpy`, `pandas`, `tqdm`,
+`transformers` (embeddings for duplicate detection), `cvat_sdk`, `matplotlib`, `pyyaml`.
+No `requirements.txt`.
+
+---
 
 This is a 3d iteration of object detection feature:
 1. Initial research, not production version.

@@ -1,3 +1,39 @@
+# yolo-inference
+
+C++ YOLO inference benchmarks on PG1 hardware: TFLite versus OpenCV-DNN+ONNX, fp16 versus int8,
+across thread counts.
+
+**Status:** ARCHIVED — frozen 2024-05 · 216 MB
+
+## Purpose
+
+Decide how to run a detector on a Raspberry Pi-class device, and whether it is fast enough at
+all. The measurement is the deliverable — the tables below are the reason this project exists,
+and they are what informed the move to a dedicated NPU (the Alif Ethos-U55) for PG2.
+
+Tested on pg1b (Pi 3) and pg1c (Pi 4) with `cp-core.service` stopped, Lena at 640×640, 100 runs
+averaged. Three runtimes: OpenCV-DNN with ONNX, TFLite fp16, TFLite int8.
+
+Also includes YOLOv7 reparameterisation and ONNX export (`reparameterization_yolov7_tiny.py`)
+and a `yolov8/` C++ ONNX inference variant.
+
+## Connections
+
+- Benchmarks the models produced by `object-detection/` (YOLOv7) and the YOLOv5n baseline.
+- The PG2 successor is `people_detection_pg2`, where inference moved to the Ethos-U55 NPU and
+  `alif_perf/` reads the cycle counts.
+- `theodore/pipeline_cpp/` is a related C++ inference pipeline.
+
+## Dependencies
+
+C++ with vcpkg (`vcpkg.json`), CMake, OpenCV, ONNX Runtime and TensorFlow Lite — the README
+below has the TFLite build instructions. Python side: `torch` and `pyyaml` for the
+reparameterisation script.
+
+---
+
+## Original notes and results
+
 YOLO inference on C++ using tf lite and opencv+onnx.
 
 # YOLOv5 
