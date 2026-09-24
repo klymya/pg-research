@@ -135,3 +135,5 @@ camera_qc/batch_*
 camera_qc/preprocessed
 
 background_subtraction/results*
+# macOS cruft
+.DS_Store
