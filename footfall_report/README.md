@@ -1,3 +1,46 @@
+# footfall_report
+
+Streamlit app that turns a weekly CSV of hourly IN/OUT counts per floor into a validated daily
+footfall report.
+
+**Status:** ACTIVE · last change 2026-09 · 116 KB
+
+## Purpose
+
+A customer-facing deliverable rather than research: someone non-technical uploads the week's
+counts and gets KPIs, hourly detail, per-floor and overall daily totals — plus an explicit
+data-quality section.
+
+The design principle that shapes the code: **nothing invalid is silently dropped or "fixed".**
+Bad rows are surfaced in the report rather than quietly discarded, so the reader can see what
+the numbers are based on. `footfall/issues.py` exists for exactly that.
+
+| Module | Role |
+|---|---|
+| `app.py` | Streamlit UI — upload, column mapping, report |
+| `footfall/parsing.py` | CSV reading, delimiter and time-format detection |
+| `footfall/analysis.py` | KPIs and aggregation |
+| `footfall/issues.py` | Data-quality findings surfaced in the report |
+| `footfall/config.py`, `config.yaml` | Column-name detection rules |
+| `tests/test_pipeline.py` | pytest suite |
+| `run_windows.bat` | Creates the venv, installs deps and launches — for a Windows end user |
+
+## Connections
+
+Standalone. Consumes counts of the kind the PG2 gateway produces, but has no code dependency on
+any other project here and is not imported by anything.
+
+Given it is a delivered application rather than research, it would sit more naturally in its
+own repository — see `REPO_INVENTORY.md` §7.
+
+## Dependencies
+
+`requirements.txt` is present: `streamlit`, `pandas`, `pyyaml`; `pytest` for the tests.
+
+---
+
+## Original notes
+
 # Footfall report
 
 Turns a weekly CSV of hourly IN/OUT counts per floor into a validated daily report:

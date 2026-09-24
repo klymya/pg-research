@@ -1,3 +1,40 @@
+> ## PointGrab note — this is vendored third-party code
+>
+> **Upstream:** Rafael Padilla's *Object-Detection-Metrics* (MIT), plus the accompanying paper.
+> Everything below this box is the upstream README, unmodified.
+>
+> **Status:** VENDORED · third-party (MIT) · 8.2 MB
+>
+> **What PointGrab added:** `metricsevaluator.py` — a wrapper over `BoundingBox`,
+> `BoundingBoxes` and `Evaluator` that is what the rest of this repo actually imports. It is
+> not upstream code.
+>
+> **Used by:** `people_detection_pg2/eval_obj_det.py`,
+> `people_detection_pg2/extended_evaluation_metrics/evaluation.py`,
+> `people_detection_pg2/eval_using_obj_det_metrics_per_frame.ipynb`,
+> `object-detection/eval_yolov7.ipynb`, and `tracker/`.
+>
+> ### ⚠ A second copy exists, and it is ahead of this one
+>
+> `algo_system_emulator/src/objectdetectionmetrics/` is **not** a duplicate — it has gained
+> keypoint support this copy does not have:
+>
+> | Only in the emulator copy |
+> |---|
+> | `KeypointBoundingBox.py`, `KeypointBoundingBoxes.py` |
+> | `KeypointEvaluator.py`, `KeypointUtils.py` |
+> | `pose_evaluation_example.py`, `README_KEYPOINTS.md` |
+>
+> Since PG2's detector is a **pose** model with one keypoint, the emulator copy is the more
+> capable one. Check which copy you are importing before trusting a keypoint metric, and
+> prefer porting fixes *from* the emulator rather than into it.
+>
+> **Recommendation:** this should be a pinned dependency, or one shared internal package — not
+> two divergent vendored trees. See `REPO_INVENTORY.md` defect (f).
+>
+> **Dependencies:** `numpy`, `matplotlib`, `opencv-python` (see `requirements.txt` below).
+
+---
 
 
 <p align="left">
