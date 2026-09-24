@@ -1,8 +1,45 @@
-# camera-qc
+# camera_qc
 
-Compare a Device-Under-Test (DUT) camera module against a reference camera and produce a one-page **PDF verdict**: PASS, MARGINAL, or FAIL.
+Compares a Device-Under-Test camera module against a reference camera and produces a one-page
+**PDF verdict**: PASS, MARGINAL or FAIL. Built for QA — one command, two folders in, one PDF out.
 
-Built for QA: one command, two folders in, one PDF out.
+**Status:** ACTIVE · last change 2026-09 · 995 MB on disk (capture batches, untracked)
+
+## Purpose
+
+Incoming camera modules vary. Some are optically defective; others merely differ in colour
+balance, which is correctable downstream. This tool separates those two cases so QA can reject
+the first and accept the second, with a paper trail.
+
+**Only sharpness can fail a unit.** Colour, exposure and noise are measured and reported but
+never change the verdict: colour is correctable by CCM/white balance, and a raised noise floor
+is a matter of degree rather than an optical defect.
+
+It is a delivered tool rather than research — an installable package with a CLI, a config file
+and tests.
+
+## Connections
+
+- **Metrics ported from `people_detection_pg2/investigations/rotated_cam_color_dfiff/`**
+  (`sensor_metrics.py`), where they were first developed for the colour-difference study.
+- Measures the same rev-C hardware that `camera_calibration/` calibrates; a module that fails
+  here should never reach calibration.
+- Standalone otherwise — nothing imports it, and it imports nothing from sibling projects.
+
+## Dependencies
+
+Declared in `pyproject.toml`: `numpy`, `opencv-python`, `pandas`, `matplotlib`, `pyyaml`,
+`markdown`, `weasyprint` (PDF rendering), `tqdm`. Installs a `camera-qc` console script.
+
+```bash
+cd camera_qc && pip install -e .
+sudo apt install -y libpango-1.0-0 libpangoft2-1.0-0   # WeasyPrint needs these on Linux
+```
+
+## Data
+
+Capture batches (`batch_*/`, `revc/`, `captures/`) are **deliberately untracked** — they are
+~1 GB of QA photographs with no value in version control. Reports are generated, not committed.
 
 ---
 

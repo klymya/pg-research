@@ -1,12 +1,65 @@
-# 4-Layer Non-NN Background Subtraction Prototype
+# background_subtraction
 
-Prototype of the confirmed 4-layer background subtraction (BGS) architecture for
-**"Sign of Life"** detection: isolating newly introduced *static* objects while
-suppressing dynamic office noise (shadows, lighting shifts, camera drift).
+Prototype of the 4-layer non-NN background-subtraction (BGS) architecture for **"Sign of Life"**
+detection: isolating newly introduced *static* objects while suppressing dynamic office noise —
+shadows, lighting shifts, camera drift. The package is pure algorithm code: no video IO, no
+dataset reading, no evaluation. The caller supplies decoded frames and optional person boxes and
+receives per-frame masks, blobs and events.
 
-The package is pure algorithm code. It performs **no video IO, no dataset
-reading and no evaluation** — the caller supplies decoded frames and optional
-person bounding boxes, and receives per-frame masks, blobs and events.
+**Status:** ACTIVE · last change 2026-09 · 6.1 GB on disk (dataset + results)
+
+## Purpose
+
+Detect that *something was left behind* — a bag, a box, a person who has stopped moving — using
+an algorithm small enough to run on the Alif MCU alongside the people detector. Neural
+inference is already spending the compute budget, so this had to be non-NN.
+
+The hard part is not finding foreground; it is **not** firing on shadows, a light being
+switched on, or the camera settling. Hence the layered design: preprocessing, a
+rate-parameterised background model, an HSV shadow veto, structural blob filtering and a
+dwell-time FSM that only reports an object once it has stayed put.
+
+Phase 2 also removed the OpenCV dependency from the core stages — `native_ops.py` reimplements
+BGR↔HSV and the morphology in pure NumPy, **bit-exact** against `cv2`, which is what makes the
+C port to the MCU tractable.
+
+## Connections
+
+- **Targets `rtos_sensor`** (7 references) — `sign_of_life_cpp/` is the reference C
+  implementation for the MCU port; `alif_image_processing_flow.md` and
+  `alif_syntaxis_standart.md` document the constraints it must meet.
+- Arbitration between Sign-of-Life and people detection is specified in `PG2.wiki`.
+- Independent of the rest of this repo — it imports nothing from sibling projects.
+
+## Dependencies
+
+Core: `numpy`, `opencv-python` (comparison and IO only — the native path avoids it), `pytest`.
+`pybgs` is used in a few comparison notebooks to benchmark against bgslibrary.
+
+```bash
+pip install numpy opencv-python pytest
+```
+
+## Datasets
+
+Only `data/` (the six original CDNET-14 sequences) is committed. All reduced-rate and
+reduced-resolution trees are regenerated — see **Datasets** below. `results_*/` are gitignored.
+
+## Documentation map
+
+This is the best-documented project in the repo. Start here:
+
+| File | Covers |
+|---|---|
+| `task.md` | The original requirement and the 4-layer specification |
+| `sol_people_detection_rationale.md` | Why Sign-of-Life and people detection are arbitrated the way they are |
+| `native_operators.md` | The pure-NumPy operator ports and their bit-exactness |
+| `models_complexity_ranking.md` | Background-model candidates ranked by cost |
+| `shadow_veto_quantisation_roadmap.md` | Quantisation plan for the shadow stage |
+| `sol_baseline_alignment_report.md`, `sol_people_detection_baseline.md` | Baseline results |
+| `test_cases_sol_basic.md` | Test-case specification |
+
+---
 
 ## Update — 2026-07-27 (Phase 2)
 
