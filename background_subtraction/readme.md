@@ -461,6 +461,42 @@ relative to the **current working directory** and log a harmless failure when
 absent, and `PAWCS` warns when a grayscale image arrives as 3-channel — which
 it does today, since `PybgsBackend` replicates single-channel features to BGR.
 
+## Datasets
+
+Only **`data/`** — the six original CDNET-14 sequences — is committed. Every reduced-rate and
+reduced-resolution tree is **derived and regenerated on demand**; committing them duplicated
+324 MB across 13,848 files for no benefit.
+
+Regenerate whichever you need:
+
+| Tree | Command |
+|---|---|
+| `data_0_1fps/` | `python downsample_dataset.py` |
+| `data_1fps/` | `python downsample_dataset.py --target-fps 1` |
+| `data_0_5fps/` | `python downsample_dataset.py --target-fps 0.5 -o data_0_5fps` |
+| `data_0_1fps_qvga/` | `python downsample_dataset.py -o data_0_1fps_qvga --size 320 240` |
+| `data_0_1fps_qqvga/` | `python downsample_dataset.py -o data_0_1fps_qqvga --size 160 120` |
+| `data_0_1fps_qvga_bmp/` | `python convert_to_bmp.py` (reads `data_0_1fps_qvga/`, so build that first) |
+
+Or all of them at once:
+
+```bash
+python downsample_dataset.py
+python downsample_dataset.py --target-fps 1
+python downsample_dataset.py --target-fps 0.5 -o data_0_5fps
+python downsample_dataset.py -o data_0_1fps_qvga  --size 320 240
+python downsample_dataset.py -o data_0_1fps_qqvga --size 160 120
+python convert_to_bmp.py
+```
+
+These are reproducible: each tree was regenerated and compared against the previously committed
+copy before removal — 13,848 files, byte-identical. The only exception is `ROI.jpg` in
+`busStation` and `tramCrossroad_1fps` under `data_0_1fps_qvga/`, whose committed copies predate
+the switch to `INTER_NEAREST` for label images. No code reads them: CDNET encodes the spatial
+ROI as value 85 inside the groundtruth masks, so `evaluate.py` needs no separate ROI file.
+
+The trees are gitignored. Do not commit them.
+
 ## Running on a dataset
 
 `main.py` runs the pipeline over an image sequence and writes one binary PNG
