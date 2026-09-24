@@ -1,3 +1,42 @@
+# orbbec-3d-research
+
+Evaluation of the Orbbec Persee 3D camera: capturing RGB and depth streams simultaneously.
+
+**Status:** ARCHIVED — frozen 2023-05 · 48 KB
+
+## Purpose
+
+A depth camera would give the ground position of a person directly, instead of inferring it
+from a bounding box through a lens model — the problem `leg_position_detectors/` and
+`leg_position_calculator/` were both attacking at the time.
+
+The work here is narrower: establish whether RGB and depth can be grabbed together at all, and
+with which API. The finding, recorded below, is that **OpenNI2 reads only depth and IR**, while
+**OpenCV built with OpenNI2 support reads both RGB and depth** — so OpenCV is the workable
+path.
+
+`src/depth/` holds the examples — the OpenNI2 variant and the OpenCV one; `OpenNIDevEnvironment`
+is the environment file the OpenCV build instructions require.
+
+## Outcome
+
+Not adopted. Monocular fisheye remained the sensing approach.
+
+## Connections
+
+- Alternative to the geometric ground-point estimation in `gw_prototype` / `pg_camera_geometry`
+  and the learned estimation in `leg_position_detectors/`.
+- One of several sensing-modality evaluations alongside `vayyar/` and `Socionext/`.
+
+## Dependencies
+
+OpenNI2, OpenCV 4.5.5 built **with** OpenNI2 support, GL and libusb — all on the device, not
+pip-installable. Setup notes below; the Ubuntu installation is documented in the PG wiki.
+
+---
+
+## Original notes
+
 # Orbbec 3D research
 
 We store here the results of [Orbbec Persee 3D camera](https://orbbec3d.com/index/Product/info.html?cate=38&id=37) research and brief descriptions for it.
