@@ -57,3 +57,19 @@ gw_cpp_version/**/*.ipynb       -filter -diff
 pg_camera_geometry/**/*.ipynb   -filter -diff
 alif-microphone-test/**/*.ipynb -filter -diff
 pipeline_report_parser/**/*.ipynb -filter -diff
+
+# Small text artefacts swept into LFS by the broad path rules above. YOLO label files and
+# per-run metric CSVs are a few hundred bytes to a few KB each: the 130-byte pointer plus a
+# network round-trip costs more than the file, and LFS defeats delta compression on text.
+# (The three genuinely large CSVs -- leg_position_calculator/box_data.csv and the two
+# object-detection-v3 annotation files -- have their own explicit rules and are unaffected.)
+people_detection_pg2/**/labels/**/*.txt -filter -diff -merge -text
+people_detection_pg2/quality_reduce_comparison/**/*.txt -filter -diff -merge -text
+people_detection_pg2/results/**/*.csv -filter -diff -merge -text
+people_detection_pg2/investigations/**/*.csv -filter -diff -merge -text
+
+# Documentation figures stay in Git: they are small, they benefit from diffing, and a reader
+# browsing the repo should not need `git lfs pull` to see them.
+docs/**/*.png       -filter -diff -merge
+**/docs/**/*.png    -filter -diff -merge
+**/docs/**/*.jpg    -filter -diff -merge
