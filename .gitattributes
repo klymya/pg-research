@@ -1,3 +1,59 @@
 
 # CDNET per-scene metadata is 7-9 bytes; LFS pointers are larger than the files.
 background_subtraction/**/temporalROI.txt -filter -diff -merge text
+
+*.ipynb filter=nbstripout
+*.zpln filter=nbstripout
+*.ipynb diff=ipynb
+
+# Notebooks whose OUTPUTS ARE THE RESULT (evaluations, comparisons, visualisations,
+# experiments, reports) keep them: the plots and tables are the research record, and the
+# input data is often no longer on the fileserver. Everything else -- dataset builders,
+# converters, training drivers, scratch -- is stripped by the nbstripout filter above.
+*eval*.ipynb        -filter -diff
+*compar*.ipynb      -filter -diff
+*visuali*.ipynb     -filter -diff
+*viz*.ipynb         -filter -diff
+*review*.ipynb      -filter -diff
+*validate*.ipynb    -filter -diff
+*experiment*.ipynb  -filter -diff
+*report*.ipynb      -filter -diff
+*research*.ipynb    -filter -diff
+*metrics*.ipynb     -filter -diff
+*analysis*.ipynb    -filter -diff
+*investigat*.ipynb  -filter -diff
+exp[0-9]*.ipynb     -filter -diff
+*_exp.ipynb         -filter -diff
+*_vs_*.ipynb        -filter -diff
+top_model*.ipynb    -filter -diff
+*pixeliz*.ipynb     -filter -diff
+*stat*.ipynb        -filter -diff
+*duplicate*.ipynb   -filter -diff
+demo.ipynb          -filter -diff
+
+# Archived projects (see REPO_INVENTORY.md §2): frozen, not being edited. Stripping their
+# notebooks would destroy the only surviving record of a finished investigation -- gap9's
+# outputs, for instance, are the only evidence of why that hardware was not chosen -- while
+# preventing no future bloat, because nobody re-saves them. Left untouched deliberately.
+gap9/**/*.ipynb                 -filter -diff
+theodore/**/*.ipynb             -filter -diff
+vayyar/**/*.ipynb               -filter -diff
+Socionext/**/*.ipynb            -filter -diff
+orbbec-3d-research/**/*.ipynb   -filter -diff
+sagemaker/**/*.ipynb            -filter -diff
+tracker/**/*.ipynb              -filter -diff
+yolo-inference/**/*.ipynb       -filter -diff
+object-detection/**/*.ipynb     -filter -diff
+object-detection-v3/**/*.ipynb  -filter -diff
+leg_position_detectors/**/*.ipynb -filter -diff
+leg_position_calculator/**/*.ipynb -filter -diff
+data-exploration/**/*.ipynb     -filter -diff
+coordinates_projection/**/*.ipynb -filter -diff
+gw_storage/**/*.ipynb           -filter -diff
+kpmg_research/**/*.ipynb        -filter -diff
+yolo_latest_test/**/*.ipynb     -filter -diff
+gw_prototype/**/*.ipynb         -filter -diff
+gw_cpp_version/**/*.ipynb       -filter -diff
+pg_camera_geometry/**/*.ipynb   -filter -diff
+alif-microphone-test/**/*.ipynb -filter -diff
+pipeline_report_parser/**/*.ipynb -filter -diff
