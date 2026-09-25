@@ -1,4 +1,4 @@
-  : # camera_calibration
+# camera_calibration
 
 Fisheye intrinsic calibration for the PG2 cam4.2 rev-B sensor. Produces the lens parameters
 that every downstream pixel→centimetre projection in the system depends on.
