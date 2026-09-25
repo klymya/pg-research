@@ -55,6 +55,71 @@ name (`..._batch1_10_margin_15_yolov8n_wb_alif_clahe_...`); tiny runs omit it.
 
 ---
 
+## Running on the training machine
+
+All training, export and evaluation here runs on **`pgadmin-MS-7885`** — the shared training
+box. Its hostname is embedded in the committed TensorBoard files
+(`events.out.tfevents.*.pgadmin-MS-7885.*`), so past runs can be traced to it.
+
+| | |
+|---|---|
+| GPUs | **3 × NVIDIA GeForce GTX 980 Ti**, 6 GB VRAM each |
+| Driver / CUDA | 535.309.01 / CUDA 11.5 |
+| CPU / RAM | 12 cores / 31 GB |
+
+### Use the `yolo-export` pyenv environment — always
+
+**Every YOLO-related task must run in the `yolo-export` environment.** This is not a
+convenience: the environment has ultralytics installed **editable from the local DeGirum
+fork**, not from PyPI —
+
+```
+ultralytics  8.3.1  ->  people_detection_pg2/ultralytics_yolov8
+```
+
+Any other environment gets upstream ultralytics, whose detection head **does not quantise to
+int8 correctly**. Training may appear to work and the exported model will be wrong.
+
+```bash
+pyenv shell yolo-export           # or: export PYENV_VERSION=yolo-export
+python -c "import ultralytics, torch; print(ultralytics.__file__); print(torch.cuda.device_count())"
+# expect a path under people_detection_pg2/ultralytics_yolov8, and 3
+```
+
+Contents: Python 3.10.12, torch 2.4.1 + torchvision 0.19.1, tensorflow 2.17.0, onnx 1.17.0,
+onnx2tf 1.22.3, onnxruntime 1.19.2, onnxslim 0.1.34, numpy 1.26.4, nbstripout 0.9.1.
+
+The environment is selected by `PYENV_VERSION`; there is **no `.python-version` file** in the
+repo, so nothing selects it for you. If you open a fresh shell and forget, you get the system
+Python.
+
+Other envs on this machine — `pgpytrain`, `pgpytrain-qt5`, `yolo-latest` — belong to other
+projects. `yolo-latest` is the dangerous one to confuse: it holds upstream **ultralytics
+8.3.203 + torch 2.8.0** from PyPI, exists for `yolo_latest_test/`, and will silently give
+you the unquantisable head. Do not use it here.
+
+### Using the three GPUs
+
+One run, one GPU:
+
+```bash
+python run_training_pipeline.py --device 0 ...
+```
+
+All three in parallel — one long-lived worker per GPU, experiments pulled from a queue:
+
+```bash
+python run_training_experiments_batch.py --experiments-json experiments.json --gpus 0,1,2
+python check_training_batch_status.py
+```
+
+> **6 GB of VRAM per card is the binding constraint.** These are 2015-era cards; the pipeline
+> defaults to `--batch 32`, and `experiments.json` does not override it. A larger model, a
+> larger `imgsz`, or another process on the same GPU will OOM. Check with `nvidia-smi` before
+> starting a batch — the scheduler does not.
+
+---
+
 ## Working pipeline
 
 The whole chain is automated. Four scripts do the work end to end.
@@ -214,6 +279,10 @@ file came from — that file is how you trace a deployed model back to its train
 
 ## Dependencies
 
+**On `pgadmin-MS-7885`, use the `yolo-export` environment — it already has all of this.** See
+[Running on the training machine](#running-on-the-training-machine). The rest of this section
+is for building the environment elsewhere.
+
 `requirements.txt` is present. Core: `numpy`, `opencv-python`, `torch`, `ultralytics`,
 `pillow`, `tqdm`, `pandas`. Export adds `tensorflow`, `onnx`, `onnx2tf`, `onnxslim` and the
 Vela compiler.
@@ -222,6 +291,10 @@ Vela compiler.
 pip install -r requirements.txt
 bash install_dg_yolo.sh      # DeGirum ultralytics fork — required for int8 export
 ```
+
+`install_dg_yolo.sh` is what makes ultralytics resolve to the local fork rather than PyPI. An
+environment without it will train and export without complaint and produce a model whose head
+is wrong under int8.
 
 Several exotic imports (`ncnn`, `tensorrt`, `openvino`, `coremltools`, `x2paddle`) come from
 ultralytics' own export module and are **not** needed here.

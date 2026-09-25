@@ -28,6 +28,36 @@ Do not widen the stripping rules to "clean up" those.
 metric `.csv`, `temporalROI.txt` — is **deliberately excluded** from LFS because it compresses
 ~10:1 in Git and LFS defeats delta compression. Do not "fix" those exclusions.
 
+## The training machine and the YOLO environment
+
+Work here happens on **`pgadmin-MS-7885`**: 3 × GTX 980 Ti (6 GB VRAM each), driver 535.309.01,
+CUDA 11.5, 12 cores, 31 GB RAM.
+
+**Every YOLO-related task must run in the `yolo-export` pyenv environment** — training, export,
+quantisation, evaluation, in `people_detection_pg2`, `pg1_yolo_evaluator`,
+`leg_position_detectors` or `object-detection-v3`.
+
+```bash
+pyenv shell yolo-export
+python -c "import ultralytics; print(ultralytics.__file__)"   # must be the local fork
+```
+
+This is not a preference. `yolo-export` has ultralytics installed **editable from
+`people_detection_pg2/ultralytics_yolov8`** (the DeGirum fork). Upstream ultralytics' detection
+head **does not quantise to int8 correctly**; in any other environment training and export will
+appear to succeed and the exported model will be wrong.
+
+There is **no `.python-version` file**, so nothing selects the env automatically — a fresh
+shell gets the system Python. Check before running anything.
+
+`yolo-latest` is a *different* env: upstream **ultralytics 8.3.203 + torch 2.8.0** from PyPI,
+against `yolo-export`'s **8.3.1 from the local fork + torch 2.4.1**. It exists for
+`yolo_latest_test/` only. Do not use it for the projects above.
+
+GPUs: `--device 0` for one run; `run_training_experiments_batch.py --gpus 0,1,2` for one worker
+per GPU. 6 GB per card is the binding constraint — check `nvidia-smi` before starting a batch,
+because the scheduler does not.
+
 ## Before you change a project
 
 **Check its status in `README.md` first.** ARCHIVED projects are frozen records of finished

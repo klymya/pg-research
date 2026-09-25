@@ -28,6 +28,12 @@ The final model and its thresholds are recorded below. Dataset lives on
 
 ## Dependencies
 
+> **Environment:** run YOLO tasks in the `yolo-export` pyenv environment on
+> `pgadmin-MS-7885` — it has ultralytics installed from the local DeGirum fork. Any other
+> environment gets upstream ultralytics, whose head does not quantise to int8 correctly.
+> See [`people_detection_pg2/readme.md`](../people_detection_pg2/readme.md#running-on-the-training-machine).
+
+
 `ultralytics`, `torch`, `torchvision`, `opencv-python`, `numpy`, `pandas`, `tqdm`,
 `transformers` (embeddings for duplicate detection), `cvat_sdk`, `matplotlib`, `pyyaml`.
 No `requirements.txt`.

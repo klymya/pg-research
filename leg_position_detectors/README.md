@@ -48,6 +48,12 @@ in `people_detection_pg2`. `yolov8/detection_head/` holds the separated heads, a
 
 ## Dependencies
 
+> **Environment:** run YOLO tasks in the `yolo-export` pyenv environment on
+> `pgadmin-MS-7885` — it has ultralytics installed from the local DeGirum fork. Any other
+> environment gets upstream ultralytics, whose head does not quantise to int8 correctly.
+> See [`people_detection_pg2/readme.md`](../people_detection_pg2/readme.md#running-on-the-training-machine).
+
+
 `torch`, `torchvision`, `torchsummary`, `ultralytics`, `onnx`, `onnxruntime`, `opencv-python`,
 `numpy`, `scipy`, `scikit-learn`, `matplotlib`, `paramiko` (for copying to a device). No
 `requirements.txt`. Requires the `DeGirum/ultralytics_yolov8` fork on `PYTHONPATH` — see

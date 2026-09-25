@@ -25,6 +25,12 @@ generated artefacts.
 
 ## Dependencies
 
+> **Environment:** use the **`yolo-latest`** pyenv env, *not* `yolo-export`. That is the whole
+> point of this project — `yolo-latest` carries upstream **ultralytics 8.3.203 + torch 2.8.0**
+> from PyPI, while `yolo-export` pins **ultralytics 8.3.1 from the local DeGirum fork +
+> torch 2.4.1**. This probes the version `people_detection_pg2` has not adopted.
+
+
 `ultralytics`, plus `onnxruntime`, `opencv-python`, `numpy` for the inference check.
 
 ```bash
