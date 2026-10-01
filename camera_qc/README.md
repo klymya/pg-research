@@ -109,9 +109,12 @@ everywhere. The summary also reports how many images are **at or above the
 reference sharpness** — stricter than PASS, which tolerates a drop of up to
 the tolerance band.
 
-Sharpness is the only *blocking* metric, so the verdict is identical either
-way; the full report just adds the advisory colour / exposure / noise numbers,
-the per-image narratives and the RGB histograms.
+The two modes can disagree. Both `sharpness` and `sharpness_fft` are
+*blocking*, but the simplified report measures only `sharpness`, so a DUT
+that passes `sharpness` and fails `sharpness_fft` reads PASS in the simplified
+report and FAIL in the full one — the full report is the stricter of the two.
+Beyond that it adds the advisory colour / exposure / noise numbers, the
+per-image narratives and the RGB histograms.
 
 ```bash
 camera-qc --ref ./ref --dut ./dut --scene chessboard   # simplified (default)
@@ -361,7 +364,9 @@ section 9 — the `|Δ| after CCM` between the previously accepted CCM-corrected
 expressed as % of the reference mean. The argument: a DUT that deviates by no
 more than this already-accepted sensor did is acceptable.
 
-The measured numbers (rounded into `config.yaml`):
+The measured numbers, and what `config.yaml` ships (the colour bands are the
+measurements rounded; the sharpness bands are deliberately tightened below
+them):
 
 | Metric | Measured \|Δ\| after CCM | In config |
 |---|---:|---:|
@@ -371,9 +376,9 @@ The measured numbers (rounded into `config.yaml`):
 | R | 10.1% | 10 |
 | G | 9.7% | 10 |
 | B | 6.1% | 7 |
-| sharpness | 15.8% | 16 |
+| sharpness | 15.8% | 10 (tightened — DUT must reach 90% of ref) |
 | noise | 9.5% | 15 (widened — see note 4) |
-| sharpness_fft | 10.8% | 11 |
+| sharpness_fft | 10.8% | 10 (tightened) |
 
 ### Known limitations to fix during tuning
 

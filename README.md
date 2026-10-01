@@ -1,5 +1,5 @@
 # researches
-
+/home/klymy/projects/PG2.wiki/PG2/Algo/Reports/Camera-Image-Quality-Evaluation-Tool.md
 > **Repository status:** Active: a monorepo whose projects are individually ACTIVE, ARCHIVED or VENDORED (see [Current Status](#current-status))<br>
 > **Primary owner/team:** Algo team<br>
 > **Technical contact:** Algo team<br>

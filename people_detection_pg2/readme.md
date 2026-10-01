@@ -256,6 +256,8 @@ file came from — that file is how you trace a deployed model back to its train
 | `quality_reduce_comparison/`, `softmax_exp/`, `testset_review/` | Focused experiments |
 | `results/` | Training runs, weights and Vela output (LFS-backed) |
 | `experiments*.json` | Experiment definitions for the batch scheduler |
+| `patch/` | Local patches to the DeGirum fork, applied by `install_dg_yolo.sh` — see [Fork patches](#fork-patches) |
+| `ultralytics_yolov8/` | The patched fork itself (git-ignored; rebuilt by `install_dg_yolo.sh`) |
 
 ## Connections
 
@@ -295,6 +297,35 @@ bash install_dg_yolo.sh      # DeGirum ultralytics fork — required for int8 ex
 `install_dg_yolo.sh` is what makes ultralytics resolve to the local fork rather than PyPI. An
 environment without it will train and export without complaint and produce a model whose head
 is wrong under int8.
+
+### Fork patches
+
+The fork is **not used as published**. `install_dg_yolo.sh` checks out a pinned commit and then
+overwrites five files with the local copies in `patch/`:
+
+| `patch/` file | Replaces in `ultralytics_yolov8/` | Change |
+|---|---|---|
+| `exporter.py` | `ultralytics/engine/exporter.py` | Caps the int8 calibration set at `max_ncalib_imgs` (passed by `export.py`, default 100) instead of using the whole dataloader |
+| `autobackend.py` | `ultralytics/nn/autobackend.py` | TFLite: reads `metadata.yaml` next to the weights instead of from the model zip |
+| `predictor.py` | `ultralytics/engine/predictor.py` | Stops passing `end2end` to NMS |
+| `predict.py` | `ultralytics/models/yolo/pose/predict.py` | Keypoints are 2 values (x, y), not 3 (x, y, visibility) |
+| `plotting.py` | `ultralytics/utils/plotting.py` | Adds dark/light colour sets for drawing |
+
+Pinned commit: `75cab2e0c68723d4344c69a3bcd85265a582ab3d` (DeGirum `ultralytics_yolov8`,
+2024-09-30). The patches are **whole-file copies, not diffs**, so they only fit that commit.
+
+- **Don't clone the fork by hand** — you get the unpatched code and nothing will complain.
+- **Don't bump the commit** without re-applying each change onto the new versions of these
+  files.
+- `ultralytics_yolov8/` is git-ignored here but is its own git checkout, so check the patches
+  from inside it:
+
+```bash
+cd ultralytics_yolov8
+git rev-parse HEAD            # expect 75cab2e0...
+git status --short            # expect exactly the five files above, all ` M`
+cmp ../patch/exporter.py ultralytics/engine/exporter.py   # and likewise for the other four
+```
 
 Several exotic imports (`ncnn`, `tensorrt`, `openvino`, `coremltools`, `x2paddle`) come from
 ultralytics' own export module and are **not** needed here.
