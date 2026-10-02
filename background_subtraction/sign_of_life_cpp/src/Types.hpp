@@ -77,7 +77,7 @@ namespace sol {
         int   modelLearnFrames  = 30;       /* every pixel updates for this many    */
 
         /* Layer 2 -- HSV shadow veto */
-        bool  shadowEnabled       = true;
+        bool  shadowEnabled       = false;  /* off by default, as on target       */
         float shadowAlpha         = 0.1f;   /* EW background-reference rate          */
         float valueRatioMin       = 0.40f;
         float valueRatioMax       = 0.95f;

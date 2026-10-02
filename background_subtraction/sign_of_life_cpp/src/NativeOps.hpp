@@ -43,13 +43,18 @@ namespace ops {
     };
     Image MorphologyEx(const Image& mask, MorphOp op, int kernelSize);
 
+    /** @brief Most components ConnectedComponents() returns; any beyond are
+     *         dropped to background. Same cap as the target NativeOps.hpp. */
+    constexpr size_t kMaxConnectedComponents = 4096u;
+
     /**
      * @brief Label the connected foreground regions of a 0/255 mask.
      * @param mask         Single-channel 0/255 image.
      * @param connectivity 4 or 8.
      * @param labels       Optional out: per-pixel label image (0 = background,
      *                     component @c k in the result carries label @c k+1).
-     * @return All components (any non-zero area), with bbox/area/centroid.
+     * @return Components (any non-zero area) with bbox/area/centroid, at most
+     *         kMaxConnectedComponents in raster order of first appearance.
      */
     std::vector<Blob> ConnectedComponents(const Image& mask, int connectivity,
                                           std::vector<int>* labels = nullptr);

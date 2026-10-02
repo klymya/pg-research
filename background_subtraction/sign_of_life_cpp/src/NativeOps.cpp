@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdio>
 #include <vector>
 
 namespace sol {
@@ -153,42 +154,88 @@ namespace ops {
         const int h = src.height;
         const int c = src.channels;
 
-        /* Horizontal pass into a float buffer, then vertical pass to uint8. */
-        std::vector<float> tmp(static_cast<size_t>(w) * h * c, 0.0f);
-        for (int y = 0; y < h; ++y)
-        {
+        /* Separable blur. The horizontal pass feeds a rolling ring of
+         * (2*radius + 1) rows instead of a whole-image float buffer -- at QVGA
+         * RGB that is 19 KB rather than 900 KB. Reflect-101 near the top and
+         * bottom edges only ever maps to rows within radius of that edge, so
+         * every row the vertical pass needs for output row y lies in
+         * [y - radius, y + radius] -- exactly what the ring holds.
+         *
+         * Both passes keep the original arithmetic exactly -- acc starts at
+         * 0.0f and adds kernel[k] * sample for k = -radius..radius in that
+         * order -- so the output is bit-identical to the straightforward form.
+         * What changed is only addressing: interior columns skip Reflect101,
+         * and the vertical pass resolves its tap rows once per output row
+         * instead of once per tap. Same as the target NativeOps.cc. */
+        const int ringRows     = 2 * radius + 1;
+        const size_t rowStride = static_cast<size_t>(w) * c;
+        std::vector<float> ring(rowStride * ringRows, 0.0f);
+
+        auto horizontalPass = [&](int row) {
+            float* dstRow         = &ring[static_cast<size_t>(row % ringRows) * rowStride];
+            const uint8_t* srcRow = src.data.data() + static_cast<size_t>(row) * rowStride;
             for (int x = 0; x < w; ++x)
             {
+                const bool interior = (x >= radius) && (x < w - radius);
                 for (int ch = 0; ch < c; ++ch)
                 {
                     float acc = 0.0f;
-                    for (int k = -radius; k <= radius; ++k)
+                    if (interior)
                     {
-                        const int xx = Reflect101(x + k, w);
-                        acc += kernel[k + radius] *
-                               src.data[(static_cast<size_t>(y) * w + xx) * c + ch];
+                        const uint8_t* s = srcRow + static_cast<size_t>(x - radius) * c + ch;
+                        for (int k = 0; k < kernelSize; ++k)
+                        {
+                            acc += kernel[k] * static_cast<float>(s[static_cast<size_t>(k) * c]);
+                        }
                     }
-                    tmp[(static_cast<size_t>(y) * w + x) * c + ch] = acc;
+                    else
+                    {
+                        for (int k = -radius; k <= radius; ++k)
+                        {
+                            const int xx = Reflect101(x + k, w);
+                            acc += kernel[k + radius] *
+                                   static_cast<float>(srcRow[static_cast<size_t>(xx) * c + ch]);
+                        }
+                    }
+                    dstRow[static_cast<size_t>(x) * c + ch] = acc;
                 }
             }
+        };
+
+        /* Prime the ring with rows [0, radius]; row y then only needs y+radius. */
+        int filledTo = -1;
+        for (int row = 0; row <= radius && row < h; ++row)
+        {
+            horizontalPass(row);
+            filledTo = row;
         }
 
         Image dst(w, h, c);
+        std::vector<const float*> taps(static_cast<size_t>(kernelSize));
         for (int y = 0; y < h; ++y)
         {
-            for (int x = 0; x < w; ++x)
+            for (int row = filledTo + 1; row <= y + radius && row < h; ++row)
             {
-                for (int ch = 0; ch < c; ++ch)
+                horizontalPass(row);
+                filledTo = row;
+            }
+
+            for (int k = -radius; k <= radius; ++k)
+            {
+                const int yy = Reflect101(y + k, h);
+                taps[static_cast<size_t>(k + radius)] =
+                    &ring[static_cast<size_t>(yy % ringRows) * rowStride];
+            }
+
+            uint8_t* dstRow = &dst.data[static_cast<size_t>(y) * rowStride];
+            for (size_t i = 0; i < rowStride; ++i)
+            {
+                float acc = 0.0f;
+                for (int k = 0; k < kernelSize; ++k)
                 {
-                    float acc = 0.0f;
-                    for (int k = -radius; k <= radius; ++k)
-                    {
-                        const int yy = Reflect101(y + k, h);
-                        acc += kernel[k + radius] *
-                               tmp[(static_cast<size_t>(yy) * w + x) * c + ch];
-                    }
-                    dst.data[(static_cast<size_t>(y) * w + x) * c + ch] = SaturateU8(acc);
+                    acc += kernel[k] * taps[static_cast<size_t>(k)][i];
                 }
+                dstRow[i] = SaturateU8(acc);
             }
         }
         return dst;
@@ -257,11 +304,140 @@ namespace ops {
             return out;
         }
 
+        /* ---- Binary fast path --------------------------------------------
+         *
+         * Every mask the pipeline morphs is strictly 0/255 (model output, shadow
+         * veto, and morphology of those). On such a mask the rank filter above
+         * reduces to set logic:
+         *   dilate -> 255 iff any in-range sample is 255 (border counts as 0)
+         *   erode  -> 0   iff any in-range sample is 0   (border counts as 255)
+         * so out-of-range samples never decide the result and can be skipped.
+         * Each structuring-element row is one contiguous run [dy, -half..+half],
+         * and "any hit in the run" is a difference of two per-row prefix counts:
+         * O(rows) per pixel instead of O(offsets). Bit-identical to RankFilter
+         * for binary input; anything else takes RankFilter itself. Same as the
+         * target NativeOps.cc. */
+
+        constexpr int kMaxKernelRows = 31;
+
+        struct KernelRow
+        {
+            int dy;
+            int half;
+        };
+
+        /** @brief Collapse @c offsets into rows; false unless every row is one
+         *         contiguous run centred on dx = 0 (the ellipse always is). */
+        bool ToKernelRows(const std::vector<std::pair<int, int>>& offsets,
+                          KernelRow (&rows)[kMaxKernelRows], int& count)
+        {
+            count = 0;
+            size_t i = 0;
+            while (i < offsets.size())
+            {
+                const int dy = offsets[i].first;
+                int lo = offsets[i].second;
+                int hi = lo;
+                int n  = 0;
+                for (; i < offsets.size() && offsets[i].first == dy; ++i, ++n)
+                {
+                    lo = std::min(lo, offsets[i].second);
+                    hi = std::max(hi, offsets[i].second);
+                }
+                if (count == kMaxKernelRows || lo != -hi || n != hi - lo + 1)
+                {
+                    return false;
+                }
+                rows[count].dy   = dy;
+                rows[count].half = hi;
+                ++count;
+            }
+            return true;
+        }
+
+        bool IsBinary(const Image& mask)
+        {
+            for (const uint8_t v : mask.data)
+            {
+                if (v != 0u && v != 255u)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        Image BinaryRankFilter(const Image& mask, const KernelRow (&rows)[kMaxKernelRows],
+                               int rowCount, bool dilate)
+        {
+            const int w = mask.width;
+            const int h = mask.height;
+            const size_t stride = static_cast<size_t>(w) + 1u;
+            Image out(w, h, 1);
+
+            /* prefix[y][x] = hits in row y before column x. A "hit" is the value
+             * that decides the result: 255 for dilate, 0 for erode. uint16_t
+             * holds any row up to 65,535 px. */
+            std::vector<uint16_t> prefix(stride * static_cast<size_t>(h));
+            for (int y = 0; y < h; ++y)
+            {
+                const uint8_t* src = &mask.data[static_cast<size_t>(y) * w];
+                uint16_t* pre      = &prefix[static_cast<size_t>(y) * stride];
+                uint16_t run       = 0u;
+                pre[0]             = 0u;
+                for (int x = 0; x < w; ++x)
+                {
+                    run = static_cast<uint16_t>(run + ((src[x] != 0u) == dilate ? 1u : 0u));
+                    pre[x + 1] = run;
+                }
+            }
+
+            const uint8_t onHit  = dilate ? 255u : 0u;
+            const uint8_t onMiss = dilate ? 0u : 255u;
+            for (int y = 0; y < h; ++y)
+            {
+                uint8_t* dst = &out.data[static_cast<size_t>(y) * w];
+                for (int x = 0; x < w; ++x)
+                {
+                    bool hit = false;
+                    for (int r = 0; r < rowCount && !hit; ++r)
+                    {
+                        const int yy = y + rows[r].dy;
+                        if (yy < 0 || yy >= h)
+                        {
+                            continue; /* border row: never decides the result */
+                        }
+                        const int lo = std::max(x - rows[r].half, 0);
+                        const int hi = std::min(x + rows[r].half, w - 1);
+                        const uint16_t* pre = &prefix[static_cast<size_t>(yy) * stride];
+                        hit = pre[hi + 1] != pre[lo];
+                    }
+                    dst[x] = hit ? onHit : onMiss;
+                }
+            }
+            return out;
+        }
+
     } /* namespace */
 
     Image MorphologyEx(const Image& mask, MorphOp op, int kernelSize)
     {
         const auto offsets = EllipseOffsets(kernelSize);
+
+        KernelRow rows[kMaxKernelRows];
+        int rowCount = 0;
+        if (IsBinary(mask) && ToKernelRows(offsets, rows, rowCount))
+        {
+            /* A binary mask stays binary, so the second pass is safe too. */
+            if (op == MorphOp::Open)
+            {
+                return BinaryRankFilter(BinaryRankFilter(mask, rows, rowCount, false),
+                                        rows, rowCount, true);
+            }
+            return BinaryRankFilter(BinaryRankFilter(mask, rows, rowCount, true),
+                                    rows, rowCount, false);
+        }
+
         if (op == MorphOp::Open)
         {
             return RankFilter(RankFilter(mask, offsets, false), offsets, true);
@@ -398,18 +574,33 @@ namespace ops {
          * Ascending root order is exactly raster order of first appearance -- a
          * component's root is the smallest provisional label in it, which is the
          * one created at its topmost-leftmost pixel -- so this reproduces the
-         * flood fill's numbering with no first-seen bookkeeping. */
+         * flood fill's numbering with no first-seen bookkeeping.
+         *
+         * Components beyond kMaxConnectedComponents are dropped (their pixels
+         * become background), exactly as on target, so both give the same
+         * blobs even for degenerate masks. */
         int count = 0;
+        bool truncated = false;
         for (size_t label = 1; label < parent.size(); ++label)
         {
-            if (parent[label] == static_cast<int>(label))
-            {
-                parent[label] = ++count; /* a root: take the next final label */
-            }
-            else
+            if (parent[label] != static_cast<int>(label))
             {
                 parent[label] = parent[parent[label]];
+                continue;
             }
+            if (static_cast<size_t>(count) >= kMaxConnectedComponents)
+            {
+                if (!truncated)
+                {
+                    std::fprintf(stderr,
+                                 "SoL: component count hit the %u cap; mask is degenerate\n",
+                                 static_cast<unsigned>(kMaxConnectedComponents));
+                    truncated = true;
+                }
+                parent[label] = 0;
+                continue;
+            }
+            parent[label] = ++count; /* a root: take the next final label */
         }
 
         std::vector<Blob> blobs(static_cast<size_t>(count));
@@ -426,12 +617,16 @@ namespace ops {
                 continue;
             }
             const int final = parent[provisional];
+            labels[i]       = final;
+            if (final == 0) /* beyond the cap */
+            {
+                continue;
+            }
+
             const size_t at = static_cast<size_t>(final) - 1u;
             const int x     = static_cast<int>(i % w);
             const int y     = static_cast<int>(i / w);
-
-            labels[i]  = final;
-            Blob& blob = blobs[at];
+            Blob& blob      = blobs[at];
             if (!seen[at]) /* first pixel of this component in raster order */
             {
                 seen[at]   = true;

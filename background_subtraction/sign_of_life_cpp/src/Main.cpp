@@ -7,7 +7,7 @@
  *
  * Usage:
  *   sign_of_life <input_dir> <output_dir> [--min-area N] [--sol-area N]
- *                [--no-shadow-veto]
+ *                [--shadow-filter]
  */
 #include "ImageIo.hpp"
 #include "Pipeline.hpp"
@@ -30,21 +30,24 @@ namespace {
         std::string outputDir;
         int minArea       = -1; /* -1 = keep the config default */
         int areaThreshold = -1;
-        bool shadowVeto   = true;
+        bool shadowFilter = false; /* off by default, as on target */
     };
 
     void PrintUsage(const char* program)
     {
         std::fprintf(stderr,
                      "Usage: %s <input_dir> <output_dir> [--min-area N] [--sol-area N]\n"
-                     "                [--no-shadow-veto]\n"
+                     "                [--shadow-filter]\n"
                      "  <input_dir>       folder of JPEG/PNG frames (processed in name order)\n"
                      "  <output_dir>      folder for the *_raw.png / *_morph.png masks and\n"
                      "                    the sign_of_life.txt report\n"
                      "  --min-area N      smallest kept foreground object in px (default 150)\n"
                      "  --sol-area N      Sign-of-Life area threshold in px (default 500)\n"
-                     "  --no-shadow-veto  disable the HSV shadow filter; its background\n"
-                     "                    reference is then never allocated\n",
+                     "  --shadow-filter   enable the HSV shadow filter (default off, as on\n"
+                     "                    target); when off its background reference is\n"
+                     "                    never allocated\n"
+                     "  --no-shadow-veto  accepted for compatibility; the filter is off by\n"
+                     "                    default\n",
                      program);
     }
 
@@ -62,9 +65,13 @@ namespace {
             {
                 options.areaThreshold = std::atoi(argv[++i]);
             }
+            else if (arg == "--shadow-filter")
+            {
+                options.shadowFilter = true;
+            }
             else if (arg == "--no-shadow-veto")
             {
-                options.shadowVeto = false;
+                options.shadowFilter = false;
             }
             else if (arg == "-h" || arg == "--help")
             {
@@ -127,7 +134,7 @@ int main(int argc, char** argv)
     {
         config.areaThreshold = options.areaThreshold;
     }
-    config.shadowEnabled = options.shadowVeto;
+    config.shadowEnabled = options.shadowFilter;
 
     const std::vector<std::string> frames = sol::io::ListImageFiles(options.inputDir);
     if (frames.empty())
