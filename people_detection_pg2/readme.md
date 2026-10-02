@@ -174,27 +174,97 @@ python check_training_batch_status.py            # classify each run from its lo
 
 ### 3. Evaluate — `extended_evaluation_metrics/run_eval_and_viz.sh`
 
-Driven by a single `.env` file. In order:
+Validation is two steps: **(1) select thresholds**, then **(2) run `run_eval_and_viz.sh`**,
+which is the **main validation script** — every model-evaluation number in `PG2.wiki`
+(leaderboards, slice reports, baseline-set tables) comes from it.
+
+#### 3.1 Select the inference thresholds (manual step)
+
+Open
+`cam4_revB/validate_model.ipynb`, set `RESULTS_PTH` to the experiment, sweep the confidence
+threshold, pick `TUNED_CONF_TH` and `TUNED_IOU_TH` by hand, and run the cell that writes them
+to `results/<exp_name>/inference_params.json`:
+
+```json
+{"conf_th": 0.25, "iou_th": 0.5}
+```
+
+`evaluation.py` reads this file only when `ENABLE_SWEEP=0` and `USE_INFERENCE_PARAMS=1`; in
+sweep mode it is ignored. The file is not copied by `cp_weights.py` — the firmware uses its
+own thresholds (`DetectorPostProcessing.hpp`: conf 0.2, NMS IoU 0.45).
+
+> **To be improved.** The notebook currently tunes on the `batch1_3` **holdout** (the same
+> frames later reported as a test set), on the **fp32** `best.pt` rather than the shipped
+> int8 model, with `BASE_PTH` hard-coded rather than taken from the experiment's dataset. The
+> IoU sweep is commented out, and the conf choice relies on validator P/R, which Ultralytics
+> reports at the max-F1 point of the curve rather than at the passed `conf`. Thresholds
+> should instead be selected on the experiment's `val` split, on the int8 model.
+
+#### 3.2 Validate — `extended_evaluation_metrics/run_eval_and_viz.sh` (main validation script)
+
+Use this for every model you evaluate or compare, fp32 or int8. Driven by a single `.env`
+file. In order:
 
 1. `evaluation.py` — Ultralytics validation, single run or a **conf × iou sweep**. Writes
    `predictions.json`, `metrics_per_img.csv`, `metrics_per_gt.csv`, `metrics_per_pred.csv`,
    `global_metrics.json`, `sweep_results.csv`, `best_params.json`.
 2. `visualize_detections.py` — per-frame overlays with TP/FP/FN colouring.
-3. Executes `extended_report.ipynb` via nbconvert and exports HTML.
+3. Executes `extended_report.ipynb` via nbconvert and exports HTML (slice-based report:
+   posture, occlusion, camera height, radial position, scene density).
 4. Optionally `generate_conclusions_claude.py` writes the conclusions section, then
    re-executes for the final HTML.
 
 `EVAL_BACKEND` selects `ultralytics_pt` (`weights/best.pt`) or the TFLite backends, so **the
-same harness scores the float model and the quantised one**. Full instructions:
+same harness scores the float model and the quantised one**. For the shipped int8 model use
+`tflite_backbone_only` (`weights/best_non_separated_saved_model/best_full_integer_quant.tflite`
+— the file `rtos_sensor` deploys).
+
+Two threshold modes — pick per purpose:
+
+| Mode | `.env` | Use it for |
+|---|---|---|
+| **Sweep** (wiki protocol) | `ENABLE_SWEEP=1`, `SWEEP_CONF_THS=0.20,0.25,0.30`, `SWEEP_IOU_THS=0.35,0.40,0.45`, `SELECTION_METRIC=f1` | Numbers comparable with the existing wiki tables. `inference_params.json` is ignored; the pair is chosen on the evaluated set itself, so absolute numbers are optimistic |
+| **Single run** | `ENABLE_SWEEP=0`, `USE_INFERENCE_PARAMS=1` | Evaluating at the thresholds selected in 3.1 (or set `CONF_TH=0.20`, `IOU_TH=0.45` to match the firmware) |
+
+Run one experiment on one test set:
+
+```bash
+pyenv shell yolo-export
+./extended_evaluation_metrics/run_eval_and_viz.sh extended_evaluation_metrics/.env.<my_experiment>
+```
+
+Run the int8 model of one or more experiments on the four standard test sets (`batch1_3`
+holdout, `testAccuracy`, `H270_16-44-09`, `PG2HardCases`) in sweep mode, with results written
+into each experiment folder:
+
+```bash
+pyenv shell yolo-export
+cd extended_evaluation_metrics
+nohup ./run_eval_int8_experiments.sh <exp_name> [<exp_name> ...] > ../logs/eval_int8.log 2>&1 &
+# results: results/<exp_name>/eval_int8/<testset>/{best_params.json,global_metrics.json,extended_report.html,...}
+```
+
+`results/<exp>/eval_int8/` is ~150 MB per experiment (overlays, per-candidate runs) and sits
+under the LFS-tracked `results/` tree — do not `git add` it; copy the numbers into the wiki.
+
+To compare against production, use the prod runs already in
+`extended_evaluation_metrics/val_baseline_<testset>/` (same protocol). Full instructions:
 `extended_evaluation_metrics/README_evaluate_new_weights.md`.
 
 Other evaluators:
 
 | Tool | Use |
 |---|---|
+| `extended_evaluation_metrics/run_eval_int8_experiments.sh` | Batch wrapper over `run_eval_and_viz.sh`: int8, 4 test sets, results into `results/<exp>/eval_int8/` |
+| `run_batch_evaluation_v2.py` | Runs the extended pipeline across a whole batch of dataset_v2 experiments (envs generated from a template) |
 | `eval_obj_det.py`, `ultralytics_validator_wrapper.py` | Direct PyTorch-vs-TFLite comparison on the same images |
-| `run_batch_evaluation_v2.py` | Runs the extended pipeline across a whole batch of dataset_v2 experiments |
 | `../pg1_yolo_evaluator/` | Same weights against PG1 footage (sibling project) |
+| `../../algo_system_emulator` | Release evaluation through the sensor + gateway emulation (required by the Model Evaluation Protocol) |
+
+> **Do not use for wiki numbers:** `cam4_revB/eval_float32_vs_int8.ipynb` scores the
+> separated int8 backbone + fp32 head, not the shipped fully-int8 model, and
+> `cam4_revB/eval_using_obj_det_metrics_per_frame.ipynb` is fp32-only and skips frames with
+> no predictions (inflating recall). Both predate `run_eval_and_viz.sh`.
 
 ### 4. Ship to the firmware — `cp_weights.py`
 

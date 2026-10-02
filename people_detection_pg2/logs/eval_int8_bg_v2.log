@@ -1,0 +1,27 @@
+nohup: ignoring input
+[2026-10-02 13:23:04] dataset_v2_cam4_revB_batch1_12_minibatch2_bg_v2_margin_10_yolov8_wb_alif_clahe / cam4revB_batch1_3 -> /home/klymy/projects/researches/people_detection_pg2/results/dataset_v2_cam4_revB_batch1_12_minibatch2_bg_v2_margin_10_yolov8_wb_alif_clahe/eval_int8/cam4revB_batch1_3
+    done
+[2026-10-02 13:24:41] dataset_v2_cam4_revB_batch1_12_minibatch2_bg_v2_margin_10_yolov8_wb_alif_clahe / testAccuracy -> /home/klymy/projects/researches/people_detection_pg2/results/dataset_v2_cam4_revB_batch1_12_minibatch2_bg_v2_margin_10_yolov8_wb_alif_clahe/eval_int8/testAccuracy
+    done
+[2026-10-02 13:25:18] dataset_v2_cam4_revB_batch1_12_minibatch2_bg_v2_margin_10_yolov8_wb_alif_clahe / H270_16_44_09 -> /home/klymy/projects/researches/people_detection_pg2/results/dataset_v2_cam4_revB_batch1_12_minibatch2_bg_v2_margin_10_yolov8_wb_alif_clahe/eval_int8/H270_16_44_09
+    done
+[2026-10-02 13:31:35] dataset_v2_cam4_revB_batch1_12_minibatch2_bg_v2_margin_10_yolov8_wb_alif_clahe / PG2HardCases -> /home/klymy/projects/researches/people_detection_pg2/results/dataset_v2_cam4_revB_batch1_12_minibatch2_bg_v2_margin_10_yolov8_wb_alif_clahe/eval_int8/PG2HardCases
+    done
+[2026-10-02 13:31:55] dataset_v2_cam4_revB_batch1_12_minibatch2_bg_v2_margin_10_yolov8_rq_wb_alif_clahe / cam4revB_batch1_3 -> /home/klymy/projects/researches/people_detection_pg2/results/dataset_v2_cam4_revB_batch1_12_minibatch2_bg_v2_margin_10_yolov8_rq_wb_alif_clahe/eval_int8/cam4revB_batch1_3
+    done
+[2026-10-02 13:33:33] dataset_v2_cam4_revB_batch1_12_minibatch2_bg_v2_margin_10_yolov8_rq_wb_alif_clahe / testAccuracy -> /home/klymy/projects/researches/people_detection_pg2/results/dataset_v2_cam4_revB_batch1_12_minibatch2_bg_v2_margin_10_yolov8_rq_wb_alif_clahe/eval_int8/testAccuracy
+    done
+[2026-10-02 13:34:11] dataset_v2_cam4_revB_batch1_12_minibatch2_bg_v2_margin_10_yolov8_rq_wb_alif_clahe / H270_16_44_09 -> /home/klymy/projects/researches/people_detection_pg2/results/dataset_v2_cam4_revB_batch1_12_minibatch2_bg_v2_margin_10_yolov8_rq_wb_alif_clahe/eval_int8/H270_16_44_09
+    done
+[2026-10-02 13:40:27] dataset_v2_cam4_revB_batch1_12_minibatch2_bg_v2_margin_10_yolov8_rq_wb_alif_clahe / PG2HardCases -> /home/klymy/projects/researches/people_detection_pg2/results/dataset_v2_cam4_revB_batch1_12_minibatch2_bg_v2_margin_10_yolov8_rq_wb_alif_clahe/eval_int8/PG2HardCases
+    done
+
+Summary (selected conf/iou, pose P/R/F1, TP/FP/FN):
+dataset_v2_cam4_revB_batch1_12_minibatch2_bg_v2_margin_10_yolov8_wb_alif_clahe        cam4revB_batch1_3  0.30/0.35  P=0.9116 R=0.8571 F1=0.8835  TP/FP/FN=354/60/55
+dataset_v2_cam4_revB_batch1_12_minibatch2_bg_v2_margin_10_yolov8_wb_alif_clahe        testAccuracy       0.30/0.35  P=0.9360 R=0.9669 F1=0.9512  TP/FP/FN=118/7/3
+dataset_v2_cam4_revB_batch1_12_minibatch2_bg_v2_margin_10_yolov8_wb_alif_clahe        H270_16_44_09      0.25/0.35  P=0.7949 R=0.6857 F1=0.7363  TP/FP/FN=1426/388/677
+dataset_v2_cam4_revB_batch1_12_minibatch2_bg_v2_margin_10_yolov8_wb_alif_clahe        PG2HardCases       0.30/0.45  P=1.0000 R=0.4545 F1=0.6250  TP/FP/FN=4/1/7
+dataset_v2_cam4_revB_batch1_12_minibatch2_bg_v2_margin_10_yolov8_rq_wb_alif_clahe     cam4revB_batch1_3  0.30/0.35  P=0.8824 R=0.8988 F1=0.8905  TP/FP/FN=369/76/40
+dataset_v2_cam4_revB_batch1_12_minibatch2_bg_v2_margin_10_yolov8_rq_wb_alif_clahe     testAccuracy       0.30/0.35  P=0.9586 R=0.9835 F1=0.9709  TP/FP/FN=119/6/2
+dataset_v2_cam4_revB_batch1_12_minibatch2_bg_v2_margin_10_yolov8_rq_wb_alif_clahe     H270_16_44_09      0.20/0.35  P=0.8151 R=0.6961 F1=0.7510  TP/FP/FN=1436/360/667
+dataset_v2_cam4_revB_batch1_12_minibatch2_bg_v2_margin_10_yolov8_rq_wb_alif_clahe     PG2HardCases       0.30/0.45  P=1.0000 R=0.5455 F1=0.7059  TP/FP/FN=5/1/6
